@@ -1,18 +1,17 @@
 /**
  * ⚡ NovaSpark Bot v5 — 2026 Edition
  * MEGA MENU — .menu / .help
- * The most detailed, categorized, beautiful menu in any WhatsApp MD bot.
+ * Full command listing with anime image — inspired by SubZero MD style
  * By Dev-Ntando
  */
 'use strict';
 const config   = require('../../config');
 const database = require('../../database');
-const os       = require('os');
 
 module.exports = {
   name: 'menu',
   aliases: ['help', 'cmds', 'commands', 'start'],
-  description: 'Full command menu — categorized by section',
+  description: 'Full command menu with image — all commands listed',
   category: 'free',
 
   execute: async ({ sock, msg, from, sender, args, reply }) => {
@@ -21,322 +20,416 @@ module.exports = {
     const num    = sender.split('@')[0];
     const plan   = isPrem ? '💎 Premium' : '🆓 Free';
     const uptime = process.uptime();
-    const uptimeStr = `${Math.floor(uptime/3600)}h ${Math.floor((uptime%3600)/60)}m`;
+    const uptimeStr = `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`;
     const memMB  = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
 
-    // Category sub-menus
+    const now = new Date().toLocaleString('en-ZA', {
+      timeZone: config.timezone || 'Africa/Johannesburg',
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+
+    // ── SUB-MENU HANDLERS (kept for .menu group / .menu ai etc) ─────────────
+
     if (sub === 'group') {
       return reply(
-        `🛡️ *Group Management Commands*\n` +
+        `🛡️ *GROUP MANAGEMENT*\n` +
         `${'━'.repeat(32)}\n\n` +
         `📋 *Moderation*\n` +
-        `  .warn @user [reason] — Warn a member\n` +
-        `  .warns @user — Check warns\n` +
-        `  .clearwarn @user — Reset warns\n` +
-        `  .kick @user — Remove from group\n` +
-        `  .promote @user — Make admin ✨\n` +
-        `  .demote @user — Remove admin ✨\n` +
-        `  .delete — Delete a replied message ✨\n\n` +
+        `• .warn @user [reason]\n` +
+        `• .warns @user\n` +
+        `• .clearwarn @user\n` +
+        `• .setwarnlimit <N>\n` +
+        `• .kick @user\n` +
+        `• .promote @user\n` +
+        `• .demote @user\n` +
+        `• .delete  _(reply to msg)_\n\n` +
         `📢 *Tag & Announce*\n` +
-        `  .tagall [msg] — Tag all members ✨\n` +
-        `  .hidetag [msg] — Silently tag all ✨\n\n` +
-        `🔒 *Safety & Protection*\n` +
-        `  .antilink on/off/set — Block links ✨\n` +
-        `  .antiword on/off — Bad word filter\n` +
-        `  .antitoxic on/off — AI toxic filter\n` +
-        `  .antiflood on [limit] — Anti-flood ✨\n` +
-        `  .antiraid on [limit] — Anti mass-join raid ✨\n\n` +
+        `• .tagall [msg]\n` +
+        `• .hidetag [msg]\n\n` +
+        `🔒 *Protection*\n` +
+        `• .antilink on/off/set\n` +
+        `• .antiword on/off/add/remove\n` +
+        `• .antitoxic on/off\n` +
+        `• .antiflood on [limit]\n` +
+        `• .antiraid on [limit]\n\n` +
         `⚙️ *Settings*\n` +
-        `  .welcome on/off [msg] — Welcome new members\n` +
-        `  .goodbye on/off [msg] — Goodbye messages\n` +
-        `  .mute / .unmute — Lock/unlock group ✨\n` +
-        `  .nightmode on/off — Auto-mute at night\n` +
-        `  .vip on/off — VIP-only mode\n` +
-        `  .ghost on/off — Ghost mode\n` +
-        `  .autoreact on/off — Auto-react\n` +
-        `  .autoreply add <kw> | <reply> — Keyword replies ✨\n` +
-        `  .autokick join <min> — Kick silent joiners ✨\n` +
-        `  .autonudge on <days> — Tag inactive members ✨\n` +
-        `  .grouplink — Get invite link ✨\n` +
-        `  .resetlink — Reset invite link ✨\n\n` +
+        `• .welcome on/off [msg]\n` +
+        `• .goodbye on/off [msg]\n` +
+        `• .mute / .unmute\n` +
+        `• .nightmode on/off\n` +
+        `• .vip on/off/add/remove/list\n` +
+        `• .ghost on/off\n` +
+        `• .autoreact on/off [random/mood]\n` +
+        `• .autoreply add <kw> | <reply>\n` +
+        `• .autokick join <min>\n` +
+        `• .autonudge on <days>\n` +
+        `• .grouplink\n` +
+        `• .resetlink\n\n` +
         `📊 *Analytics*\n` +
-        `  .groupstats — Full group analytics\n` +
-        `  .groupinfo — Group info\n\n` +
-        `_✨ = New in NovaSpark v5_`
+        `• .groupstats\n` +
+        `• .groupinfo\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
-    if (sub === 'games') {
+    if (sub === 'ai') {
       return reply(
-        `🎮 *Games & Fun*\n` +
+        `🧠 *AI & GPT COMMANDS*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `🕹️ *Games*\n` +
-        `  .wordle — 5-letter word guessing game\n` +
-        `  .trivia — Live trivia from Open Trivia DB\n` +
-        `  .hangman — Classic hangman game\n` +
-        `  .rps rock/paper/scissors — With score tracking\n\n` +
-        `🤔 *Party Games*\n` +
-        `  .2truth — Two Truths & A Lie 🆕\n` +
-        `  .wyr — Would You Rather 🆕\n` +
-        `  .truth / .dare — Truth or Dare\n` +
-        `  .riddle — Brain teaser\n\n` +
-        `_All games track your scores in your profile!_`
+        `💬 *Chat AI*\n` +
+        `• .gpt <question>\n` +
+        `• .gemini <question>\n` +
+        `• .character <name> <msg>\n` +
+        `  ↳ luffy · naruto · goku · tony · sherlock · batman\n` +
+        `• .autochat on/off\n` +
+        `• .autochat persona <name>\n` +
+        `• .autochat reset\n\n` +
+        `🎨 *Image AI*\n` +
+        `• .imagine <prompt>\n` +
+      `• .genmusic <prompt>  🆕\n` +
+        `• .remini  _(reply to photo)_\n` +
+        `• .removebg  _(reply to photo)_\n\n` +
+        `📚 *Study AI*\n` +
+        `• .homework <question>\n` +
+        `• .essay <topic>\n` +
+        `• .summarize <text>\n` +
+        `• .studytips <subject>\n` +
+        `• .math <problem>\n` +
+        `• .pdf <title> | <subject>\n\n` +
+        `💎 *Premium AI*\n` +
+        `• .examprep <subject>\n` +
+        `• .code <lang> <task>\n` +
+        `• .setpersona <description>\n` +
+        `• .autostudy on <subject>\n` +
+        `• .mystats\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
     if (sub === 'downloads') {
       return reply(
-        `⬇️ *Downloaders*\n` +
+        `⬇️ *DOWNLOADERS*\n` +
         `${'━'.repeat(32)}\n\n` +
         `🎵 *Audio*\n` +
-        `  .song <name/URL> — YouTube MP3 download ✨\n` +
-        `  .spotify <URL> — Spotify track download ✨\n\n` +
+        `• .song <name/URL>  — YouTube MP3\n` +
+        `• .spotify <URL>  — Spotify track\n\n` +
         `🎬 *Video*\n` +
-        `  .video <name/URL> — YouTube MP4 download ✨\n` +
-        `  .tiktok <URL> — TikTok (no watermark) ✨\n` +
-        `  .fb <URL> — Facebook video (HD/SD) ✨\n\n` +
+        `• .video <name/URL>  — YouTube MP4\n` +
+        `• .yt <query>  — YouTube search\n` +
+        `• .tiktok <URL>  — TikTok no-watermark\n` +
+        `• .fb <URL>  — Facebook video\n\n` +
         `📸 *Images & Social*\n` +
-        `  .ig <URL> — Instagram photo/reel/video ✨\n` +
-        `  .pin <URL> — Pinterest image/video ✨\n\n` +
-        `_✨ = New in NovaSpark v5_`
+        `• .ig <URL>  — Instagram photo/reel\n` +
+        `• .pin <URL>  — Pinterest image/video\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
-    if (sub === 'ai') {
+    if (sub === 'games') {
       return reply(
-        `🧠 *AI Commands*\n` +
+        `🎮 *GAMES & FUN*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `💬 *Chat AI*\n` +
-        `  .gpt <question> — ChatGPT-style AI ✨\n` +
-        `  .gemini <question> — Google Gemini AI ✨\n` +
-        `  .character <name> <msg> — Roleplay AI ✨\n` +
-        `    Characters: luffy, naruto, goku, tony, sherlock, batman\n\n` +
-        `🎨 *Image AI*\n` +
-        `  .imagine <prompt> — AI image generation ✨\n` +
-        `  .remini — AI image enhancer/upscaler ✨\n` +
-        `  .removebg — AI background remover\n\n` +
-        `📚 *Study AI*\n` +
-        `  .autochat on/off — AI group chat replies\n` +
-        `  .homework <question> — Detailed AI answer\n` +
-        `  .essay <topic> — Full structured essay\n` +
-        `  .summarize <text> — Bullet-point summary\n` +
-        `  .studytips <subject> — AI study tips\n` +
-        `  .pdf <title> | <subject> — Generate PDF\n\n` +
-        `💎 *Premium AI*\n` +
-        `  .examprep <subject> — Full exam revision 💎\n` +
-        `  .code <lang> <task> — Generate working code 💎\n` +
-        `  .setpersona <description> — Custom AI persona 💎\n\n` +
-        `_✨ = New in v5  |  💎 = Premium_`
+        `🕹️ *Games*\n` +
+        `• .wordle\n` +
+        `• .trivia\n` +
+        `• .hangman\n` +
+        `• .rps rock/paper/scissors\n\n` +
+        `🤔 *Party Games*\n` +
+        `• .2truth  — Two Truths & A Lie\n` +
+        `• .wyr  — Would You Rather\n` +
+        `• .truth / .dare\n` +
+        `• .riddle\n\n` +
+        `_All scores saved to your profile!_\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
     if (sub === 'social') {
       return reply(
-        `💬 *Social & Fun*\n` +
+        `💬 *SOCIAL & FUN*\n` +
         `${'━'.repeat(32)}\n\n` +
         `😂 *Fun*\n` +
-        `  .joke — Random joke ✨\n` +
-        `  .meme — Random meme image ✨\n` +
-        `  .quote — Inspirational quote ✨\n` +
-        `  .lyrics <song> — Song lyrics ✨\n` +
-        `  .8ball <question> — Magic 8-Ball ✨\n` +
-        `  .flirt [@user] — Flirty pickup line ✨\n` +
-        `  .insult [@user] — Savage roast ✨\n` +
-        `  .gayrate [@user] — Vibe check ✨\n` +
-        `  .flip — Coin flip 🪙 ✨\n` +
-        `  .dice [n] [sides] — Roll dice 🎲 ✨\n` +
-        `  .horoscope <sign> — Daily horoscope 🔮 ✨\n` +
-        `  .riddle — Brain teaser 🧩 ✨\n` +
-        `  .dare — Truth or Dare challenge 😈 ✨\n\n` +
+        `• .joke\n` +
+        `• .meme\n` +
+        `• .quote\n` +
+        `• .lyrics <song>\n` +
+        `• .8ball <question>\n` +
+        `• .flirt [@user]\n` +
+        `• .insult [@user]\n` +
+        `• .gayrate [@user]\n` +
+        `• .flip\n` +
+        `• .dice [n] [sides]\n` +
+        `• .horoscope <sign>\n` +
+        `• .riddle\n` +
+        `• .dare\n\n` +
         `💕 *Social*\n` +
-        `  .ship @user1 @user2 — Love compatibility\n` +
-        `  .compliment [@user] — AI compliment\n` +
-        `  .truth — Truth or Dare (truth) ✨\n` +
-        `  .roast @user — AI personalised roast\n` +
-        `  .poll Q | A | B | C — WhatsApp poll\n` +
-        `  .fact — Random verified fact\n` +
-        `  .urban <word> — Urban Dictionary\n\n` +
-        `_✨ = New in NovaSpark v5_`
+        `• .ship @user1 @user2\n` +
+        `• .compliment [@user]\n` +
+        `• .truth\n` +
+        `• .roast @user\n` +
+        `• .poll Q | A | B | C\n` +
+        `• .fact\n` +
+        `• .urban <word>\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
     if (sub === 'tools') {
       return reply(
-        `🔧 *Tools & Utilities*\n` +
+        `🔧 *TOOLS & UTILITIES*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .ping — Bot latency & system stats ✨\n` +
-        `  .vv — Reveal view-once messages ✨\n` +
-        `  .ss <url> — Screenshot website ✨\n` +
-        `  .simage — Sticker → image/video ✨\n` +
-        `  .myactivity — Your message rank ✨\n` +
-        `  .topmembers — Group leaderboard ✨\n` +
-        `  .alive — Bot status card ✨\n` +
-        `  .getpp [@user] — Get profile picture ✨\n` +
-        `  .owner — Bot owner info ✨\n` +
-        `  .calc <expression> — Scientific calculator\n` +
-        `  .weather <city> — 3-day forecast\n` +
-        `  .time [timezone] — World clock\n` +
-        `  .motivate [@user] — Motivation quote\n` +
-        `  .remind <time> <msg> — Set reminder 💎\n` +
-        `  .translate <lang> <text> — Translate\n` +
-        `  .currency 100 USD ZAR — Exchange rate\n` +
-        `  .bmi <kg> <cm> — BMI calculator\n` +
-        `  .news [topic] — Live headlines\n` +
-        `  .profile [@user] — Profile card\n` +
-        `  .qr <text> — Generate QR code\n` +
-        `  .sticker — Image → WhatsApp sticker\n` +
-        `  .tts <text> — Text to speech audio\n\n` +
-        `🆕 *New Tools (v5.1)*\n` +
-        `  .password [length] — Strong password gen ✨\n` +
-        `  .countdown <date> [name] — Days until event ✨\n` +
-        `  .color #HEX — Color info & preview ✨\n` +
-        `  .nasa — NASA Astronomy Picture ✨\n` +
-        `  .define <word> — Dictionary lookup 🆕\n` +
-        `  .ip <address> — IP location & ISP 🆕\n` +
-        `  .crypto <symbol> — Live crypto prices 🆕\n` +
-        `  .short <url> — URL shortener 🆕\n\n` +
-        `_💎 = Premium  |  ✨ = New in v5  |  🆕 = New in v5.2_`
-      );
-    }
-
-    if (sub === 'ai') {
-      return reply(
-        `🧠 *AI Commands*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `  .autochat on/off — Toggle AI chat replies 🧠\n` +
-        `  .autochat persona <name> — Set AI personality\n` +
-        `  .autochat reset — Clear conversation memory\n` +
-        `  .homework <question> — Detailed AI answer\n` +
-        `  .essay <topic> — Full structured essay\n` +
-        `  .summarize <text> — Bullet-point summary\n` +
-        `  .studytips <subject> — AI study tips\n` +
-        `  .pdf <title> | <subject> — Generate PDF\n\n` +
-        `💎 *Premium AI*\n` +
-        `  .examprep <subject> — Full exam revision\n` +
-        `  .code <lang> <task> — Generate working code\n` +
-        `  .setpersona <description> — Custom AI persona\n` +
-        `  .autostudy on <subject> — Daily study tips\n` +
-        `  .mystats — Your personal bot analytics`
+        `• .ping\n` +
+        `• .alive\n` +
+        `• .vv  — View-once revealer\n` +
+        `• .ss <url>  — Screenshot\n` +
+        `• .sticker  — Image → sticker\n` +
+        `• .simage  — Sticker → image\n` +
+        `• .tts <text>  — Text to speech\n` +
+        `• .translate <lang> <text>\n` +
+        `• .currency 100 USD ZAR\n` +
+        `• .bmi <kg> <cm>\n` +
+        `• .calc <expression>\n` +
+        `• .weather <city>\n` +
+        `• .time [timezone]\n` +
+        `• .news [topic]\n` +
+        `• .qr <text>\n` +
+        `• .getpp [@user]\n` +
+        `• .profile [@user]\n` +
+        `• .motivate [@user]\n` +
+        `• .myactivity\n` +
+        `• .topmembers\n` +
+        `• .owner\n\n` +
+        `🆕 *v5.1 Tools*\n` +
+        `• .password [length]\n` +
+        `• .countdown <date> [name]\n` +
+        `• .color #HEX\n` +
+        `• .nasa\n\n` +
+        `🆕 *v5.2 Tools*\n` +
+        `• .define <word>\n` +
+        `• .ip <address> / .myip\n` +
+        `• .crypto <symbol>\n` +
+      `• .bible [John 3:16/search]  🆕\n` +
+        `• .short <url> / .unshort <url>\n\n` +
+        `💎 *Premium*\n` +
+        `• .remind <time> <msg>\n` +
+        `• .mystats\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
     if (sub === 'owner') {
       return reply(
-        `👑 *Owner Commands*\n` +
+        `👑 *OWNER COMMANDS*\n` +
         `${'━'.repeat(32)}\n\n` +
         `🔒 *Bot Control*\n` +
-        `  .shutdown — Shut down the bot 🔴\n` +
-        `  .restart — Restart the bot process 🔄\n` +
-        `  .maintenance on/off [msg] — Maintenance mode\n` +
-        `  .ownermode on/off — Owner-only lockdown\n` +
-        `  .setprefix <char> — Change command prefix\n` +
-        `  .resetprefix — Restore default prefix (.)\n\n` +
+        `• .shutdown\n` +
+        `• .restart\n` +
+        `• .maintenance on/off [msg]\n` +
+        `• .ownermode on/off\n` +
+        `• .setprefix <char>\n` +
+        `• .resetprefix\n\n` +
         `🚫 *Ban System*\n` +
-        `  .ban @user [reason] — Ban user bot-wide\n` +
-        `  .unban @user — Remove ban\n` +
-        `  .banlist — View all banned users\n\n` +
+        `• .ban @user [reason]\n` +
+        `• .unban @user\n` +
+        `• .banlist\n\n` +
         `👤 *Bot Profile*\n` +
-        `  .setname <name> — Change bot display name\n` +
-        `  .setstatus <text> — Update bot About/bio\n` +
-        `  .setpp — Change bot profile photo (reply to image)\n\n` +
-        `📋 *Group Management*\n` +
-        `  .listgroups — List all groups bot is in\n` +
-        `  .leavegroup [id] — Leave a group\n` +
-        `  .joingroup <link> — Join via invite link\n\n` +
+        `• .setname <name>\n` +
+        `• .setstatus <text>\n` +
+        `• .setpp  _(reply to image)_\n\n` +
+        `📋 *Groups*\n` +
+        `• .listgroups\n` +
+        `• .leavegroup [id]\n` +
+        `• .joingroup <link>\n\n` +
         `📢 *Messaging*\n` +
-        `  .announce <msg> — Formatted announcement\n` +
-        `  .globalannounce <msg> — Announce to ALL groups\n` +
-        `  .broadcast <msg> — Plain broadcast to all groups\n` +
-        `  .dm @user <msg> — DM a user through the bot\n\n` +
+        `• .announce <msg>\n` +
+        `• .globalannounce <msg>\n` +
+        `• .broadcast <msg>\n` +
+        `• .dm @user <msg>\n\n` +
         `🗄️ *Database*\n` +
-        `  .cleardb list — Show available tables\n` +
-        `  .cleardb <table> — Wipe a database table\n` +
-        `  .botstats — Full server & usage stats\n` +
-        `  .setpremium @user — Grant premium\n` +
-        `  .removepremium @user — Revoke premium\n\n` +
+        `• .cleardb list\n` +
+        `• .cleardb <table>\n` +
+        `• .botstats\n` +
+        `• .setpremium @user\n` +
+        `• .removepremium @user\n\n` +
         `🔧 *Other*\n` +
-        `  .anticall on/off — Auto-reject incoming calls\n` +
-        `  .antidelete on/off — Forward deleted messages to owner\n` +
-        `  .autoread on/off — Auto-mark messages as read\n` +
-        `  .pmblocker on/off — Block DMs to bot\n` +
-        `  .broadcast <msg> — Message all groups\n\n` +
-        `_All commands are owner-only and will be silently ignored if used by others._`
+        `• .anticall on/off\n` +
+        `• .antidelete on/off\n` +
+        `• .autoread on/off\n` +
+        `• .pmblocker on/off\n\n` +
+        `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
 
-    // Main menu — send with anime image
-    const now = new Date().toLocaleString('en-ZA', {
-      timeZone: config.timezone, weekday:'short', month:'short', day:'numeric',
-      hour:'2-digit', minute:'2-digit', hour12: false,
-    });
+    // ── MAIN MENU ────────────────────────────────────────────────────────────
+    // Shows ALL commands in one message with an anime image caption (SubZero style)
 
     const menuText =
-      `⚡ *NovaSpark Bot v${config.botVersion}*\n` +
-      `_The Most Advanced WhatsApp MD Bot — 2026 Edition_\n` +
-      `${'━'.repeat(35)}\n\n` +
-      `👤 *User:* +${num}\n` +
-      `🏷️  *Plan:* ${plan}\n` +
-      `🕐 *Time:* ${now}\n` +
-      `⏱️  *Uptime:* ${uptimeStr} | 💾 ${memMB}MB\n\n` +
-      `${'─'.repeat(30)}\n` +
-      `📂 *Menu Categories*\n\n` +
-      `  🛡️ \`.menu group\`      — Group management\n` +
-      `  🧠 \`.menu ai\`         — AI, GPT & image AI\n` +
-      `  ⬇️ \`.menu downloads\`  — All downloaders ✨\n` +
-      `  🎮 \`.menu games\`      — Games & quizzes\n` +
-      `  💬 \`.menu social\`     — Social & fun\n` +
-      `  🔧 \`.menu tools\`      — Tools & utilities\n` +
-      `  👑 \`.menu owner\`      — Owner commands\n` +
-      `  📋 \`.bmenu\`           — Interactive list menu ✨\n\n` +
-      `${'─'.repeat(30)}\n` +
-      `🔥 *What\'s New in v5.2*\n` +
-      `  🤥 .2truth — Two Truths & A Lie\n` +
-      `  🤔 .wyr — Would You Rather\n` +
-      `  📖 .define <word> — Dictionary lookup\n` +
-      `  🌐 .ip <address> — IP info & location\n` +
-      `  💰 .crypto <symbol> — Live crypto prices\n` +
-      `  ✂️ .short <url> — URL shortener\n` +
-      `  🌊 .antiflood on — Anti-flood protection\n` +
-      `  ⏱️ .autokick join <min> — Kick silent joiners\n` +
-      `  🤖 .autoreply add — Keyword auto-replies\n` +
-      `  🚨 .antiraid on — Mass-join raid protection\n` +
-      `  📣 .autonudge on — Tag inactive members\n\n` +
-      `${'─'.repeat(30)}\n` +
-      `✅ *v5 Highlights*\n` +
-      `  🔗 AntiLink  |  📢 TagAll & HideTag\n` +
-      `  ⬆️⬇️ Promote/Demote  |  🔇 Mute/Unmute\n` +
-      `  ⬇️ YT/TikTok/IG/FB/Pinterest/Spotify\n` +
-      `  🤖 GPT + Gemini + Character AI\n` +
-      `  ✨ Remini AI  |  🎨 AI Image Gen\n` +
-      `  🎮 Wordle/Trivia/Hangman/RPS\n` +
-      `  📊 Activity stats & leaderboard\n\n` +
-      `${'━'.repeat(35)}\n` +
-      `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
-      `_${config.channelLink}_`;
+      `╔═══════════════════════════╗\n` +
+      `║  ⚡ *NOVASPARK BOT v${config.botVersion}*  ║\n` +
+      `╚═══════════════════════════╝\n` +
+      `_The Most Advanced WhatsApp MD Bot_\n\n` +
 
-    // Anime image URLs — rotates randomly each .menu call
-    const ANIME_IMAGES = [
-      'https://i.imgur.com/4M34hi2.png',   // anime bot girl
-      'https://i.pinimg.com/originals/9a/6c/1c/9a6c1c6b0e2d1c7be4a6c2f0e1c3a9b1.jpg',
-      'https://i.imgur.com/2yaf2fb.jpg',
+      `┌─[ 👤 *USER INFO* ]\n` +
+      `│ • User   : +${num}\n` +
+      `│ • Plan   : ${plan}\n` +
+      `│ • Prefix : [ ${config.prefix} ]\n` +
+      `│ • Time   : ${now}\n` +
+      `│ • Uptime : ${uptimeStr}  💾 ${memMB}MB\n` +
+      `└──────────────────────────\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `🧠 *AI & GPT*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .gpt <question>\n` +
+      `• .gemini <question>\n` +
+      `• .character <name> <msg>\n` +
+      `• .autochat on/off\n` +
+      `• .imagine <prompt>\n` +
+      `• .genmusic <prompt>  🆕\n` +
+      `• .remini\n` +
+      `• .removebg\n` +
+      `• .homework <question>\n` +
+      `• .essay <topic>\n` +
+      `• .summarize <text>\n` +
+      `• .studytips <subject>\n` +
+      `• .math <problem>\n` +
+      `• .pdf <title> | <subject>\n` +
+      `• .translate <lang> <text>\n` +
+      `💎 .examprep / .code / .setpersona\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `⬇️ *DOWNLOADS*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .song <name/URL>\n` +
+      `• .video <name/URL>\n` +
+      `• .yt <query>\n` +
+      `• .tiktok <URL>\n` +
+      `• .spotify <URL>\n` +
+      `• .ig <URL>\n` +
+      `• .fb <URL>\n` +
+      `• .pin <URL>\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `🎮 *GAMES*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .wordle\n` +
+      `• .trivia\n` +
+      `• .hangman\n` +
+      `• .rps rock/paper/scissors\n` +
+      `• .2truth\n` +
+      `• .wyr\n` +
+      `• .truth / .dare\n` +
+      `• .riddle\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `💬 *SOCIAL & FUN*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .joke / .meme / .quote\n` +
+      `• .lyrics <song>\n` +
+      `• .8ball <question>\n` +
+      `• .flirt / .insult / .roast [@user]\n` +
+      `• .compliment [@user]\n` +
+      `• .ship @user1 @user2\n` +
+      `• .gayrate [@user]\n` +
+      `• .flip / .dice\n` +
+      `• .horoscope <sign>\n` +
+      `• .fact / .urban <word>\n` +
+      `• .poll Q | A | B | C\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `🛡️ *GROUP MANAGEMENT*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .warn / .warns / .clearwarn\n` +
+      `• .setwarnlimit <N>\n` +
+      `• .kick / .promote / .demote\n` +
+      `• .mute / .unmute\n` +
+      `• .tagall / .hidetag\n` +
+      `• .antilink / .antiword\n` +
+      `• .antitoxic / .antiflood\n` +
+      `• .antiraid / .antidelete\n` +
+      `• .autoreply / .autokick\n` +
+      `• .autonudge / .autoreact\n` +
+      `• .nightmode / .vip / .ghost\n` +
+      `• .welcome / .goodbye\n` +
+      `• .grouplink / .resetlink\n` +
+      `• .groupstats / .groupinfo\n` +
+      `• .delete\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `🔧 *TOOLS*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .ping / .alive / .owner\n` +
+      `• .vv / .ss <url> / .sticker\n` +
+      `• .simage / .tts <text>\n` +
+      `• .calc / .bmi / .weather\n` +
+      `• .time / .news / .qr <text>\n` +
+      `• .currency / .translate\n` +
+      `• .getpp / .profile / .motivate\n` +
+      `• .myactivity / .topmembers\n` +
+      `• .password / .countdown\n` +
+      `• .color #HEX / .nasa\n` +
+      `• .define / .ip / .myip\n` +
+      `• .crypto / .short / .unshort\n` +
+      `💎 .remind / .mystats\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `👑 *OWNER ONLY*\n` +
+      `${'━'.repeat(32)}\n` +
+      `• .shutdown / .restart\n` +
+      `• .maintenance / .ownermode\n` +
+      `• .setprefix / .setname\n` +
+      `• .setstatus / .setpp\n` +
+      `• .ban / .unban / .banlist\n` +
+      `• .broadcast / .announce\n` +
+      `• .globalannounce / .dm\n` +
+      `• .setpremium / .removepremium\n` +
+      `• .listgroups / .leavegroup\n` +
+      `• .joingroup / .botstats\n` +
+      `• .cleardb / .anticall\n` +
+      `• .autoread / .pmblocker\n\n` +
+
+      `${'━'.repeat(32)}\n` +
+      `📋 *.bmenu* — Interactive tap menu\n` +
+      `${'━'.repeat(32)}\n\n` +
+      `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
+      `_${config.channelLink || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'}_`;
+
+    // ── IMAGE SOURCES ─────────────────────────────────────────────────────────
+    // Primary: waifu.im random SFW anime — same style as SubZero MD uses
+    // Fallback chain: local imgur mirrors → plain text
+    const FALLBACK_IMAGES = [
       'https://cdn.waifu.im/6f0b71f9c3e50dca.jpg',
       'https://cdn.waifu.im/7f5b4e8c2a1d3f90.jpg',
+      'https://i.imgur.com/4M34hi2.png',
+      'https://i.imgur.com/2yaf2fb.jpg',
     ];
-    // Use waifu.im random endpoint (always returns a valid anime image)
-    const animeUrl = 'https://api.waifu.im/search?included_tags=waifu&is_nsfw=false&many=false';
 
     try {
-      // Try to fetch a random waifu.im image URL
-      const axios = require('axios');
-      const res   = await axios.get(animeUrl, { timeout: 6000 });
-      const imgUrl = res.data?.images?.[0]?.url || ANIME_IMAGES[Math.floor(Math.random() * ANIME_IMAGES.length)];
-      await sock.sendMessage(from, {
-        image:   { url: imgUrl },
-        caption: menuText,
-        mimetype: 'image/jpeg',
-      }, { quoted: msg });
+      const axios  = require('axios');
+      let imgUrl;
+
+      try {
+        const res = await axios.get(
+          'https://api.waifu.im/search?included_tags=waifu&is_nsfw=false&many=false',
+          { timeout: 6000 }
+        );
+        imgUrl = res.data?.images?.[0]?.url;
+      } catch {
+        // waifu.im timed out — use a fallback URL
+      }
+
+      if (!imgUrl) {
+        imgUrl = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+      }
+
+      await sock.sendMessage(
+        from,
+        { image: { url: imgUrl }, caption: menuText, mimetype: 'image/jpeg' },
+        { quoted: msg }
+      );
     } catch {
-      // If image fetch fails, fall back to plain text menu
+      // If ALL image attempts fail, send plain text
       return reply(menuText);
     }
   },
