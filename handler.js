@@ -97,7 +97,8 @@ const imagine2Cmd    = require('./commands/ai/imagine2');
 const reminiCmd      = require('./commands/ai/remini');
 const characterCmd   = require('./commands/ai/character');
 
-// ── v5 FUN COMMANDS ───────────────────────────────────────────────────────────const jokeCmd        = require('./commands/fun/joke');
+// ── v5 FUN COMMANDS ───────────────────────────────────────────────────────────
+const jokeCmd        = require('./commands/fun/joke');
 const flirtCmd       = require('./commands/fun/flirt');
 const insultCmd      = require('./commands/fun/insult');
 const truthCmd       = require('./commands/fun/truth');
@@ -106,6 +107,18 @@ const memeCmd        = require('./commands/fun/meme');
 const gayrateCmd     = require('./commands/fun/gayrate');
 const quoteCmd       = require('./commands/fun/quote');
 const lyricsCmd      = require('./commands/fun/lyrics');
+
+// ── v5.1 NEW COMMANDS ─────────────────────────────────────────────────────────
+const flipCmd        = require('./commands/fun/flip');
+const diceCmd        = require('./commands/fun/dice');
+const horoscopeCmd   = require('./commands/fun/horoscope');
+const riddleCmd      = require('./commands/fun/riddle');
+const dareCmd        = require('./commands/free/dare');
+const passwordCmd    = require('./commands/free/password');
+const countdownCmd   = require('./commands/free/countdown');
+const colorCmd       = require('./commands/free/color');
+const nasaCmd        = require('./commands/free/nasa');
+const buttonMenuCmd  = require('./commands/free/buttonmenu');
 
 // ── v5 OWNER COMMANDS ─────────────────────────────────────────────────────────
 const anticallCmd    = require('./commands/owner/anticall');
@@ -186,6 +199,9 @@ const ALL_COMMANDS = [
   shipCmd,
   ...(Array.isArray(dareCmds)       ? dareCmds       : [dareCmds]),
   ...(Array.isArray(complimentCmds) ? complimentCmds : [complimentCmds]),
+  // v5.1 new commands
+  flipCmd, diceCmd, horoscopeCmd, riddleCmd, dareCmd,
+  passwordCmd, countdownCmd, colorCmd, nasaCmd, buttonMenuCmd,
 ];
 
 const cmdMap = new Map();

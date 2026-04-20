@@ -132,12 +132,16 @@ module.exports = {
         `  .8ball <question> — Magic 8-Ball ✨\n` +
         `  .flirt [@user] — Flirty pickup line ✨\n` +
         `  .insult [@user] — Savage roast ✨\n` +
-        `  .gayrate [@user] — Vibe check ✨\n\n` +
+        `  .gayrate [@user] — Vibe check ✨\n` +
+        `  .flip — Coin flip 🪙 ✨\n` +
+        `  .dice [n] [sides] — Roll dice 🎲 ✨\n` +
+        `  .horoscope <sign> — Daily horoscope 🔮 ✨\n` +
+        `  .riddle — Brain teaser 🧩 ✨\n` +
+        `  .dare — Truth or Dare challenge 😈 ✨\n\n` +
         `💕 *Social*\n` +
         `  .ship @user1 @user2 — Love compatibility\n` +
         `  .compliment [@user] — AI compliment\n` +
         `  .truth — Truth or Dare (truth) ✨\n` +
-        `  .dare — Truth or Dare (dare)\n` +
         `  .roast @user — AI personalised roast\n` +
         `  .poll Q | A | B | C — WhatsApp poll\n` +
         `  .fact — Random verified fact\n` +
@@ -168,7 +172,15 @@ module.exports = {
         `  .currency 100 USD ZAR — Exchange rate\n` +
         `  .bmi <kg> <cm> — BMI calculator\n` +
         `  .news [topic] — Live headlines\n` +
-        `  .profile [@user] — Profile card\n\n` +
+        `  .profile [@user] — Profile card\n` +
+        `  .qr <text> — Generate QR code\n` +
+        `  .sticker — Image → WhatsApp sticker\n` +
+        `  .tts <text> — Text to speech audio\n\n` +
+        `🆕 *New Tools (v5.1)*\n` +
+        `  .password [length] — Strong password gen ✨\n` +
+        `  .countdown <date> [name] — Days until event ✨\n` +
+        `  .color #HEX — Color info & preview ✨\n` +
+        `  .nasa — NASA Astronomy Picture ✨\n\n` +
         `_💎 = Premium  |  ✨ = New in v5_`
       );
     }
@@ -210,36 +222,33 @@ module.exports = {
       `⏱️  *Uptime:* ${uptimeStr} | 💾 ${memMB}MB\n\n` +
       `${'─'.repeat(30)}\n` +
       `📂 *Menu Categories*\n\n` +
-      `  🛡️ \`.menu group\` — Group management\n` +
-      `  🧠 \`.menu ai\` — AI, GPT & image AI\n` +
-      `  ⬇️ \`.menu downloads\` — All downloaders ✨\n` +
-      `  🎮 \`.menu games\` — Games & quizzes\n` +
-      `  💬 \`.menu social\` — Social & fun\n` +
-      `  🔧 \`.menu tools\` — Tools & utilities\n\n` +
+      `  🛡️ \`.menu group\`      — Group management\n` +
+      `  🧠 \`.menu ai\`         — AI, GPT & image AI\n` +
+      `  ⬇️ \`.menu downloads\`  — All downloaders ✨\n` +
+      `  🎮 \`.menu games\`      — Games & quizzes\n` +
+      `  💬 \`.menu social\`     — Social & fun\n` +
+      `  🔧 \`.menu tools\`      — Tools & utilities\n` +
+      `  📋 \`.bmenu\`           — Interactive list menu ✨\n\n` +
       `${'─'.repeat(30)}\n` +
-      `🔥 *What\'s New in v5*\n` +
-      `  🔗 AntiLink — delete/warn/kick on links\n` +
-      `  📢 TagAll & HideTag — bulk mentions\n` +
-      `  ⬆️⬇️ Promote & Demote admins\n` +
-      `  🔇 Mute/Unmute group instantly\n` +
-      `  🗑️ Delete any message in group\n` +
-      `  🔄 Reset/Get group invite link\n` +
-      `  😂 Jokes, Memes, Lyrics, 8-Ball\n` +
-      `  💌 Flirt, Insult, GayRate commands\n` +
-      `  🏓 Ping with full system stats\n` +
-      `  🤖 Alive status card\n` +
-      `  🖼️ GetPP — fetch profile pictures\n` +
-      `  📡 Broadcast to all groups\n` +
-      `  📵 AntiCall — auto-reject calls\n` +
-      `  💬 PM Blocker — block DMs\n` +
-      `  👁️ AutoRead — mark all as read\n` +
-      `  👁️ VV — reveal view-once messages\n` +
-      `  📸 Sticker→Image converter\n` +
-      `  📷 Screenshot any website\n` +
+      `🔥 *What\'s New in v5.1*\n` +
+      `  🪙 .flip — Coin flip\n` +
+      `  🎲 .dice [n] [sides] — Roll dice\n` +
+      `  🔮 .horoscope <sign> — Daily horoscope\n` +
+      `  🧩 .riddle — Brain teaser + reveal\n` +
+      `  😈 .dare — Truth or Dare challenges\n` +
+      `  🔐 .password [length] — Password generator\n` +
+      `  ⏳ .countdown <date> — Days until event\n` +
+      `  🎨 .color #HEX — Color info & converter\n` +
+      `  🚀 .nasa — NASA Astronomy Picture\n` +
+      `  📋 .bmenu — Interactive button menu\n\n` +
+      `${'─'.repeat(30)}\n` +
+      `✅ *v5 Highlights*\n` +
+      `  🔗 AntiLink  |  📢 TagAll & HideTag\n` +
+      `  ⬆️⬇️ Promote/Demote  |  🔇 Mute/Unmute\n` +
       `  ⬇️ YT/TikTok/IG/FB/Pinterest/Spotify\n` +
       `  🤖 GPT + Gemini + Character AI\n` +
-      `  ✨ Remini AI image enhancer\n` +
-      `  🎨 AI Image generation\n` +
+      `  ✨ Remini AI  |  🎨 AI Image Gen\n` +
+      `  🎮 Wordle/Trivia/Hangman/RPS\n` +
       `  📊 Activity stats & leaderboard\n\n` +
       `${'━'.repeat(35)}\n` +
       `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
