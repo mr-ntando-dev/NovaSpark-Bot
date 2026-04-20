@@ -1,45 +1,65 @@
 ##############################################################
 #  NovaSpark Bot — Render deployment manifest
-#  Deploy as a Background Worker (no HTTP port needed).
+#  Deploy as a Web Service so the Admin Panel is reachable
+#  and Render's health checks pass.
 #  Persistent disk keeps WhatsApp session across restarts.
 ##############################################################
 
 services:
-  - type: worker              # Background Worker — no open port required
+  - type: web                  # Web Service — exposes HTTP for the Admin Panel
     name: novaspark-bot
     runtime: node
-    region: oregon            # closest to Africa; change to "frankfurt" if latency matters
-    plan: starter             # cheapest paid plan (free plan spins down)
+    region: oregon             # Change to "frankfurt" for lower Africa latency
+    plan: starter              # $7/month — stays alive 24/7
 
     # ── Build ────────────────────────────────────────────────
-    buildCommand: npm install --omit=dev
-    startCommand: node index.js
+    buildCommand: npm install
 
-    # ── Persistent disk (keeps session/ folder alive) ────────
+    # ── Start (bot + admin panel in one process) ─────────────
+    startCommand: node server.js
+
+    # ── Health check (Render pings this to confirm the service is up) ──
+    healthCheckPath: /health
+
+    # ── Auto-deploy on push to main ──────────────────────────
+    autoDeploy: true
+
+    # ── Persistent disk (keeps WhatsApp session files) ───────
     disk:
       name: session-data
       mountPath: /opt/render/project/src/session
       sizeGB: 1
 
-    # ── Environment variables ────────────────────────────────
+    # ── Environment variables ─────────────────────────────────
+    # Set these in the Render dashboard under Environment
     envVars:
       - key: NODE_ENV
         value: production
 
-      # Required — your WhatsApp session string (NovaSpark!... or KnightBot!...)
-      - key: SESSION_ID
-        sync: false           # fill this in the Render dashboard after deploy
+      - key: PORT
+        value: 3000
 
-      # Optional — improves AI response quality
+      # ── Admin Panel credentials ────────────────────────────
+      - key: ADMIN_USERNAME
+        value: novaspark
+
+      - key: ADMIN_PASSWORD
+        value: ntando
+
+      - key: SESSION_SECRET
+        generateValue: true     # Render auto-generates a secure random string
+
+      # ── Bot session (set in dashboard, never commit to git) ──
+      - key: SESSION_ID
+        sync: false
+
+      # ── Session directory — matches the persistent disk mountPath ────
+      - key: SESSION_DIR
+        value: /opt/render/project/src/session
+
+      # ── Optional AI API keys ──────────────────────────────
       - key: OPENAI_API_KEY
         sync: false
 
-      # Optional — used by .pdf command
       - key: DEEPAI_API_KEY
         sync: false
-
-      # Skip Puppeteer/Chromium download (not needed)
-      - key: PUPPETEER_SKIP_DOWNLOAD
-        value: "true"
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: "true"
