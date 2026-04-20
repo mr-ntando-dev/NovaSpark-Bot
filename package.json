@@ -1,7 +1,7 @@
 {
   "name": "novaspark-bot",
-  "version": "2.0.0",
-  "description": "NovaSpark Bot — WhatsApp MD AutoChat Bot with Free & Premium features. By Dev-Ntando.",
+  "version": "3.0.0",
+  "description": "NovaSpark Bot v3 — The WhatsApp MD bot that actually works. By Dev-Ntando.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "keywords": [
     "whatsapp bot", "novaspark", "autochat", "baileys", "md",
-    "homework helper", "essay writer", "pdf generator", "study bot"
+    "sticker maker", "ai image", "tts", "news bot", "qr code"
   ],
   "author": "Dev-Ntando",
   "license": "MIT",
@@ -23,7 +23,10 @@
     "form-data": "^4.0.5",
     "node-fetch": "^2.7.0",
     "pino": "^9.0.0",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.33.4",
+    "qrcode": "^1.5.4",
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

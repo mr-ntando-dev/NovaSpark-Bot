@@ -283,9 +283,17 @@ async function startBot() {
     }
   });
 
+  // ── Anti-delete: catch message-delete events ─────────────────────────────
+  const antideleteCmd = require('./commands/owner/antidelete');
+  sock.ev.on('messages.update', (updates) => {
+    const deletes = updates.filter(u => u.update?.messageStubType === 1 || u.update?.revoke);
+    if (deletes.length) {
+      antideleteCmd.handleDelete(sock, { keys: deletes.map(d => d.key) }).catch(() => {});
+    }
+  });
+
   // ── Swallow non-critical events ───────────────────────────────────────────
   sock.ev.on('message-receipt.update', () => {});
-  sock.ev.on('messages.update',        () => {});
   sock.ev.on('error', (err) => {
     const code = err?.output?.statusCode;
     if ([515, 503, 408].includes(code)) return;

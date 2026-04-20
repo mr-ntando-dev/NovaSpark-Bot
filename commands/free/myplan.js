@@ -4,8 +4,8 @@ const config   = require('../../config');
 
 module.exports = {
   name: 'myplan',
-  aliases: ['plan', 'upgrade'],
-  description: 'Check your current plan and available features',
+  aliases: ['plan', 'upgrade', 'help', 'menu'],
+  description: 'Show all available commands and your plan status',
   category: 'free',
   execute: async ({ sender, reply }) => {
     const userId   = sender.split('@')[0];
@@ -14,30 +14,40 @@ module.exports = {
     const ownerNum = Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber;
 
     const freeFeatures = [
-      '⚡ AutoChat AI — always on, no activation needed',
-      '🔢 Math Solver — auto-detected + .math command',
-      '🌤️ Weather — real-time via .weather or just ask',
-      '📚 Homework Helper — auto-detected + .homework',
-      '✍️ Essay Writer — auto-detected + .essay',
-      '📋 Summarizer — auto-detected + .summarize',
-      '🌍 Translator — auto-detected + .translate',
-      '📖 Study Tips — auto-detected + .studytips',
-      '📄 Project PDF Generator (.pdf)',
-      '🎭 5 AI Personas',
-      '🖼️ Auto Image Generation & Analysis',
-      '📝 OCR — reads & solves math from photos',
+      // AI / Autochat
+      '⚡ AutoChat AI — always on, auto-detects message type',
+      '🔢 .math — solve any math, step by step',
+      '🌤️ .weather — real-time weather for any city',
+      '📚 .homework — AI homework answer',
+      '✍️ .essay — full structured essay',
+      '📋 .summarize — bullet-point summary',
+      '🌍 .translate — any language',
+      '📖 .studytips — AI study tips',
+      '📄 .pdf — generate a school project PDF',
+      // v3 NEW
+      '🖼️ .sticker — turn any image/video into a sticker',
+      '📰 .news [topic] — live headlines (world/tech/zim/sport…)',
+      '📲 .qr <text> — generate a scannable QR code',
+      '🎨 .imagine <prompt> — AI image generation (FREE)',
+      '🎙️ .tts [lang] <text> — text-to-speech voice note',
+      '💱 .currency 100 USD ZAR — live exchange rates',
+      '📊 .poll Q | A | B | C — native WhatsApp poll',
+      '🧠 .fact — random verified interesting fact',
+      '📖 .urban <word> — Urban Dictionary slang lookup',
+      '⚖️ .bmi <kg> <cm> — BMI + health advice',
+      '👥 .groupinfo — group analytics (groups only)',
+      '🔥 .roast @user — AI-generated personalised roast',
+      '🎭 .autochat persona <name> — switch AI personality',
     ];
 
     const premiumFeatures = [
-      '💎 Everything in Free',
-      '🎓 Exam Prep AI (.examprep)',
-      '💻 Code Generator (.code)',
-      '🔔 Reminder System (.remind)',
-      '📊 Analytics Dashboard (.mystats)',
-      '📚 Auto Study Mode (.autostudy)',
-      '🎭 Custom AI Persona (.setpersona)',
-      '📄 Unlimited PDF types (CV, research paper, report)',
-      '⚡ Priority AI — faster & more detailed responses',
+      '💎 Everything in Free — with priority AI',
+      '🎓 .examprep — full exam revision notes',
+      '💻 .code — generate working code in any language',
+      '🔔 .remind — set reminders (30s to 1d)',
+      '📊 .mystats — personal usage analytics',
+      '📚 .autostudy — daily study tips on schedule',
+      '🎭 .setpersona — fully custom AI personality',
     ];
 
     if (premium) {

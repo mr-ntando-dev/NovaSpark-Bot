@@ -18,6 +18,8 @@ const PREMIUM_DB   = path.join(DB_PATH, 'premium.json');
 const REMIND_DB    = path.join(DB_PATH, 'reminders.json');
 const ANALYTICS_DB = path.join(DB_PATH, 'analytics.json');
 const PROFILE_DB   = path.join(DB_PATH, 'profiles.json');
+const SETTINGS_DB  = path.join(DB_PATH, 'settings.json');
+const MEMORY_DB    = path.join(DB_PATH, 'memory.json');
 
 if (!fs.existsSync(DB_PATH)) fs.mkdirSync(DB_PATH, { recursive: true });
 
@@ -32,6 +34,8 @@ initDB(PREMIUM_DB,   { users: [] });
 initDB(REMIND_DB,    []);
 initDB(ANALYTICS_DB, {});
 initDB(PROFILE_DB,   {});
+initDB(SETTINGS_DB,  {});
+initDB(MEMORY_DB,    {});
 
 const readDB = (filePath) => {
   try { return JSON.parse(fs.readFileSync(filePath, 'utf-8')); }
@@ -143,6 +147,44 @@ const getUserReminders = (userId) => readDB(REMIND_DB).filter(r => r.userId === 
 // Mods
 const isModerator = (number) => { const mods = readDB(MODS_DB); return Array.isArray(mods.moderators) && mods.moderators.includes(number); };
 
+// ── Settings (key/value store for global bot settings like antidelete) ────────
+const getSetting = (key) => {
+  const db = readDB(SETTINGS_DB);
+  return db[key] !== undefined ? db[key] : null;
+};
+const setSetting = (key, value) => {
+  const db  = readDB(SETTINGS_DB);
+  db[key]   = value;
+  return writeDB(SETTINGS_DB, db);
+};
+
+// ── Persistent Conversation Memory (survives restarts) ────────────────────────
+// Stores last N messages per user for cross-restart AI context
+const MEMORY_LIMIT = 20; // messages per user
+
+const getMemory = (userId) => {
+  const db  = readDB(MEMORY_DB);
+  const num = _norm(userId);
+  return Array.isArray(db[num]) ? db[num] : [];
+};
+
+const appendMemory = (userId, role, content) => {
+  const db  = readDB(MEMORY_DB);
+  const num = _norm(userId);
+  if (!Array.isArray(db[num])) db[num] = [];
+  db[num].push({ role, content, ts: Date.now() });
+  // Keep only last MEMORY_LIMIT entries
+  if (db[num].length > MEMORY_LIMIT) db[num] = db[num].slice(-MEMORY_LIMIT);
+  return writeDB(MEMORY_DB, db);
+};
+
+const clearMemory = (userId) => {
+  const db  = readDB(MEMORY_DB);
+  const num = _norm(userId);
+  delete db[num];
+  return writeDB(MEMORY_DB, db);
+};
+
 module.exports = {
   getGroupSettings, updateGroupSettings,
   getUser, updateUser,
@@ -151,4 +193,6 @@ module.exports = {
   logCommand, getAnalytics,
   addReminder, getPendingReminders, markReminderDone, getUserReminders,
   isModerator,
+  getSetting, setSetting,
+  getMemory, appendMemory, clearMemory,
 };

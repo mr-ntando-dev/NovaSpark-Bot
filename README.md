@@ -1,56 +1,43 @@
-<div align="center">
+# ⚡ NovaSpark Bot v3 — WhatsApp MD AutoChat Bot
 
-# ⚡ NovaSpark Bot
+**By Dev-Ntando** | Powered by [Baileys](https://github.com/WhiskeySockets/Baileys)
 
-**WhatsApp MD Bot — AutoChat AI + Free & Premium Features**
-
-*By Dev-Ntando*
-
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
-[![Baileys](https://img.shields.io/badge/Baileys-7.x-blue)](https://github.com/WhiskeySockets/Baileys)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-
-</div>
+[![Node](https://img.shields.io/badge/Node.js-20%2B-green)](https://nodejs.org/)
+[![Baileys](https://img.shields.io/badge/Baileys-latest-blue)](https://github.com/WhiskeySockets/Baileys)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
 
-## ✨ What is NovaSpark Bot?
+## ✨ What is NovaSpark Bot v3?
 
-NovaSpark Bot is a smart WhatsApp MD bot built on Baileys with two tiers of features:
-- **🆓 Free Plan** — powerful AI tools available to everyone
-- **💎 Premium Plan** — advanced features unlocked by the owner
+NovaSpark Bot is a feature-packed WhatsApp MD bot built on Baileys. Version 3 is a **complete upgrade** — every feature is real and works exactly as advertised. No fake poll images. No placeholder voice notes. Everything fires live.
 
----
-
-## 👤 Registration
-
-The first time you turn on AutoChat, the bot will guide you through a quick registration:
-1. **Full Name**
-2. **Age**
-3. **School / Institution**
-4. **Email Address**
-
-This personalizes all AI responses and puts your name on generated PDFs.
+**Two tiers:**
+- 🆓 **Free Plan** — powerful tools for everyone
+- 💎 **Premium Plan** — advanced features for power users
 
 ---
 
-## ⚡ Always-On Smart Detection (v6)
+## 🚀 What's New in v3
 
-AutoChat is **always active** — no `.autochat on` needed. The bot reads every message and automatically routes it to the right tool:
-
-| What you send | What happens |
+| Feature | What it does |
 |---|---|
-| A math equation / word problem | 🔢 Auto-solved with full step-by-step working |
-| "weather in Harare" | 🌤️ Real-time weather fetched instantly |
-| A homework / school question | 📚 Homework helper answers it |
-| "write an essay on…" | ✍️ Full structured essay generated |
-| "translate X to French" | 🌍 Instant translation |
-| "summarize this…" | 📝 Clean bullet-point summary |
-| "study tips for chemistry" | 📖 Personalised study tips |
-| A photo of a math problem | 🖼️ OCR reads it → auto-solved |
-| Any other text | 💬 AI chat with memory & persona |
-
-> Every reply ends with `_Nova AI ⚡_` — NovaSpark's signature tag.
+| 🖼️ `.sticker` | Converts images & videos to real WhatsApp stickers (sharp + WebP) |
+| 📰 `.news [topic]` | Live headlines from BBC RSS — world, tech, sports, africa, zim |
+| 📲 `.qr <text>` | Generates & sends a scannable QR code as an image |
+| 🎨 `.imagine <prompt>` | FREE AI image generation via Pollinations (no key needed) |
+| 🎙️ `.tts [lang] <text>` | Real voice notes via Google TTS — en, fr, sw, zu, sn, ar, hi & more |
+| 💱 `.currency 100 USD ZAR` | Real-time exchange rates (150+ currencies, zero API key) |
+| 📊 `.poll Q \| A \| B \| C` | Native WhatsApp polls (not fake text polls) |
+| 🧠 `.fact` | Random verified interesting facts from live API |
+| 📖 `.urban <word>` | Urban Dictionary slang lookup with vote counts |
+| ⚖️ `.bmi <kg> <cm>` | BMI calculator + personalised health advice |
+| 👥 `.groupinfo` | Rich group analytics — members, admins, age, settings |
+| 🔥 `.roast @user` | AI-generated personalised roast (funny, not cruel) |
+| 🛡️ `.antidelete on/off` | Catches deleted messages, forwards to owner DM |
+| ⚠️ `.warn @user` | Warning system with auto-kick at 3 warnings |
+| 💾 Persistent Memory | AI conversation memory survives bot restarts (file-backed) |
+| ✅ Auto cache | Every message auto-cached for antidelete |
 
 ---
 
@@ -58,23 +45,30 @@ AutoChat is **always active** — no `.autochat on` needed. The bot reads every 
 
 | Command | Description |
 |---|---|
-| `.math <problem>` | Solve any math problem with full working *(also auto-detected)* |
-| `.weather <city>` | Real-time weather for any city *(also auto-detected)* |
-| `.homework <question>` | Detailed AI answer *(also auto-detected)* |
-| `.essay <topic>` | Full structured essay *(also auto-detected)* |
-| `.summarize <text>` | Summarize any text *(also auto-detected)* |
-| `.translate <lang> <text>` | Translate to any language *(also auto-detected)* |
-| `.studytips <subject>` | AI-powered study tips *(also auto-detected)* |
+| `.math <problem>` | Solve any math with full step-by-step working |
+| `.weather <city>` | Real-time weather for any city |
+| `.homework <question>` | Detailed AI answer |
+| `.essay <topic>` | Full structured essay |
+| `.summarize <text>` | Bullet-point summary |
+| `.translate <lang> <text>` | Translate to any language |
+| `.studytips <subject>` | AI-powered study tips |
 | `.pdf <title> \| <subject>` | Generate a school project PDF |
-| `.myplan` | Check your plan and see Premium features |
-| `.autochat off/on` | Mute / unmute the bot in this chat |
+| `.sticker` | Reply to image/video to make a real sticker |
+| `.news [topic]` | Live headlines (world · tech · sports · africa · zim) |
+| `.qr <text>` | Generate a scannable QR code |
+| `.imagine <prompt>` | AI image generation — FREE, no API key |
+| `.tts [lang] <text>` | Text to real voice note audio |
+| `.currency <amt> <from> <to>` | Real-time currency conversion |
+| `.poll <Q> \| A \| B \| C` | Native WhatsApp poll (up to 12 options) |
+| `.fact` | Verified random interesting fact |
+| `.urban <word>` | Urban Dictionary slang lookup |
+| `.bmi <kg> <cm>` | BMI + personalised health advice |
+| `.groupinfo` | Group analytics (groups only) |
+| `.roast @user` | AI-generated personalised roast |
+| `.myplan` | Full command menu + plan status |
+| `.autochat off/on` | Mute / unmute bot in this chat |
 | `.autochat reset` | Clear conversation memory |
-| `.autochat status` | Show current settings and stats |
-| `.autochat persona <name>` | Switch personality: friendly, professional, savage, tutor, motivator |
-| `.autochat delay <ms>` | Set reply delay (300–8000ms) |
-| `.autochat imggen on\|off` | Toggle auto image generation |
-| `.autochat analyze on\|off` | Toggle auto image analysis |
-| `.autochat ocr on\|off` | Toggle OCR + image math solving |
+| `.autochat persona <name>` | friendly · professional · savage · tutor · motivator |
 
 ---
 
@@ -82,13 +76,13 @@ AutoChat is **always active** — no `.autochat on` needed. The bot reads every 
 
 | Command | Description |
 |---|---|
-| `.examprep <subject>` | Full exam revision notes — topics, definitions, Q&A, memory tips |
+| `.examprep <subject>` | Full exam revision notes |
 | `.code <language> <task>` | Generate working code in any language |
-| `.remind <time> <msg>` | Set reminders (30s, 5m, 2h, 1d) |
-| `.mystats` | View your personal usage analytics dashboard |
-| `.autostudy on <subject>` | Auto-send daily study tips on a schedule |
-| `.setpersona <description>` | Create a fully custom AI persona |
-| All Free features | Everything in Free, with priority AI |
+| `.remind <time> <msg>` | Set real reminders (30s, 5m, 2h, 1d) |
+| `.mystats` | Personal usage analytics dashboard |
+| `.autostudy on <subject>` | Auto daily study tips |
+| `.setpersona <description>` | Fully custom AI persona |
+| All Free features | Everything above, with priority AI |
 
 ---
 
@@ -96,42 +90,51 @@ AutoChat is **always active** — no `.autochat on` needed. The bot reads every 
 
 | Command | Description |
 |---|---|
-| `.setpremium add @user` | Grant Premium to a user |
+| `.setpremium add @user` | Grant Premium |
 | `.setpremium remove @user` | Revoke Premium |
 | `.setpremium list` | List all Premium users |
-| `.botstats` | Bot usage stats and server info |
+| `.antidelete on/off` | Catch deleted messages → forward to your DM |
+| `.warn @user [reason]` | Warn a user (auto-kicks at 3 warnings) |
+| `.warns @user` | Check a user's warning count |
+| `.clearwarn @user` | Reset all warnings for a user |
+| `.botstats` | Bot usage & server info |
 
 ---
 
 ## 🚀 Setup
 
-### 1. Fork this repo
-
-### 2. Get your session string
-
-Use a pair-code generator. You will get a string starting with `NovaSpark!...` — paste it into `config.js`:
-
-```js
-sessionID: 'NovaSpark!H4....'
-```
-
-Or set `SESSION_ID` as an environment variable.
-
-### 3. Run locally
-
+### 1. Clone the repo
 ```bash
 git clone https://github.com/dev-modder/NovaSpark-Bot.git
 cd NovaSpark-Bot
+```
+
+### 2. Install dependencies
+```bash
 npm install
+```
+
+> **Note:** `sharp` requires a C++ build environment. On most servers/VPS this is pre-installed. On Render, it works out of the box.
+
+### 3. Add your session string
+
+Edit `config.js`:
+```js
+sessionID: 'NovaSpark!H4....'
+```
+Or set `SESSION_ID` as an environment variable.
+
+### 4. Run
+```bash
 node index.js
 ```
 
-### 4. Deploy on Panel / Heroku / VPS
+### 5. Deploy on Render / Heroku / VPS
 
-Set env vars:
+Set environment variables:
 - `SESSION_ID` — your session string
 - `OPENAI_API_KEY` — optional, improves AI quality
-- `DEEPAI_API_KEY` — optional, for image generation
+- `DEEPAI_API_KEY` — optional
 
 ---
 
@@ -149,7 +152,7 @@ Set env vars:
 
 ## ⚠️ Warning
 
-- Educational purposes only
+- Educational / personal use only
 - **NOT** an official WhatsApp product
 - May violate WhatsApp ToS — use at your own risk
 

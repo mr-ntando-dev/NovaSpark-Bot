@@ -22,28 +22,49 @@ const translateCmd = require('./commands/free/translate');
 const studytipsCmd = require('./commands/free/studytips');
 const pdfCmd       = require('./commands/free/pdf');
 const myplanCmd    = require('./commands/free/myplan');
-const mathCmd      = require('./commands/free/math');      // math is now FREE
-const weatherCmd   = require('./commands/free/weather');   // new free weather command
+const mathCmd      = require('./commands/free/math');
+const weatherCmd   = require('./commands/free/weather');
+// ── v3 NEW FREE COMMANDS ──────────────────────────────────────────────────────
+const stickerCmd   = require('./commands/free/sticker');
+const newsCmd      = require('./commands/free/news');
+const qrCmd        = require('./commands/free/qr');
+const factCmd      = require('./commands/free/fact');
+const currencyCmd  = require('./commands/free/currency');
+const urbanCmd     = require('./commands/free/urban');
+const bmiCmd       = require('./commands/free/bmi');
+const pollCmd      = require('./commands/free/poll');
+const imagineCmd   = require('./commands/free/imagine');
+const ttsCmd       = require('./commands/free/tts');
+const groupinfoCmd = require('./commands/free/groupinfo');
+const roastCmd     = require('./commands/free/roast');
 
 // Premium commands
-const examprepCmd     = require('./commands/premium/examprep');
-const codeCmd         = require('./commands/premium/code');
-const mystatsCmd      = require('./commands/premium/mystats');
-const remindCmd       = require('./commands/premium/remind');
-const autostudyCmd    = require('./commands/premium/autostudy');
+const examprepCmd      = require('./commands/premium/examprep');
+const codeCmd          = require('./commands/premium/code');
+const mystatsCmd       = require('./commands/premium/mystats');
+const remindCmd        = require('./commands/premium/remind');
+const autostudyCmd     = require('./commands/premium/autostudy');
 const custompersonaCmd = require('./commands/premium/custompersona');
 
 // Owner commands
-const setpremiumCmd = require('./commands/owner/setpremium');
-const botstatsCmd   = require('./commands/owner/botstats');
+const setpremiumCmd   = require('./commands/owner/setpremium');
+const botstatsCmd     = require('./commands/owner/botstats');
+const antideleteCmd   = require('./commands/owner/antidelete');
+const warnCmds        = require('./commands/owner/warn'); // array of [warn, warns, clearwarn]
 
 // ── Build command map ─────────────────────────────────────────────────────────
 const ALL_COMMANDS = [
   autochatCmd,
+  // free
   homeworkCmd, essayCmd, summarizeCmd, translateCmd, studytipsCmd, pdfCmd, myplanCmd,
-  mathCmd, weatherCmd,                                       // free — math & weather
+  mathCmd, weatherCmd,
+  stickerCmd, newsCmd, qrCmd, factCmd, currencyCmd, urbanCmd, bmiCmd,
+  pollCmd, imagineCmd, ttsCmd, groupinfoCmd, roastCmd,
+  // premium
   examprepCmd, codeCmd, mystatsCmd, remindCmd, autostudyCmd, custompersonaCmd,
-  setpremiumCmd, botstatsCmd,
+  // owner
+  setpremiumCmd, botstatsCmd, antideleteCmd,
+  ...warnCmds, // spread array of warn commands
 ];
 
 const cmdMap = new Map();
@@ -117,6 +138,9 @@ const handleMessage = async (sock, msg) => {
   try {
     if (!msg || !msg.key || !msg.message) return;
     if (msg.key.fromMe) return;
+
+    // ── Anti-delete: cache every incoming message ─────────────────────────────
+    try { antideleteCmd.cacheMessage(msg); } catch { /* never crash on this */ }
 
     const messageContent = getMessageContent(msg);
     if (!messageContent) return;
