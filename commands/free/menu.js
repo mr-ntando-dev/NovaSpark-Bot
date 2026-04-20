@@ -206,6 +206,50 @@ module.exports = {
       );
     }
 
+    if (sub === 'owner') {
+      return reply(
+        `👑 *Owner Commands*\n` +
+        `${'━'.repeat(32)}\n\n` +
+        `🔒 *Bot Control*\n` +
+        `  .shutdown — Shut down the bot 🔴\n` +
+        `  .restart — Restart the bot process 🔄\n` +
+        `  .maintenance on/off [msg] — Maintenance mode\n` +
+        `  .ownermode on/off — Owner-only lockdown\n` +
+        `  .setprefix <char> — Change command prefix\n` +
+        `  .resetprefix — Restore default prefix (.)\n\n` +
+        `🚫 *Ban System*\n` +
+        `  .ban @user [reason] — Ban user bot-wide\n` +
+        `  .unban @user — Remove ban\n` +
+        `  .banlist — View all banned users\n\n` +
+        `👤 *Bot Profile*\n` +
+        `  .setname <name> — Change bot display name\n` +
+        `  .setstatus <text> — Update bot About/bio\n` +
+        `  .setpp — Change bot profile photo (reply to image)\n\n` +
+        `📋 *Group Management*\n` +
+        `  .listgroups — List all groups bot is in\n` +
+        `  .leavegroup [id] — Leave a group\n` +
+        `  .joingroup <link> — Join via invite link\n\n` +
+        `📢 *Messaging*\n` +
+        `  .announce <msg> — Formatted announcement\n` +
+        `  .globalannounce <msg> — Announce to ALL groups\n` +
+        `  .broadcast <msg> — Plain broadcast to all groups\n` +
+        `  .dm @user <msg> — DM a user through the bot\n\n` +
+        `🗄️ *Database*\n` +
+        `  .cleardb list — Show available tables\n` +
+        `  .cleardb <table> — Wipe a database table\n` +
+        `  .botstats — Full server & usage stats\n` +
+        `  .setpremium @user — Grant premium\n` +
+        `  .removepremium @user — Revoke premium\n\n` +
+        `🔧 *Other*\n` +
+        `  .anticall on/off — Auto-reject incoming calls\n` +
+        `  .antidelete on/off — Forward deleted messages to owner\n` +
+        `  .autoread on/off — Auto-mark messages as read\n` +
+        `  .pmblocker on/off — Block DMs to bot\n` +
+        `  .broadcast <msg> — Message all groups\n\n` +
+        `_All commands are owner-only and will be silently ignored if used by others._`
+      );
+    }
+
     // Main menu
     const now = new Date().toLocaleString('en-ZA', {
       timeZone: config.timezone, weekday:'short', month:'short', day:'numeric',
@@ -228,6 +272,7 @@ module.exports = {
       `  🎮 \`.menu games\`      — Games & quizzes\n` +
       `  💬 \`.menu social\`     — Social & fun\n` +
       `  🔧 \`.menu tools\`      — Tools & utilities\n` +
+      `  👑 \`.menu owner\`      — Owner commands\n` +
       `  📋 \`.bmenu\`           — Interactive list menu ✨\n\n` +
       `${'─'.repeat(30)}\n` +
       `🔥 *What\'s New in v5.1*\n` +

@@ -123,6 +123,21 @@ const buttonMenuCmd  = require('./commands/free/buttonmenu');
 // ── v5 OWNER COMMANDS ─────────────────────────────────────────────────────────
 const anticallCmd    = require('./commands/owner/anticall');
 const pmblockerCmd   = require('./commands/owner/pmblocker');
+
+// ── v5.1 OWNER COMMANDS ───────────────────────────────────────────────────────
+const banCmds          = require('./commands/owner/ban');
+const shutdownCmds     = require('./commands/owner/shutdown');
+const setprofileCmds   = require('./commands/owner/setprofile');
+const setprefixCmds    = require('./commands/owner/setprefix');
+const groupManageCmds  = require('./commands/owner/groupmanage');
+const maintenanceCmds  = require('./commands/owner/maintenance');
+const cleardbCmd       = require('./commands/owner/cleardb');
+const announceCmds     = require('./commands/owner/announce');
+const dmCmd            = require('./commands/owner/dmowner');
+
+// Helpers extracted from new owner modules
+const { isBanned }     = require('./commands/owner/ban');
+const { getModeState } = require('./commands/owner/maintenance');
 const broadcastCmd   = require('./commands/owner/broadcast');
 const autoreadCmd    = require('./commands/owner/autoread');
 
@@ -202,6 +217,16 @@ const ALL_COMMANDS = [
   // v5.1 new commands
   flipCmd, diceCmd, horoscopeCmd, riddleCmd, dareCmd,
   passwordCmd, countdownCmd, colorCmd, nasaCmd, buttonMenuCmd,
+  // v5.1 owner commands
+  ...(Array.isArray(banCmds)         ? banCmds.filter(c => c.name)         : [banCmds].filter(c => c && c.name)),
+  ...(Array.isArray(shutdownCmds)    ? shutdownCmds                        : [shutdownCmds]),
+  ...(Array.isArray(setprofileCmds)  ? setprofileCmds                      : [setprofileCmds]),
+  ...(Array.isArray(setprefixCmds)   ? setprefixCmds.filter(c => c.name)   : [setprefixCmds].filter(c => c && c.name)),
+  ...(Array.isArray(groupManageCmds) ? groupManageCmds                     : [groupManageCmds]),
+  ...(Array.isArray(maintenanceCmds) ? maintenanceCmds.filter(c => c.name) : [maintenanceCmds].filter(c => c && c.name)),
+  cleardbCmd,
+  ...(Array.isArray(announceCmds)    ? announceCmds                        : [announceCmds]),
+  dmCmd,
 ];
 
 const cmdMap = new Map();
@@ -412,6 +437,20 @@ module.exports = async (sock, msg) => {
   }
 
   if (!isCmd) return;
+
+  // ── Ban check — silently ignore banned users ──────────────────────────────
+  if (!isOwner(senderNorm) && isBanned(senderNorm)) return;
+
+  // ── Maintenance / Owner mode gate ─────────────────────────────────────────
+  if (!isOwner(senderNorm)) {
+    const modeState = getModeState();
+    if (modeState.ownerMode) {
+      return reply('🔒 Bot is in *owner-only mode*. Commands are restricted.');
+    }
+    if (modeState.maintenance) {
+      return reply(modeState.message || '🔧 Bot is under maintenance. Please wait.');
+    }
+  }
 
   // ── Rate limit ────────────────────────────────────────────────────────────
   if (!isOwner(senderNorm) && isRateLimited(senderNorm)) {
