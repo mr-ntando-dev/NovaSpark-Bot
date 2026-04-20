@@ -1,0 +1,28 @@
+{
+  "name": "NovaSpark Bot",
+  "description": "NovaSpark — WhatsApp MD AutoChat Bot (Baileys)",
+  "repository": "",
+  "keywords": ["whatsapp", "baileys", "bot", "autochat", "novaspark"],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    }
+  ],
+  "env": {
+    "SESSION_ID": {
+      "description": "NovaSpark session string (e.g. NovaSpark!<base64_compressed_data>)",
+      "required": false,
+      "value": ""
+    },
+    "OPENAI_API_KEY": {
+      "description": "Optional: OpenAI API key for AI responses",
+      "required": false,
+      "value": ""
+    },
+    "DEEPAI_API_KEY": {
+      "description": "Optional: DeepAI key for image generation",
+      "required": false,
+      "value": ""
+    }
+  }
+}

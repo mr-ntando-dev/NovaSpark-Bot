@@ -1,0 +1,31 @@
+{
+  "name": "novaspark-bot",
+  "version": "1.0.0",
+  "description": "NovaSpark Bot — WhatsApp MD AutoChat Bot powered by Baileys",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "whatsapp bot",
+    "novaspark",
+    "autochat",
+    "baileys",
+    "md"
+  ],
+  "author": "Dev-Ntando",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "axios": "^1.15.0",
+    "form-data": "^4.0.5",
+    "node-fetch": "^2.7.0",
+    "pino": "^9.0.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
