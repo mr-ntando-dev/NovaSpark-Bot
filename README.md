@@ -2,9 +2,13 @@
 
 # ⚡ NovaSpark Bot
 
-**A lightning-fast WhatsApp MD AutoChat Bot built on [Baileys](https://github.com/WhiskeySockets/Baileys)**
+**WhatsApp MD Bot — AutoChat AI + Free & Premium Features**
 
 *By Dev-Ntando*
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
+[![Baileys](https://img.shields.io/badge/Baileys-7.x-blue)](https://github.com/WhiskeySockets/Baileys)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 </div>
 
@@ -12,30 +16,69 @@
 
 ## ✨ What is NovaSpark Bot?
 
-NovaSpark Bot is a lean, focused WhatsApp MD bot with one purpose: **AutoChat** — a powerful AI-powered auto-reply system that brings your WhatsApp chats to life. No bloat. No unused commands. Just AutoChat, done right.
+NovaSpark Bot is a smart WhatsApp MD bot built on Baileys with two tiers of features:
+- **🆓 Free Plan** — powerful AI tools available to everyone
+- **💎 Premium Plan** — advanced features unlocked by the owner
 
 ---
 
-## 🤖 AutoChat Commands
+## 👤 Registration
+
+The first time you turn on AutoChat, the bot will guide you through a quick registration:
+1. **Full Name**
+2. **Age**
+3. **School / Institution**
+4. **Email Address**
+
+This personalizes all AI responses and puts your name on generated PDFs.
+
+---
+
+## 🆓 Free Plan Features
 
 | Command | Description |
 |---|---|
-| `.autochat on` | Enable AutoChat in this chat |
-| `.autochat off` | Disable AutoChat |
+| `.autochat on/off` | Enable/disable AutoChat AI in this chat |
 | `.autochat reset` | Clear conversation memory |
-| `.autochat status` | Show current state & stats |
-| `.autochat persona <name>` | Switch AI personality |
+| `.autochat status` | Show current settings and stats |
+| `.autochat persona <name>` | Switch personality: friendly, professional, savage, tutor, motivator |
 | `.autochat delay <ms>` | Set reply delay (300–8000ms) |
 | `.autochat imggen on\|off` | Toggle auto image generation |
 | `.autochat analyze on\|off` | Toggle auto image analysis |
-| `.autochat ocr on\|off` | Toggle auto OCR on images |
+| `.autochat ocr on\|off` | Toggle OCR (read text from images) |
+| `.homework <question>` | Detailed AI answer to any homework question |
+| `.essay <topic>` | Full structured essay on any topic |
+| `.summarize <text>` | Summarize any text (or reply to a message) |
+| `.translate <lang> <text>` | Translate to any language |
+| `.studytips <subject>` | AI-powered study tips for any subject |
+| `.pdf <title> \| <subject>` | Generate a school project PDF |
+| `.myplan` | Check your plan and see Premium features |
 
-**Auto-features (when AutoChat is enabled):**
-- Text → AI chat reply with memory & persona
-- "draw/generate/create image of X" → generates & sends an image
-- Image received → AI describes/analyzes it
-- Image with text → OCR extracts + AI comments
-- Sticker/audio → natural acknowledgement
+---
+
+## 💎 Premium Plan Features
+
+| Command | Description |
+|---|---|
+| `.examprep <subject>` | Full exam revision notes — topics, definitions, Q&A, memory tips |
+| `.code <language> <task>` | Generate working code in any language |
+| `.math <problem>` | Solve math problems with full step-by-step working |
+| `.remind <time> <msg>` | Set reminders (30s, 5m, 2h, 1d) |
+| `.mystats` | View your personal usage analytics dashboard |
+| `.autostudy on <subject>` | Auto-send daily study tips on a schedule |
+| `.setpersona <description>` | Create a fully custom AI persona |
+| All Free features | Everything in Free, with priority AI |
+
+---
+
+## 👑 Owner Commands
+
+| Command | Description |
+|---|---|
+| `.setpremium add @user` | Grant Premium to a user |
+| `.setpremium remove @user` | Revoke Premium |
+| `.setpremium list` | List all Premium users |
+| `.botstats` | Bot usage stats and server info |
 
 ---
 
@@ -43,27 +86,17 @@ NovaSpark Bot is a lean, focused WhatsApp MD bot with one purpose: **AutoChat** 
 
 ### 1. Fork this repo
 
-> This creates your own copy of `NovaSpark-Bot` under your GitHub account.
+### 2. Get your session string
 
-### 2. Get a Pair Code / Session String
-
-Deploy the pair-code helper and generate your session string.
-
-After scanning, you will receive a session string. Paste it into `config.js`:
+Use a pair-code generator. You will get a string starting with `NovaSpark!...` — paste it into `config.js`:
 
 ```js
 sessionID: 'NovaSpark!H4....'
 ```
 
-Or set it as an environment variable:
+Or set `SESSION_ID` as an environment variable.
 
-```
-SESSION_ID=NovaSpark!H4....
-```
-
-### 3. Deploy (Panel / VPS / Heroku)
-
-#### Local
+### 3. Run locally
 
 ```bash
 git clone https://github.com/dev-modder/NovaSpark-Bot.git
@@ -72,45 +105,35 @@ npm install
 node index.js
 ```
 
-- If `sessionID` is empty → scan the QR code in terminal (Linked Devices in WhatsApp)
-- If `sessionID` is set → bot logs in automatically
+### 4. Deploy on Panel / Heroku / VPS
+
+Set env vars:
+- `SESSION_ID` — your session string
+- `OPENAI_API_KEY` — optional, improves AI quality
+- `DEEPAI_API_KEY` — optional, for image generation
 
 ---
 
-## ⚙️ Configuration
-
-Edit `config.js` to set:
+## ⚙️ Configuration (`config.js`)
 
 | Key | Description |
 |---|---|
-| `ownerNumber` | Your WhatsApp number(s) without `+` |
+| `ownerNumber` | Your number(s) without `+` |
 | `ownerName` | Your name(s) |
-| `botName` | Bot display name |
+| `botName` | Display name |
 | `prefix` | Command prefix (default `.`) |
 | `sessionID` | Session string |
 
 ---
 
-## 📦 Dependencies
+## ⚠️ Warning
 
-- [`@whiskeysockets/baileys`](https://github.com/WhiskeySockets/Baileys) — WhatsApp Web API
-- `axios` — HTTP client for AI API calls
-- `pino` — Logger
-- `qrcode-terminal` — QR code display
-
----
-
-## ⚠️ Important Warning
-
-- This bot is for **educational purposes only**.
-- This is **NOT** an official WhatsApp bot.
-- Using third-party bots **may violate WhatsApp's Terms of Service** and can result in your account being **banned**.
-- You use this bot **at your own risk**.
+- Educational purposes only
+- **NOT** an official WhatsApp product
+- May violate WhatsApp ToS — use at your own risk
 
 ---
 
-## 📄 License (MIT)
+## 📄 License
 
-Copyright (c) 2026 Dev-Ntando. See [LICENSE](LICENSE).
-
-This project is **not affiliated with, authorized, maintained, sponsored, or endorsed** by WhatsApp Inc. or any of its affiliates.
+MIT © 2026 Dev-Ntando

@@ -1,7 +1,7 @@
 {
   "name": "novaspark-bot",
-  "version": "1.0.0",
-  "description": "NovaSpark Bot — WhatsApp MD AutoChat Bot powered by Baileys",
+  "version": "2.0.0",
+  "description": "NovaSpark Bot — WhatsApp MD AutoChat Bot with Free & Premium features. By Dev-Ntando.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -9,11 +9,8 @@
     "dev": "nodemon index.js"
   },
   "keywords": [
-    "whatsapp bot",
-    "novaspark",
-    "autochat",
-    "baileys",
-    "md"
+    "whatsapp bot", "novaspark", "autochat", "baileys", "md",
+    "homework helper", "essay writer", "pdf generator", "study bot"
   ],
   "author": "Dev-Ntando",
   "license": "MIT",

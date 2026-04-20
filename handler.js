@@ -1,6 +1,6 @@
 /**
  * Message Handler — NovaSpark Bot
- * Processes incoming messages and routes to AutoChat only.
+ * Routes commands: autochat, free plan, premium plan, owner.
  * By Dev-Ntando
  */
 
@@ -8,18 +8,96 @@
 
 const config   = require('./config');
 const database = require('./database');
-const { jidDecode } = require('@whiskeysockets/baileys');
-const fs   = require('fs');
-const path = require('path');
+const fs       = require('fs');
+const path     = require('path');
 
-// ── AutoChat AI (per-chat toggle) ─────────────────────────────────────────────
+// ── Command modules ───────────────────────────────────────────────────────────
 const autochatCmd = require('./commands/ai/autochat');
 
-// Group metadata cache to prevent rate limiting
-const groupMetadataCache = new Map();
-const CACHE_TTL = 60000; // 1 minute
+// Free commands
+const homeworkCmd  = require('./commands/free/homework');
+const essayCmd     = require('./commands/free/essay');
+const summarizeCmd = require('./commands/free/summarize');
+const translateCmd = require('./commands/free/translate');
+const studytipsCmd = require('./commands/free/studytips');
+const pdfCmd       = require('./commands/free/pdf');
+const myplanCmd    = require('./commands/free/myplan');
 
-// ── Unwrap WhatsApp message containers ────────────────────────────────────────
+// Premium commands
+const examprepCmd     = require('./commands/premium/examprep');
+const codeCmd         = require('./commands/premium/code');
+const mathCmd         = require('./commands/premium/math');
+const mystatsCmd      = require('./commands/premium/mystats');
+const remindCmd       = require('./commands/premium/remind');
+const autostudyCmd    = require('./commands/premium/autostudy');
+const custompersonaCmd = require('./commands/premium/custompersona');
+
+// Owner commands
+const setpremiumCmd = require('./commands/owner/setpremium');
+const botstatsCmd   = require('./commands/owner/botstats');
+
+// ── Build command map ─────────────────────────────────────────────────────────
+const ALL_COMMANDS = [
+  autochatCmd,
+  homeworkCmd, essayCmd, summarizeCmd, translateCmd, studytipsCmd, pdfCmd, myplanCmd,
+  examprepCmd, codeCmd, mathCmd, mystatsCmd, remindCmd, autostudyCmd, custompersonaCmd,
+  setpremiumCmd, botstatsCmd,
+];
+
+const cmdMap = new Map();
+for (const cmd of ALL_COMMANDS) {
+  if (cmd.name) cmdMap.set(cmd.name.toLowerCase(), cmd);
+  if (Array.isArray(cmd.aliases)) {
+    for (const alias of cmd.aliases) cmdMap.set(alias.toLowerCase(), cmd);
+  }
+}
+
+// ── Reminder poller (check every 30 seconds) ─────────────────────────────────
+let _sock = null;
+setInterval(async () => {
+  if (!_sock) return;
+  try {
+    const due = database.getPendingReminders();
+    for (const r of due) {
+      database.markReminderDone(r.id);
+      const chatId = r.chatId !== '__PENDING__' ? r.chatId : `${r.userId}@s.whatsapp.net`;
+      await _sock.sendMessage(chatId, {
+        text: `🔔 *Reminder!*\n\n📌 _${r.message}_\n\n_NovaSpark Bot ⚡_`
+      }).catch(() => {});
+    }
+  } catch { /* silent */ }
+}, 30000);
+
+// ── JID helpers ───────────────────────────────────────────────────────────────
+const normalizeJid = (jid) => {
+  if (!jid || typeof jid !== 'string') return null;
+  if (jid.includes(':')) return jid.split(':')[0];
+  if (jid.includes('@')) return jid.split('@')[0];
+  return jid;
+};
+
+const isOwner = (sender) => {
+  if (!sender) return false;
+  const num = normalizeJid(sender);
+  return config.ownerNumber.some(o => normalizeJid(o.includes('@') ? o : o + '@s.whatsapp.net') === num);
+};
+
+// ── Group metadata cache ──────────────────────────────────────────────────────
+const groupMetaCache = new Map();
+const getGroupMeta = async (sock, groupId) => {
+  try {
+    if (!groupId || !groupId.endsWith('@g.us')) return null;
+    const cached = groupMetaCache.get(groupId);
+    if (cached && Date.now() - cached.ts < 60000) return cached.data;
+    const meta = await sock.groupMetadata(groupId);
+    groupMetaCache.set(groupId, { data: meta, ts: Date.now() });
+    return meta;
+  } catch {
+    return groupMetaCache.get(groupId)?.data || null;
+  }
+};
+
+// ── Unwrap WhatsApp message ───────────────────────────────────────────────────
 const getMessageContent = (msg) => {
   if (!msg || !msg.message) return null;
   let m = msg.message;
@@ -30,56 +108,10 @@ const getMessageContent = (msg) => {
   return m;
 };
 
-// ── Cached group metadata ─────────────────────────────────────────────────────
-const getGroupMetadata = async (sock, groupId) => {
-  try {
-    if (!groupId || !groupId.endsWith('@g.us')) return null;
-    const cached = groupMetadataCache.get(groupId);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) return cached.data;
-    const metadata = await sock.groupMetadata(groupId);
-    groupMetadataCache.set(groupId, { data: metadata, timestamp: Date.now() });
-    return metadata;
-  } catch {
-    const cached = groupMetadataCache.get(groupId);
-    return cached ? cached.data : null;
-  }
-};
-
-// ── Normalize JID helpers ─────────────────────────────────────────────────────
-const normalizeJid = (jid) => {
-  if (!jid || typeof jid !== 'string') return null;
-  if (jid.includes(':')) return jid.split(':')[0];
-  if (jid.includes('@')) return jid.split('@')[0];
-  return jid;
-};
-
-const normalizeJidWithLid = (jid) => {
-  if (!jid) return jid;
-  const sessionPath = path.join(__dirname, config.sessionName || 'session');
-  const num = jid.includes('@') ? jid.split('@')[0] : jid;
-  const domain = jid.includes('@') ? jid.split('@')[1] : 's.whatsapp.net';
-  const mapping = path.join(sessionPath, `lid-mapping-${num}.json`);
-  if (fs.existsSync(mapping)) {
-    try {
-      const data = JSON.parse(fs.readFileSync(mapping, 'utf8'));
-      if (data) return `${data}@${domain}`;
-    } catch { /* ignore */ }
-  }
-  return jid;
-};
-
-// ── Owner check ───────────────────────────────────────────────────────────────
-const isOwner = (sender) => {
-  if (!sender) return false;
-  const senderNumber = normalizeJid(normalizeJidWithLid(sender));
-  return config.ownerNumber.some(owner => {
-    const ownerJid = owner.includes('@') ? owner : `${owner}@s.whatsapp.net`;
-    return normalizeJid(normalizeJidWithLid(ownerJid)) === senderNumber;
-  });
-};
-
 // ── Main message handler ──────────────────────────────────────────────────────
 const handleMessage = async (sock, msg) => {
+  _sock = sock; // keep ref for reminder poller
+
   try {
     if (!msg || !msg.key || !msg.message) return;
     if (msg.key.fromMe) return;
@@ -91,7 +123,6 @@ const handleMessage = async (sock, msg) => {
     const sender  = msg.key.participant || msg.key.remoteJid;
     const isGroup = from.endsWith('@g.us');
 
-    // Extract text
     const text =
       messageContent.conversation ||
       messageContent.extendedTextMessage?.text ||
@@ -102,51 +133,65 @@ const handleMessage = async (sock, msg) => {
 
     const body = text.trim();
 
-    // ── Command routing (.autochat ...) ──────────────────────────────────────
-    if (body.toLowerCase().startsWith(`${config.prefix}autochat`)) {
-      const groupMetadata = isGroup ? await getGroupMetadata(sock, from) : null;
-      const isAdmin = isGroup && groupMetadata?.participants
-        ? groupMetadata.participants.some(p => normalizeJid(p.id) === normalizeJid(sender) && (p.admin === 'admin' || p.admin === 'superadmin'))
-        : false;
+    // ── Build context object ──────────────────────────────────────────────────
+    const groupMetadata = isGroup ? await getGroupMeta(sock, from) : null;
+    const isAdmin = isGroup && groupMetadata?.participants
+      ? groupMetadata.participants.some(p =>
+          normalizeJid(p.id) === normalizeJid(sender) &&
+          (p.admin === 'admin' || p.admin === 'superadmin'))
+      : false;
 
-      const ctx = {
-        sock,
-        msg,
-        from,
-        sender,
-        body,
-        args:         body.split(' ').slice(1),
-        isGroup,
-        isOwner:      isOwner(sender),
-        isAdmin,
-        groupMetadata,
-        messageContent,
-        database,
-        config,
-        reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
-      };
+    const ctx = {
+      sock,
+      msg,
+      from,
+      sender,
+      body,
+      isGroup,
+      isOwner:      isOwner(sender),
+      isAdmin,
+      groupMetadata,
+      messageContent,
+      database,
+      config,
+      reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
+    };
 
-      await autochatCmd.execute(ctx);
+    // ── Command routing ───────────────────────────────────────────────────────
+    if (body.startsWith(config.prefix)) {
+      const withoutPrefix = body.slice(config.prefix.length).trim();
+      const [cmdName, ...args] = withoutPrefix.split(/\s+/);
+      const cmd = cmdMap.get(cmdName.toLowerCase());
+
+      if (cmd) {
+        ctx.args = args;
+        database.logCommand(sender, cmdName.toLowerCase());
+        await cmd.execute(ctx);
+        return;
+      }
+
+      // Unknown command — only reply if autochat is OFF (avoid polluting AI chat)
+      const autochatSession = autochatCmd.sessions.get(from);
+      if (!autochatSession?.enabled) {
+        await ctx.reply(
+          `❓ Unknown command. Here are the available commands:\n\n` +
+          `*Free:*\n` +
+          `  .autochat on/off/status\n` +
+          `  .homework .essay .summarize\n` +
+          `  .translate .studytips .pdf\n` +
+          `  .myplan\n\n` +
+          `*Premium 💎:*\n` +
+          `  .examprep .code .math\n` +
+          `  .remind .mystats .autostudy\n` +
+          `  .setpersona\n\n` +
+          `_Type .myplan to see your plan & upgrade info._`
+        );
+      }
       return;
     }
 
-    // ── AutoChat passive handler (responds to all messages when enabled) ──────
+    // ── AutoChat passive handler ──────────────────────────────────────────────
     if (autochatCmd.handleMessage) {
-      const groupMetadata = isGroup ? await getGroupMetadata(sock, from) : null;
-      const ctx = {
-        sock,
-        msg,
-        from,
-        sender,
-        body,
-        isGroup,
-        isOwner:      isOwner(sender),
-        groupMetadata,
-        messageContent,
-        database,
-        config,
-        reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
-      };
       await autochatCmd.handleMessage(ctx);
     }
 

@@ -1,60 +1,48 @@
 /**
  * Global Configuration — NovaSpark Bot
- * Version: 1.0.0 — by Dev-Ntando
+ * Version: 2.0.0 — by Dev-Ntando
  */
 
 module.exports = {
 
-  // ────────────────────────────────────────────
-  // 👑 OWNER CONFIGURATION
-  // ────────────────────────────────────────────
-  ownerNumber: ['263786831091', '263777124998'], // Numbers without + or spaces
-  ownerName:   ['Dev-Ntando', 'Mr Ntando Ofc'],  // Names matching ownerNumber order
+  // ── Owner ─────────────────────────────────────────────────────────────────
+  ownerNumber: ['263786831091', '263777124998'],
+  ownerName:   ['Dev-Ntando', 'Mr Ntando Ofc'],
 
-  // ────────────────────────────────────────────
-  // ⚡ BOT CONFIGURATION
-  // ────────────────────────────────────────────
+  // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
   prefix:      '.',
   sessionName: 'session',
   sessionID:   process.env.SESSION_ID || '',
+  timezone:    'Africa/Harare',
 
-  // ────────────────────────────────────────────
-  // 🔑 API KEYS
-  // ────────────────────────────────────────────
+  // ── API Keys (optional — AI falls back to free endpoints if not set) ──────
   apiKeys: {
     openai:    process.env.OPENAI_API_KEY    || '',
     deepai:    process.env.DEEPAI_API_KEY    || '',
     remove_bg: process.env.REMOVE_BG_API_KEY || '',
   },
 
-  // ────────────────────────────────────────────
-  // 💬 DEFAULT MESSAGES
-  // ────────────────────────────────────────────
+  // ── Messages ──────────────────────────────────────────────────────────────
   messages: {
     wait:           '⏳ Please wait...',
     success:        '✅ Done!',
     error:          '❌ Something went wrong.',
     ownerOnly:      '👑 This command is only for the bot owner!',
     adminOnly:      '🛡️ Admins only!',
-    groupOnly:      '👥 This command can only be used in groups!',
-    privateOnly:    '💬 This command can only be used in private chat!',
+    groupOnly:      '👥 Groups only!',
+    privateOnly:    '💬 Private chat only!',
     botAdminNeeded: '🤖 I need to be an admin to do that!',
-    invalidCommand: '❓ Unknown command.',
-    cooldown:       '⏱️ Slow down — please wait a moment.',
+    invalidCommand: '❓ Unknown command. Type .myplan for help.',
+    premiumOnly:    '💎 This is a Premium feature. Type .myplan to upgrade.',
   },
 
-  // ────────────────────────────────────────────
-  // 🗄️ DATABASE DEFAULTS
-  // ────────────────────────────────────────────
+  // ── Defaults ──────────────────────────────────────────────────────────────
   defaultGroupSettings: {
-    antilink:  false,
-    antitag:   false,
-    welcome:   false,
-    goodbye:   false,
-    muted:     false,
-    nsfw:      false,
-    autochat:  false,
+    welcome:  false,
+    goodbye:  false,
+    muted:    false,
+    autochat: false,
   },
 
 };
