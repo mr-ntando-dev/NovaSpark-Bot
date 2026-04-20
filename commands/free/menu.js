@@ -66,28 +66,57 @@ module.exports = {
       return reply(
         `🎮 *Games*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .wordle — 5-letter word guessing game 🆕\n` +
-        `  .trivia — Live trivia from Open Trivia DB 🆕\n` +
-        `  .hangman — Classic hangman game 🆕\n` +
-        `  .rps rock/paper/scissors — With score tracking 🆕\n` +
-        `  .ttt @user — Tic-Tac-Toe (coming soon)\n\n` +
+        `  .wordle — 5-letter word guessing game\n` +
+        `  .trivia — Live trivia from Open Trivia DB\n` +
+        `  .hangman — Classic hangman game\n` +
+        `  .rps rock/paper/scissors — With score tracking\n\n` +
         `_All games track your scores in your profile!_`
       );
     }
 
-    if (sub === 'media') {
+    if (sub === 'downloads') {
       return reply(
-        `🎨 *Media & Downloader*\n` +
+        `⬇️ *Downloaders*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .sticker — Reply to image/video → sticker\n` +
-        `  .imagine <prompt> — Free AI image generation\n` +
-        `  .removebg — AI background remover 🆕\n` +
-        `  .tiktok <url> — TikTok downloader (no watermark) 🆕\n` +
-        `  .yt <query> — YouTube search + thumbnail 🆕\n` +
-        `  .textart <style> <text> — Fancy Unicode text 🆕\n` +
-        `  .tts [lang] <text> — Text to voice note\n` +
-        `  .qr <text> — QR code generator\n\n` +
-        `_Styles for .textart: bold italic bubble square flip mirror tiny_`
+        `🎵 *Audio*\n` +
+        `  .song <name/URL> — YouTube MP3 download ✨\n` +
+        `  .spotify <URL> — Spotify track download ✨\n\n` +
+        `🎬 *Video*\n` +
+        `  .video <name/URL> — YouTube MP4 download ✨\n` +
+        `  .tiktok <URL> — TikTok (no watermark) ✨\n` +
+        `  .fb <URL> — Facebook video (HD/SD) ✨\n\n` +
+        `📸 *Images & Social*\n` +
+        `  .ig <URL> — Instagram photo/reel/video ✨\n` +
+        `  .pin <URL> — Pinterest image/video ✨\n\n` +
+        `_✨ = New in NovaSpark v5_`
+      );
+    }
+
+    if (sub === 'ai') {
+      return reply(
+        `🧠 *AI Commands*\n` +
+        `${'━'.repeat(32)}\n\n` +
+        `💬 *Chat AI*\n` +
+        `  .gpt <question> — ChatGPT-style AI ✨\n` +
+        `  .gemini <question> — Google Gemini AI ✨\n` +
+        `  .character <name> <msg> — Roleplay AI ✨\n` +
+        `    Characters: luffy, naruto, goku, tony, sherlock, batman\n\n` +
+        `🎨 *Image AI*\n` +
+        `  .imagine <prompt> — AI image generation ✨\n` +
+        `  .remini — AI image enhancer/upscaler ✨\n` +
+        `  .removebg — AI background remover\n\n` +
+        `📚 *Study AI*\n` +
+        `  .autochat on/off — AI group chat replies\n` +
+        `  .homework <question> — Detailed AI answer\n` +
+        `  .essay <topic> — Full structured essay\n` +
+        `  .summarize <text> — Bullet-point summary\n` +
+        `  .studytips <subject> — AI study tips\n` +
+        `  .pdf <title> | <subject> — Generate PDF\n\n` +
+        `💎 *Premium AI*\n` +
+        `  .examprep <subject> — Full exam revision 💎\n` +
+        `  .code <lang> <task> — Generate working code 💎\n` +
+        `  .setpersona <description> — Custom AI persona 💎\n\n` +
+        `_✨ = New in v5  |  💎 = Premium_`
       );
     }
 
@@ -122,6 +151,11 @@ module.exports = {
         `🔧 *Tools & Utilities*\n` +
         `${'━'.repeat(32)}\n\n` +
         `  .ping — Bot latency & system stats ✨\n` +
+        `  .vv — Reveal view-once messages ✨\n` +
+        `  .ss <url> — Screenshot website ✨\n` +
+        `  .simage — Sticker → image/video ✨\n` +
+        `  .myactivity — Your message rank ✨\n` +
+        `  .topmembers — Group leaderboard ✨\n` +
         `  .alive — Bot status card ✨\n` +
         `  .getpp [@user] — Get profile picture ✨\n` +
         `  .owner — Bot owner info ✨\n` +
@@ -177,9 +211,9 @@ module.exports = {
       `${'─'.repeat(30)}\n` +
       `📂 *Menu Categories*\n\n` +
       `  🛡️ \`.menu group\` — Group management\n` +
-      `  🧠 \`.menu ai\` — AI & autochat\n` +
+      `  🧠 \`.menu ai\` — AI, GPT & image AI\n` +
+      `  ⬇️ \`.menu downloads\` — All downloaders ✨\n` +
       `  🎮 \`.menu games\` — Games & quizzes\n` +
-      `  🎨 \`.menu media\` — Media & downloaders\n` +
       `  💬 \`.menu social\` — Social & fun\n` +
       `  🔧 \`.menu tools\` — Tools & utilities\n\n` +
       `${'─'.repeat(30)}\n` +
@@ -198,7 +232,15 @@ module.exports = {
       `  📡 Broadcast to all groups\n` +
       `  📵 AntiCall — auto-reject calls\n` +
       `  💬 PM Blocker — block DMs\n` +
-      `  👁️ AutoRead — mark all as read\n\n` +
+      `  👁️ AutoRead — mark all as read\n` +
+      `  👁️ VV — reveal view-once messages\n` +
+      `  📸 Sticker→Image converter\n` +
+      `  📷 Screenshot any website\n` +
+      `  ⬇️ YT/TikTok/IG/FB/Pinterest/Spotify\n` +
+      `  🤖 GPT + Gemini + Character AI\n` +
+      `  ✨ Remini AI image enhancer\n` +
+      `  🎨 AI Image generation\n` +
+      `  📊 Activity stats & leaderboard\n\n` +
       `${'━'.repeat(35)}\n` +
       `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
       `_${config.channelLink}_`

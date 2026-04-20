@@ -74,8 +74,30 @@ const deleteCmd      = require('./commands/group/delete');
 const resetlinkCmd   = require('./commands/group/resetlink');
 const grouplinkCmd   = require('./commands/group/grouplink');
 
-// ── v5 FUN COMMANDS ───────────────────────────────────────────────────────────
-const jokeCmd        = require('./commands/fun/joke');
+// ── v5 DOWNLOADS ─────────────────────────────────────────────────────────────
+const ytmp3Cmd       = require('./commands/downloads/ytmp3');
+const ytmp4Cmd       = require('./commands/downloads/ytmp4');
+const tiktokDlCmd    = require('./commands/downloads/tiktokdl');
+const instagramCmd   = require('./commands/downloads/instagram');
+const facebookCmd    = require('./commands/downloads/facebook');
+const pinterestCmd   = require('./commands/downloads/pinterest');
+const spotifyCmd     = require('./commands/downloads/spotify');
+
+// ── v5 GENERAL ────────────────────────────────────────────────────────────────
+const viewonceCmd    = require('./commands/general/viewonce');
+const simageCmd      = require('./commands/general/simage');
+const sswebCmd       = require('./commands/general/ssweb');
+const myactivityCmd  = require('./commands/general/myactivity');
+const topmembersCmd  = require('./commands/general/topmembers');
+
+// ── v5 AI ─────────────────────────────────────────────────────────────────────
+const gptCmd         = require('./commands/ai/gpt');
+const geminiCmd      = require('./commands/ai/gemini');
+const imagine2Cmd    = require('./commands/ai/imagine2');
+const reminiCmd      = require('./commands/ai/remini');
+const characterCmd   = require('./commands/ai/character');
+
+// ── v5 FUN COMMANDS ───────────────────────────────────────────────────────────const jokeCmd        = require('./commands/fun/joke');
 const flirtCmd       = require('./commands/fun/flirt');
 const insultCmd      = require('./commands/fun/insult');
 const truthCmd       = require('./commands/fun/truth');
@@ -148,6 +170,12 @@ const ALL_COMMANDS = [
   anticallCmd, pmblockerCmd, broadcastCmd, autoreadCmd,
   // v5 tools
   pingCmd, aliveCmd, getppCmd, ownerCmd,
+  // v5 downloads
+  ytmp3Cmd, ytmp4Cmd, tiktokDlCmd, instagramCmd, facebookCmd, pinterestCmd, spotifyCmd,
+  // v5 general
+  viewonceCmd, simageCmd, sswebCmd, myactivityCmd, topmembersCmd,
+  // v5 AI
+  gptCmd, geminiCmd, imagine2Cmd, reminiCmd, characterCmd,
   // v4 games
   wordleCmd, triviaCmd, hangmanCmd, rpsCmd,
   // v4 tools
