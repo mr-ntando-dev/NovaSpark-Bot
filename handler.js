@@ -120,6 +120,22 @@ const colorCmd       = require('./commands/free/color');
 const nasaCmd        = require('./commands/free/nasa');
 const buttonMenuCmd  = require('./commands/free/buttonmenu');
 
+// ── v5.2 NEW AUTO-FEATURES & COMMANDS ────────────────────────────────────────
+const antifloodCmd    = require('./commands/group/antiflood');
+const autokickCmd     = require('./commands/group/autokick');
+const autostatusCmd   = require('./commands/group/autostatus');
+const autoreplykwCmd  = require('./commands/group/autoreplykw');
+const antiraidCmd     = require('./commands/group/antiraid');
+const autonudgeCmd    = require('./commands/group/autonudge');
+// v5.2 fun
+const twotruthCmd     = require('./commands/fun/twotruth');
+const wyrCmd          = require('./commands/fun/wouldyourather');
+// v5.2 tools
+const defineCmd       = require('./commands/tools/dictionary');
+const ipCmd           = require('./commands/tools/ip');
+const cryptoCmd       = require('./commands/tools/crypto');
+const shorturlCmd     = require('./commands/tools/shorturl');
+
 // ── v5 OWNER COMMANDS ─────────────────────────────────────────────────────────
 const anticallCmd    = require('./commands/owner/anticall');
 const pmblockerCmd   = require('./commands/owner/pmblocker');
@@ -217,6 +233,12 @@ const ALL_COMMANDS = [
   // v5.1 new commands
   flipCmd, diceCmd, horoscopeCmd, riddleCmd, dareCmd,
   passwordCmd, countdownCmd, colorCmd, nasaCmd, buttonMenuCmd,
+  // v5.2 group auto-features
+  antifloodCmd, autokickCmd, autostatusCmd, autoreplykwCmd, antiraidCmd, autonudgeCmd,
+  // v5.2 fun
+  twotruthCmd, wyrCmd,
+  // v5.2 tools
+  defineCmd, ipCmd, cryptoCmd, shorturlCmd,
   // v5.1 owner commands
   ...(Array.isArray(banCmds)         ? banCmds.filter(c => c.name)         : [banCmds].filter(c => c && c.name)),
   ...(Array.isArray(shutdownCmds)    ? shutdownCmds                        : [shutdownCmds]),
@@ -263,6 +285,12 @@ setInterval(async () => {
       }).catch(() => {});
     }
   } catch {}
+}, 30000);
+
+// ── Auto-Kick poller (v5.2) ───────────────────────────────────────────────────
+setInterval(async () => {
+  if (!_sock) return;
+  try { await autokickCmd.pollKicks(_sock); } catch {}
 }, 30000);
 
 // ── Night mode poller ─────────────────────────────────────────────────────────
@@ -392,6 +420,24 @@ module.exports = async (sock, msg) => {
     try {
       const handled = await antiwordCmd.check(sock, msg, from, groupSettings);
       if (handled) return;
+    } catch {}
+
+    // ── v5.2 Anti-Flood ─────────────────────────────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm)) {
+        const handled = await antifloodCmd.check(sock, msg, from, groupSettings);
+        if (handled) return;
+      }
+    } catch {}
+
+    // ── v5.2 Auto-Reply Keywords ─────────────────────────────────────────────
+    try {
+      await autoreplykwCmd.check(sock, msg, from, body);
+    } catch {}
+
+    // ── v5.2 Auto-Kick (silent join) — clear pending kick when member speaks ─
+    try {
+      autokickCmd.clearKick(from, senderNorm);
     } catch {}
 
     // VIP mode enforcement

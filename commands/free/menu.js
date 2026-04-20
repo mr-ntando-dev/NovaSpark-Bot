@@ -44,7 +44,8 @@ module.exports = {
         `  .antilink on/off/set — Block links ✨\n` +
         `  .antiword on/off — Bad word filter\n` +
         `  .antitoxic on/off — AI toxic filter\n` +
-        `  .antispam on/off — Anti-spam\n\n` +
+        `  .antiflood on [limit] — Anti-flood ✨\n` +
+        `  .antiraid on [limit] — Anti mass-join raid ✨\n\n` +
         `⚙️ *Settings*\n` +
         `  .welcome on/off [msg] — Welcome new members\n` +
         `  .goodbye on/off [msg] — Goodbye messages\n` +
@@ -53,6 +54,9 @@ module.exports = {
         `  .vip on/off — VIP-only mode\n` +
         `  .ghost on/off — Ghost mode\n` +
         `  .autoreact on/off — Auto-react\n` +
+        `  .autoreply add <kw> | <reply> — Keyword replies ✨\n` +
+        `  .autokick join <min> — Kick silent joiners ✨\n` +
+        `  .autonudge on <days> — Tag inactive members ✨\n` +
         `  .grouplink — Get invite link ✨\n` +
         `  .resetlink — Reset invite link ✨\n\n` +
         `📊 *Analytics*\n` +
@@ -64,12 +68,18 @@ module.exports = {
 
     if (sub === 'games') {
       return reply(
-        `🎮 *Games*\n` +
+        `🎮 *Games & Fun*\n` +
         `${'━'.repeat(32)}\n\n` +
+        `🕹️ *Games*\n` +
         `  .wordle — 5-letter word guessing game\n` +
         `  .trivia — Live trivia from Open Trivia DB\n` +
         `  .hangman — Classic hangman game\n` +
         `  .rps rock/paper/scissors — With score tracking\n\n` +
+        `🤔 *Party Games*\n` +
+        `  .2truth — Two Truths & A Lie 🆕\n` +
+        `  .wyr — Would You Rather 🆕\n` +
+        `  .truth / .dare — Truth or Dare\n` +
+        `  .riddle — Brain teaser\n\n` +
         `_All games track your scores in your profile!_`
       );
     }
@@ -180,8 +190,12 @@ module.exports = {
         `  .password [length] — Strong password gen ✨\n` +
         `  .countdown <date> [name] — Days until event ✨\n` +
         `  .color #HEX — Color info & preview ✨\n` +
-        `  .nasa — NASA Astronomy Picture ✨\n\n` +
-        `_💎 = Premium  |  ✨ = New in v5_`
+        `  .nasa — NASA Astronomy Picture ✨\n` +
+        `  .define <word> — Dictionary lookup 🆕\n` +
+        `  .ip <address> — IP location & ISP 🆕\n` +
+        `  .crypto <symbol> — Live crypto prices 🆕\n` +
+        `  .short <url> — URL shortener 🆕\n\n` +
+        `_💎 = Premium  |  ✨ = New in v5  |  🆕 = New in v5.2_`
       );
     }
 
@@ -275,17 +289,18 @@ module.exports = {
       `  👑 \`.menu owner\`      — Owner commands\n` +
       `  📋 \`.bmenu\`           — Interactive list menu ✨\n\n` +
       `${'─'.repeat(30)}\n` +
-      `🔥 *What\'s New in v5.1*\n` +
-      `  🪙 .flip — Coin flip\n` +
-      `  🎲 .dice [n] [sides] — Roll dice\n` +
-      `  🔮 .horoscope <sign> — Daily horoscope\n` +
-      `  🧩 .riddle — Brain teaser + reveal\n` +
-      `  😈 .dare — Truth or Dare challenges\n` +
-      `  🔐 .password [length] — Password generator\n` +
-      `  ⏳ .countdown <date> — Days until event\n` +
-      `  🎨 .color #HEX — Color info & converter\n` +
-      `  🚀 .nasa — NASA Astronomy Picture\n` +
-      `  📋 .bmenu — Interactive button menu\n\n` +
+      `🔥 *What\'s New in v5.2*\n` +
+      `  🤥 .2truth — Two Truths & A Lie\n` +
+      `  🤔 .wyr — Would You Rather\n` +
+      `  📖 .define <word> — Dictionary lookup\n` +
+      `  🌐 .ip <address> — IP info & location\n` +
+      `  💰 .crypto <symbol> — Live crypto prices\n` +
+      `  ✂️ .short <url> — URL shortener\n` +
+      `  🌊 .antiflood on — Anti-flood protection\n` +
+      `  ⏱️ .autokick join <min> — Kick silent joiners\n` +
+      `  🤖 .autoreply add — Keyword auto-replies\n` +
+      `  🚨 .antiraid on — Mass-join raid protection\n` +
+      `  📣 .autonudge on — Tag inactive members\n\n` +
       `${'─'.repeat(30)}\n` +
       `✅ *v5 Highlights*\n` +
       `  🔗 AntiLink  |  📢 TagAll & HideTag\n` +
