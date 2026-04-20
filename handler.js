@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v4 — 2026 EDITION
+ * ⚡ NovaSpark Bot v5 — 2026 EDITION
  * Message Handler — Full Feature Set
  * Routes commands, triggers auto-features, manages sessions
  * By Dev-Ntando
@@ -61,7 +61,41 @@ const welcomeCmds    = require('./commands/group/welcome');
 const antiwordCmd    = require('./commands/group/antiword');
 const groupstatsCmd  = require('./commands/group/groupstats');
 const kickCmds       = require('./commands/group/kick');
-const antilinkCmd    = require('./commands/owner/antidelete'); // reuse existing if exists
+
+// ── v5 NEW GROUP COMMANDS ─────────────────────────────────────────────────────
+const antilinkCmd    = require('./commands/group/antilink');
+const promoteCmd     = require('./commands/group/promote');
+const demoteCmd      = require('./commands/group/demote');
+const tagallCmd      = require('./commands/group/tagall');
+const hidetagCmd     = require('./commands/group/hidetag');
+const muteCmd        = require('./commands/group/mute');
+const unmuteCmd      = require('./commands/group/unmute');
+const deleteCmd      = require('./commands/group/delete');
+const resetlinkCmd   = require('./commands/group/resetlink');
+const grouplinkCmd   = require('./commands/group/grouplink');
+
+// ── v5 FUN COMMANDS ───────────────────────────────────────────────────────────
+const jokeCmd        = require('./commands/fun/joke');
+const flirtCmd       = require('./commands/fun/flirt');
+const insultCmd      = require('./commands/fun/insult');
+const truthCmd       = require('./commands/fun/truth');
+const eightballCmd   = require('./commands/fun/8ball');
+const memeCmd        = require('./commands/fun/meme');
+const gayrateCmd     = require('./commands/fun/gayrate');
+const quoteCmd       = require('./commands/fun/quote');
+const lyricsCmd      = require('./commands/fun/lyrics');
+
+// ── v5 OWNER COMMANDS ─────────────────────────────────────────────────────────
+const anticallCmd    = require('./commands/owner/anticall');
+const pmblockerCmd   = require('./commands/owner/pmblocker');
+const broadcastCmd   = require('./commands/owner/broadcast');
+const autoreadCmd    = require('./commands/owner/autoread');
+
+// ── v5 TOOLS ─────────────────────────────────────────────────────────────────
+const pingCmd        = require('./commands/tools/ping');
+const aliveCmd       = require('./commands/tools/alive');
+const getppCmd       = require('./commands/tools/getpp');
+const ownerCmd       = require('./commands/tools/owner');
 
 // ── v4 GAMES ─────────────────────────────────────────────────────────────────
 const wordleCmd      = require('./commands/games/wordle');
@@ -104,6 +138,16 @@ const ALL_COMMANDS = [
   antiwordCmd, groupstatsCmd,
   ...(Array.isArray(welcomeCmds) ? welcomeCmds : [welcomeCmds]),
   ...(Array.isArray(kickCmds)    ? kickCmds    : [kickCmds]),
+  // v5 group
+  antilinkCmd, promoteCmd, demoteCmd, tagallCmd, hidetagCmd,
+  muteCmd, unmuteCmd, deleteCmd, resetlinkCmd, grouplinkCmd,
+  // v5 fun
+  jokeCmd, flirtCmd, insultCmd, truthCmd, eightballCmd,
+  memeCmd, gayrateCmd, quoteCmd, lyricsCmd,
+  // v5 owner
+  anticallCmd, pmblockerCmd, broadcastCmd, autoreadCmd,
+  // v5 tools
+  pingCmd, aliveCmd, getppCmd, ownerCmd,
   // v4 games
   wordleCmd, triviaCmd, hangmanCmd, rpsCmd,
   // v4 tools
@@ -263,6 +307,12 @@ module.exports = async (sock, msg) => {
       if (database.logGroupMessage) database.logGroupMessage(from, senderNorm);
     } catch {}
 
+    // Anti-link check (v5)
+    try {
+      const handled = await antilinkCmd.check(sock, msg, from, groupSettings);
+      if (handled) return;
+    } catch {}
+
     // Anti-toxic scan
     try {
       const handled = await antitoxicCmd.scan(sock, msg, from, groupSettings);
@@ -300,8 +350,16 @@ module.exports = async (sock, msg) => {
     return;
   }
 
-  // ── Non-group autochat ────────────────────────────────────────────────────
+  // ── Non-group: PM Blocker (v5) ───────────────────────────────────────────
   if (!isGroup && !isCmd) {
+    // PM blocker
+    if (pmblockerCmd.pmState?.enabled) {
+      try {
+        await sock.sendMessage(from, { text: pmblockerCmd.pmState.message || '⚠️ DMs are blocked.' });
+      } catch {}
+      return;
+    }
+    // Autochat
     const gs = database.getGroupSettings(from);
     if (gs?.autochat !== false) {
       try { await autochatCmd.handleMessage?.(sock, msg, from, sender, body, gs); } catch {}

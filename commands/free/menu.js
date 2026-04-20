@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v4 — 2026 Edition
+ * ⚡ NovaSpark Bot v5 — 2026 Edition
  * MEGA MENU — .menu / .help
  * The most detailed, categorized, beautiful menu in any WhatsApp MD bot.
  * By Dev-Ntando
@@ -34,26 +34,31 @@ module.exports = {
         `  .warns @user — Check warns\n` +
         `  .clearwarn @user — Reset warns\n` +
         `  .kick @user — Remove from group\n` +
-        `  .promote @user — Make admin\n` +
-        `  .demote @user — Remove admin\n\n` +
-        `🔒 *Safety*\n` +
-        `  .antilink on/off — Block links\n` +
+        `  .promote @user — Make admin ✨\n` +
+        `  .demote @user — Remove admin ✨\n` +
+        `  .delete — Delete a replied message ✨\n\n` +
+        `📢 *Tag & Announce*\n` +
+        `  .tagall [msg] — Tag all members ✨\n` +
+        `  .hidetag [msg] — Silently tag all ✨\n\n` +
+        `🔒 *Safety & Protection*\n` +
+        `  .antilink on/off/set — Block links ✨\n` +
         `  .antiword on/off — Bad word filter\n` +
-        `  .antitoxic on/off — AI toxic filter 🆕\n` +
+        `  .antitoxic on/off — AI toxic filter\n` +
         `  .antispam on/off — Anti-spam\n\n` +
         `⚙️ *Settings*\n` +
         `  .welcome on/off [msg] — Welcome new members\n` +
         `  .goodbye on/off [msg] — Goodbye messages\n` +
-        `  .nightmode on/off [start] [end] — Auto-mute at night 🆕\n` +
-        `  .vip on/off — VIP-only mode 🆕\n` +
-        `  .vip add/remove @user — Manage VIP list 🆕\n` +
-        `  .ghost on/off — Ghost mode 🆕\n` +
-        `  .autoreact on/off [mode] — Auto-react 🆕\n` +
-        `  .mute / .unmute — Mute/unmute group\n\n` +
+        `  .mute / .unmute — Lock/unlock group ✨\n` +
+        `  .nightmode on/off — Auto-mute at night\n` +
+        `  .vip on/off — VIP-only mode\n` +
+        `  .ghost on/off — Ghost mode\n` +
+        `  .autoreact on/off — Auto-react\n` +
+        `  .grouplink — Get invite link ✨\n` +
+        `  .resetlink — Reset invite link ✨\n\n` +
         `📊 *Analytics*\n` +
-        `  .groupstats — Full group analytics 🆕\n` +
+        `  .groupstats — Full group analytics\n` +
         `  .groupinfo — Group info\n\n` +
-        `_🆕 = Exclusive NovaSpark v4 feature_`
+        `_✨ = New in NovaSpark v5_`
       );
     }
 
@@ -90,15 +95,25 @@ module.exports = {
       return reply(
         `💬 *Social & Fun*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .ship @user1 @user2 — Love compatibility 🆕\n` +
-        `  .compliment [@user] — AI compliment 🆕\n` +
-        `  .insult [@user] — Savage roast 🆕\n` +
-        `  .truth — Truth or Dare (truth) 🆕\n` +
-        `  .dare — Truth or Dare (dare) 🆕\n` +
+        `😂 *Fun*\n` +
+        `  .joke — Random joke ✨\n` +
+        `  .meme — Random meme image ✨\n` +
+        `  .quote — Inspirational quote ✨\n` +
+        `  .lyrics <song> — Song lyrics ✨\n` +
+        `  .8ball <question> — Magic 8-Ball ✨\n` +
+        `  .flirt [@user] — Flirty pickup line ✨\n` +
+        `  .insult [@user] — Savage roast ✨\n` +
+        `  .gayrate [@user] — Vibe check ✨\n\n` +
+        `💕 *Social*\n` +
+        `  .ship @user1 @user2 — Love compatibility\n` +
+        `  .compliment [@user] — AI compliment\n` +
+        `  .truth — Truth or Dare (truth) ✨\n` +
+        `  .dare — Truth or Dare (dare)\n` +
         `  .roast @user — AI personalised roast\n` +
-        `  .poll Q | A | B | C — Native WhatsApp poll\n` +
+        `  .poll Q | A | B | C — WhatsApp poll\n` +
         `  .fact — Random verified fact\n` +
-        `  .urban <word> — Urban Dictionary\n`
+        `  .urban <word> — Urban Dictionary\n\n` +
+        `_✨ = New in NovaSpark v5_`
       );
     }
 
@@ -106,17 +121,21 @@ module.exports = {
       return reply(
         `🔧 *Tools & Utilities*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .calc <expression> — Scientific calculator 🆕\n` +
-        `  .weather <city> — 3-day forecast 🆕\n` +
-        `  .time [timezone] — World clock 🆕\n` +
-        `  .motivate [@user] — Live motivation quote 🆕\n` +
-        `  .remind <time> <msg> — Set a reminder 💎\n` +
-        `  .translate <lang> <text> — Translate anything\n` +
-        `  .currency 100 USD ZAR — Real-time exchange\n` +
+        `  .ping — Bot latency & system stats ✨\n` +
+        `  .alive — Bot status card ✨\n` +
+        `  .getpp [@user] — Get profile picture ✨\n` +
+        `  .owner — Bot owner info ✨\n` +
+        `  .calc <expression> — Scientific calculator\n` +
+        `  .weather <city> — 3-day forecast\n` +
+        `  .time [timezone] — World clock\n` +
+        `  .motivate [@user] — Motivation quote\n` +
+        `  .remind <time> <msg> — Set reminder 💎\n` +
+        `  .translate <lang> <text> — Translate\n` +
+        `  .currency 100 USD ZAR — Exchange rate\n` +
         `  .bmi <kg> <cm> — BMI calculator\n` +
         `  .news [topic] — Live headlines\n` +
-        `  .profile [@user] — Profile card 🆕\n\n` +
-        `_💎 = Premium feature_\n_🆕 = Exclusive v4 feature_`
+        `  .profile [@user] — Profile card\n\n` +
+        `_💎 = Premium  |  ✨ = New in v5_`
       );
     }
 
@@ -124,7 +143,7 @@ module.exports = {
       return reply(
         `🧠 *AI Commands*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `  .autochat on/off — Toggle AI chat replies\n` +
+        `  .autochat on/off — Toggle AI chat replies 🧠\n` +
         `  .autochat persona <name> — Set AI personality\n` +
         `  .autochat reset — Clear conversation memory\n` +
         `  .homework <question> — Detailed AI answer\n` +
@@ -164,17 +183,22 @@ module.exports = {
       `  💬 \`.menu social\` — Social & fun\n` +
       `  🔧 \`.menu tools\` — Tools & utilities\n\n` +
       `${'─'.repeat(30)}\n` +
-      `🔥 *What\'s New in v4*\n` +
-      `  👻 Ghost Mode — bot goes invisible\n` +
-      `  🧠 AI Anti-Toxic Filter — auto-moderation\n` +
-      `  🌙 Night Mode — auto-mute schedule\n` +
-      `  ⭐ VIP Mode — exclusive member access\n` +
-      `  🎮 Wordle + Trivia + Hangman games\n` +
-      `  🖼️ Remove Background (AI)\n` +
-      `  🎵 TikTok Downloader (no watermark)\n` +
-      `  📊 Group Analytics Dashboard\n` +
-      `  💕 Ship / Compatibility Score\n` +
-      `  ✍️  Fancy Text Art Styles\n\n` +
+      `🔥 *What\'s New in v5*\n` +
+      `  🔗 AntiLink — delete/warn/kick on links\n` +
+      `  📢 TagAll & HideTag — bulk mentions\n` +
+      `  ⬆️⬇️ Promote & Demote admins\n` +
+      `  🔇 Mute/Unmute group instantly\n` +
+      `  🗑️ Delete any message in group\n` +
+      `  🔄 Reset/Get group invite link\n` +
+      `  😂 Jokes, Memes, Lyrics, 8-Ball\n` +
+      `  💌 Flirt, Insult, GayRate commands\n` +
+      `  🏓 Ping with full system stats\n` +
+      `  🤖 Alive status card\n` +
+      `  🖼️ GetPP — fetch profile pictures\n` +
+      `  📡 Broadcast to all groups\n` +
+      `  📵 AntiCall — auto-reject calls\n` +
+      `  💬 PM Blocker — block DMs\n` +
+      `  👁️ AutoRead — mark all as read\n\n` +
       `${'━'.repeat(35)}\n` +
       `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
       `_${config.channelLink}_`

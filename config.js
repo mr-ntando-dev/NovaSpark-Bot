@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v4 — 2026 EDITION
+ * ⚡ NovaSpark Bot v5 — 2026 EDITION
  * Global Configuration
  * By Dev-Ntando
  */
@@ -12,7 +12,7 @@ module.exports = {
 
   // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
-  botVersion:  '4.0.0',
+  botVersion:  '5.0.0',
   prefix:      '.',
   sessionName: process.env.SESSION_DIR || 'session',
   sessionID:   process.env.SESSION_ID  || '',

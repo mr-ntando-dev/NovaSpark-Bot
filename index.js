@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v4 — 2026 EDITION
+ * ⚡ NovaSpark Bot v5 — 2026 EDITION
  * Main Entry Point — WhatsApp MD AutoChat Bot
  * Powered by Baileys | By Dev-Ntando
  */
@@ -44,7 +44,7 @@ function printBanner() {
   orig.log([
     '',
     '╔══════════════════════════════════════════════╗',
-    '  ⚡   N O V A S P A R K   B O T   v4  ⚡',
+    '  ⚡   N O V A S P A R K   B O T   v5  ⚡',
     '       2 0 2 6  E D I T I O N',
     '╚══════════════════════════════════════════════╝',
     '',
@@ -151,11 +151,27 @@ async function startBot() {
   // ── Creds save ────────────────────────────────────────────────────────────
   sock.ev.on('creds.update', saveCreds);
 
+  // ── AntiCall (v5) ─────────────────────────────────────────────────────────
+  const anticallMod  = require('./commands/owner/anticall');
+  const autoreadMod  = require('./commands/owner/autoread');
+  sock.ev.on('call', async (calls) => {
+    if (!anticallMod.anticallState?.enabled) return;
+    for (const c of calls) {
+      if (c.status === 'offer') {
+        try { await sock.rejectCall(c.id, c.from); } catch {}
+      }
+    }
+  });
+
   // ── Messages ──────────────────────────────────────────────────────────────
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return;
     for (const msg of messages) {
       if (!msg.message || msg.key.fromMe) continue;
+      // AutoRead (v5)
+      if (autoreadMod.autoreadState?.enabled) {
+        try { await sock.readMessages([msg.key]); } catch {}
+      }
       try {
         // Cache for antidelete
         if (handler.cacheMessage) handler.cacheMessage(msg);
