@@ -14,27 +14,27 @@ module.exports = {
   adminOnly: true,
   botAdminNeeded: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx       = msg.message?.extendedTextMessage?.contextInfo || {};
       const mentioned = ctx.mentionedJid || [];
       const target    = mentioned[0] || (ctx.stanzaId && ctx.participant ? ctx.participant : null);
 
-      if (!target) return extra.reply('❌ Mention or reply to the user you want to promote.\n\n_Example: .promote @user_');
+      if (!target) return reply('❌ Mention or reply to the user you want to promote.\n\n_Example: .promote @user_');
 
-      const meta = await sock.groupMetadata(extra.from);
+      const meta = await sock.groupMetadata(from);
       const part = meta.participants.find(p => p.id === target || p.lid === target);
 
-      if (!part)                                             return extra.reply('❌ User not found in this group.');
-      if (part.admin === 'admin' || part.admin === 'superadmin') return extra.reply('❌ That user is already an admin!');
+      if (!part)                                             return reply('❌ User not found in this group.');
+      if (part.admin === 'admin' || part.admin === 'superadmin') return reply('❌ That user is already an admin!');
 
-      await sock.groupParticipantsUpdate(extra.from, [target], 'promote');
-      await sock.sendMessage(extra.from, {
+      await sock.groupParticipantsUpdate(from, [target], 'promote');
+      await sock.sendMessage(from, {
         text: `✅ @${target.split('@')[0]} is now a *Group Admin*! 🛡️`,
         mentions: [target],
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

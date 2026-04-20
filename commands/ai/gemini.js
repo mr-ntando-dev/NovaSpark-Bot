@@ -36,16 +36,16 @@ module.exports = {
   description: 'Ask Google Gemini AI',
   usage: '.gemini <question>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const query = args.join(' ');
-    if (!query) return extra.reply('🧠 Ask Gemini anything!\n\n_Example: .gemini Explain quantum physics simply_');
+    if (!query) return reply('🧠 Ask Gemini anything!\n\n_Example: .gemini Explain quantum physics simply_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🧠', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '🧠', key: msg.key } });
       const answer = await askGemini(query);
-      await extra.reply(`🧠 *Gemini AI*\n\n${answer}`);
+      await reply(`🧠 *Gemini AI*\n\n${answer}`);
     } catch (e) {
-      await extra.reply(`❌ Gemini Error: ${e.message}`);
+      await reply(`❌ Gemini Error: ${e.message}`);
     }
   },
 };

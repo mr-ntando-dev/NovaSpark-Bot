@@ -14,8 +14,8 @@ module.exports = {
   description: 'Reveal a view-once image/video/audio',
   usage: '.vv (reply to a view-once message)',
 
-  async execute(sock, msg, args, extra) {
-    const chatId = extra.from;
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
+    const chatId = from;
 
     const ctx =
       msg.message?.extendedTextMessage?.contextInfo ||
@@ -25,7 +25,7 @@ module.exports = {
       msg.message?.listResponseMessage?.contextInfo;
 
     if (!ctx?.quotedMessage || !ctx?.stanzaId) {
-      return extra.reply('👁️ Reply to a *view-once* message to reveal it!\n\n_Usage: .vv_');
+      return reply('👁️ Reply to a *view-once* message to reveal it!\n\n_Usage: .vv_');
     }
 
     const quoted = ctx.quotedMessage;
@@ -40,7 +40,7 @@ module.exports = {
       !!quoted?.audioMessage?.viewOnce;
 
     if (!hasViewOnce) {
-      return extra.reply('❌ That is not a view-once message!');
+      return reply('❌ That is not a view-once message!');
     }
 
     let actualMsg = null;
@@ -67,13 +67,13 @@ module.exports = {
     }
 
     if (!actualMsg || !mtype) {
-      return extra.reply('❌ Unsupported view-once message format.');
+      return reply('❌ Unsupported view-once message format.');
     }
 
     const downloadType = mtype === 'imageMessage' ? 'image' : mtype === 'videoMessage' ? 'video' : 'audio';
 
     try {
-      await extra.reply('👁️ Revealing view-once...');
+      await reply('👁️ Revealing view-once...');
 
       const stream = await downloadContentFromMessage(actualMsg[mtype], downloadType);
       const chunks = [];
@@ -99,7 +99,7 @@ module.exports = {
         }, { quoted: msg });
       }
     } catch (e) {
-      await extra.reply(`❌ Failed to reveal: ${e.message}`);
+      await reply(`❌ Failed to reveal: ${e.message}`);
     }
   },
 };

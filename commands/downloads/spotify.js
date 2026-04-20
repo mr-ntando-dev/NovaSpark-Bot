@@ -42,14 +42,14 @@ module.exports = {
   description: 'Download Spotify track as audio',
   usage: '.spotify <Spotify track URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const url = (args[0] || args.join(' ')).trim();
-    if (!url) return extra.reply('🎧 Provide a Spotify track URL!\n\n_Example: .spotify https://open.spotify.com/track/xxx_');
-    if (!SP_PATTERNS.some(p => p.test(url))) return extra.reply('❌ Only Spotify track links are supported.\n_URL must contain open.spotify.com/track/_');
+    if (!url) return reply('🎧 Provide a Spotify track URL!\n\n_Example: .spotify https://open.spotify.com/track/xxx_');
+    if (!SP_PATTERNS.some(p => p.test(url))) return reply('❌ Only Spotify track links are supported.\n_URL must contain open.spotify.com/track/_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🎧', key: msg.key } });
-      await extra.reply('🎧 Fetching Spotify track...');
+      await sock.sendMessage(from, { react: { text: '🎧', key: msg.key } });
+      await reply('🎧 Fetching Spotify track...');
 
       const data    = await downloadSpotify(url);
       const tmpFile = path.join(os.tmpdir(), `ns_sp_${Date.now()}.mp3`);
@@ -59,10 +59,10 @@ module.exports = {
       const caption = `🎵 *${data.title || 'Spotify Track'}*\n🎤 ${data.artist || ''}\n\n_⚡ NovaSpark Bot_`;
 
       if (data.cover) {
-        await sock.sendMessage(extra.from, { image: { url: data.cover }, caption }, { quoted: msg });
+        await sock.sendMessage(from, { image: { url: data.cover }, caption }, { quoted: msg });
       }
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         audio:    fs.readFileSync(tmpFile),
         mimetype: 'audio/mp4',
         fileName: `${(data.title || 'spotify').replace(/[^\w\s-]/g, '')}.mp3`,
@@ -71,7 +71,7 @@ module.exports = {
 
       fs.unlink(tmpFile, () => {});
     } catch (e) {
-      await extra.reply(`❌ Failed: ${e.message}`);
+      await reply(`❌ Failed: ${e.message}`);
     }
   },
 };

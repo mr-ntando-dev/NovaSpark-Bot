@@ -20,11 +20,11 @@ module.exports = {
   description: 'Silly vibe percentage check',
   usage: '.gayrate [@user]',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx       = msg.message?.extendedTextMessage?.contextInfo || {};
       const mentioned = ctx.mentionedJid || [];
-      const target    = mentioned[0] || extra.sender;
+      const target    = mentioned[0] || sender;
       const tag       = `@${target.split('@')[0]}`;
 
       // deterministic-ish: hash sender + today's date so it stays the same day
@@ -34,12 +34,12 @@ module.exports = {
       const pct  = ((seed + dateSeed) % 101);
 
       const template = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         text: `🎭 ${template(tag, pct)}`,
         mentions: [target],
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

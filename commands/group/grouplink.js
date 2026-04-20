@@ -14,14 +14,14 @@ module.exports = {
   adminOnly: true,
   botAdminNeeded: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
-      const code = await sock.groupInviteCode(extra.from);
-      await extra.reply(
+      const code = await sock.groupInviteCode(from);
+      await reply(
         `🔗 *Group Invite Link*\n\nhttps://chat.whatsapp.com/${code}\n\n_Use .resetlink to revoke and generate a new link._`
       );
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

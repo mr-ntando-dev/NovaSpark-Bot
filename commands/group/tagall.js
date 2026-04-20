@@ -13,9 +13,9 @@ module.exports = {
   groupOnly: true,
   adminOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
-      const meta         = await sock.groupMetadata(extra.from);
+      const meta         = await sock.groupMetadata(from);
       const participants = meta.participants.map(p => p.id);
       const message      = args.join(' ') || '📢 Attention everyone!';
 
@@ -24,9 +24,9 @@ module.exports = {
         text += `${i + 1}. @${id.split('@')[0]}\n`;
       });
 
-      await sock.sendMessage(extra.from, { text, mentions: participants }, { quoted: msg });
+      await sock.sendMessage(from, { text, mentions: participants }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

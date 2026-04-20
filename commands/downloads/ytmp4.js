@@ -44,12 +44,12 @@ module.exports = {
   description: 'Download YouTube video (MP4)',
   usage: '.video <name or YouTube URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const query = args.join(' ');
-    if (!query) return extra.reply('🎬 Provide a video name or YouTube URL!\n\n_Example: .video Bohemian Rhapsody_');
+    if (!query) return reply('🎬 Provide a video name or YouTube URL!\n\n_Example: .video Bohemian Rhapsody_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🎬', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '🎬', key: msg.key } });
 
       let videoUrl, videoTitle, videoThumb, videoDuration;
 
@@ -58,7 +58,7 @@ module.exports = {
         videoTitle = 'Video';
       } else {
         const { videos } = await yts(query);
-        if (!videos?.length) return extra.reply('❌ No videos found.');
+        if (!videos?.length) return reply('❌ No videos found.');
         const v     = videos[0];
         videoUrl    = v.url;
         videoTitle  = v.title;
@@ -67,12 +67,12 @@ module.exports = {
       }
 
       if (videoThumb) {
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           image: { url: videoThumb },
           caption: `🎬 *${videoTitle}*\n⏱ ${videoDuration || ''}\n\n⬇️ Downloading video...`,
         }, { quoted: msg });
       } else {
-        await extra.reply(`🎬 Downloading *${videoTitle}*...`);
+        await reply(`🎬 Downloading *${videoTitle}*...`);
       }
 
       const data   = await tryApis(videoUrl);
@@ -83,10 +83,10 @@ module.exports = {
       const fileSizeMB = fs.statSync(tmpFile).size / 1024 / 1024;
       if (fileSizeMB > 64) {
         fs.unlink(tmpFile, () => {});
-        return extra.reply(`❌ Video too large (${fileSizeMB.toFixed(1)}MB) — WhatsApp limit is 64MB.`);
+        return reply(`❌ Video too large (${fileSizeMB.toFixed(1)}MB) — WhatsApp limit is 64MB.`);
       }
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         video:    fs.readFileSync(tmpFile),
         mimetype: 'video/mp4',
         fileName: `${(data.title || videoTitle || 'video').replace(/[^\w\s-]/g, '')}.mp4`,
@@ -95,7 +95,7 @@ module.exports = {
 
       fs.unlink(tmpFile, () => {});
     } catch (e) {
-      await extra.reply(`❌ Download failed: ${e.message}`);
+      await reply(`❌ Download failed: ${e.message}`);
     }
   },
 };

@@ -34,13 +34,13 @@ module.exports = {
   usage: '.pmblocker on | off | status | setmsg <text>',
   ownerOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const sub  = (args[0] || '').toLowerCase();
     const rest = args.slice(1).join(' ');
 
     if (!sub || sub === 'status') {
       const s = readState();
-      return extra.reply(
+      return reply(
         `💬 *PM Blocker*\n\n` +
         `Status : *${s.enabled ? '🟢 ON' : '🔴 OFF'}*\n` +
         `Message: _${s.message}_`
@@ -52,7 +52,7 @@ module.exports = {
       s.enabled = true;
       writeState(s);
       pmState.enabled = true;
-      return extra.reply('💬 *PM Blocker enabled.* DMs will receive the block message.');
+      return reply('💬 *PM Blocker enabled.* DMs will receive the block message.');
     }
 
     if (sub === 'off') {
@@ -60,18 +60,18 @@ module.exports = {
       s.enabled = false;
       writeState(s);
       pmState.enabled = false;
-      return extra.reply('💬 *PM Blocker disabled.*');
+      return reply('💬 *PM Blocker disabled.*');
     }
 
     if (sub === 'setmsg') {
-      if (!rest) return extra.reply('❌ Provide a message: `.pmblocker setmsg <your text>`');
+      if (!rest) return reply('❌ Provide a message: `.pmblocker setmsg <your text>`');
       const s = readState();
       s.message = rest;
       writeState(s);
       pmState.message = rest;
-      return extra.reply(`✅ PM block message updated to:\n\n_${rest}_`);
+      return reply(`✅ PM block message updated to:\n\n_${rest}_`);
     }
 
-    return extra.reply('❓ Usage: `.pmblocker on | off | status | setmsg <text>`');
+    return reply('❓ Usage: `.pmblocker on | off | status | setmsg <text>`');
   },
 };

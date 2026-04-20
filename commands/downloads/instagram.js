@@ -51,14 +51,14 @@ module.exports = {
   description: 'Download Instagram photos/reels/videos',
   usage: '.ig <Instagram URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const url = (args[0] || args.join(' ')).trim();
-    if (!url) return extra.reply('📸 Provide an Instagram URL!\n\n_Example: .ig https://www.instagram.com/reel/xxx_');
-    if (!IG_PATTERNS.some(p => p.test(url))) return extra.reply('❌ That does not look like an Instagram post/reel link.');
+    if (!url) return reply('📸 Provide an Instagram URL!\n\n_Example: .ig https://www.instagram.com/reel/xxx_');
+    if (!IG_PATTERNS.some(p => p.test(url))) return reply('❌ That does not look like an Instagram post/reel link.');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '📥', key: msg.key } });
-      await extra.reply('📥 Fetching Instagram media...');
+      await sock.sendMessage(from, { react: { text: '📥', key: msg.key } });
+      await reply('📥 Fetching Instagram media...');
 
       const media = await downloadIG(url);
       let sent = 0;
@@ -66,13 +66,13 @@ module.exports = {
       for (const item of media.slice(0, 10)) {
         try {
           if (item.type === 'video' || item.url?.includes('.mp4')) {
-            await sock.sendMessage(extra.from, {
+            await sock.sendMessage(from, {
               video:   { url: item.url },
               mimetype: 'video/mp4',
               caption: sent === 0 ? `📸 Instagram Download\n_⚡ NovaSpark Bot_` : '',
             }, { quoted: sent === 0 ? msg : undefined });
           } else {
-            await sock.sendMessage(extra.from, {
+            await sock.sendMessage(from, {
               image:   { url: item.url },
               caption: sent === 0 ? `📸 Instagram Download\n_⚡ NovaSpark Bot_` : '',
             }, { quoted: sent === 0 ? msg : undefined });
@@ -82,9 +82,9 @@ module.exports = {
         } catch {}
       }
 
-      if (!sent) await extra.reply('❌ No media could be downloaded from that link.');
+      if (!sent) await reply('❌ No media could be downloaded from that link.');
     } catch (e) {
-      await extra.reply(`❌ Failed: ${e.message}`);
+      await reply(`❌ Failed: ${e.message}`);
     }
   },
 };

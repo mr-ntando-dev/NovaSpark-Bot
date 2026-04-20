@@ -44,12 +44,12 @@ module.exports = {
   description: 'Download YouTube audio (MP3)',
   usage: '.song <name or YouTube URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const query = args.join(' ');
-    if (!query) return extra.reply('🎵 Provide a song name or YouTube URL!\n\n_Example: .song Blinding Lights_');
+    if (!query) return reply('🎵 Provide a song name or YouTube URL!\n\n_Example: .song Blinding Lights_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🎵', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '🎵', key: msg.key } });
 
       let videoUrl, videoTitle, videoThumb, videoDuration;
 
@@ -58,7 +58,7 @@ module.exports = {
         videoTitle = 'Song';
       } else {
         const { videos } = await yts(query);
-        if (!videos?.length) return extra.reply('❌ No results found for that song.');
+        if (!videos?.length) return reply('❌ No results found for that song.');
         const v     = videos[0];
         videoUrl    = v.url;
         videoTitle  = v.title;
@@ -68,12 +68,12 @@ module.exports = {
 
       // Send thumbnail card
       if (videoThumb) {
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           image: { url: videoThumb },
           caption: `🎵 *${videoTitle}*\n⏱ ${videoDuration || ''}\n\n⬇️ Downloading audio...`,
         }, { quoted: msg });
       } else {
-        await extra.reply(`🎵 Downloading *${videoTitle}*...`);
+        await reply(`🎵 Downloading *${videoTitle}*...`);
       }
 
       const data = await tryApis(videoUrl);
@@ -83,7 +83,7 @@ module.exports = {
       const dlRes   = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
       fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         audio:    fs.readFileSync(tmpFile),
         mimetype: 'audio/mp4',
         fileName: `${(data.title || videoTitle || 'song').replace(/[^\w\s-]/g, '')}.mp3`,
@@ -92,7 +92,7 @@ module.exports = {
 
       fs.unlink(tmpFile, () => {});
     } catch (e) {
-      await extra.reply(`❌ Download failed: ${e.message}`);
+      await reply(`❌ Download failed: ${e.message}`);
     }
   },
 };

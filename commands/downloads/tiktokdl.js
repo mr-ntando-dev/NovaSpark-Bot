@@ -50,21 +50,21 @@ module.exports = {
   description: 'Download TikTok video (no watermark)',
   usage: '.tiktok <TikTok URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const url = args[0] || args.join(' ');
-    if (!url) return extra.reply('📱 Provide a TikTok URL!\n\n_Example: .tiktok https://vm.tiktok.com/xxx_');
-    if (!TT_PATTERNS.some(p => p.test(url))) return extra.reply('❌ That does not look like a TikTok link.');
+    if (!url) return reply('📱 Provide a TikTok URL!\n\n_Example: .tiktok https://vm.tiktok.com/xxx_');
+    if (!TT_PATTERNS.some(p => p.test(url))) return reply('❌ That does not look like a TikTok link.');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '⬇️', key: msg.key } });
-      await extra.reply('⬇️ Downloading TikTok (no watermark)...');
+      await sock.sendMessage(from, { react: { text: '⬇️', key: msg.key } });
+      await reply('⬇️ Downloading TikTok (no watermark)...');
 
       const data    = await downloadTT(url);
       const tmpFile = path.join(os.tmpdir(), `ns_tt_${Date.now()}.mp4`);
       const dlRes   = await axios.get(data.videoUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
       fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         video:    fs.readFileSync(tmpFile),
         mimetype: 'video/mp4',
         fileName: 'tiktok.mp4',
@@ -73,7 +73,7 @@ module.exports = {
 
       fs.unlink(tmpFile, () => {});
     } catch (e) {
-      await extra.reply(`❌ Failed: ${e.message}`);
+      await reply(`❌ Failed: ${e.message}`);
     }
   },
 };

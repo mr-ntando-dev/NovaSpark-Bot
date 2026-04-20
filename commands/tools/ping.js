@@ -22,9 +22,9 @@ module.exports = {
   description: 'Check bot ping, uptime, and system stats',
   usage: '.ping',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const start = Date.now();
-    const sent  = await sock.sendMessage(extra.from, { text: '🏓 Pong!' }, { quoted: msg });
+    const sent  = await sock.sendMessage(from, { text: '🏓 Pong!' }, { quoted: msg });
     const ms    = Date.now() - start;
 
     const uptime = fmtUptime(process.uptime());
@@ -33,7 +33,7 @@ module.exports = {
     const totMB  = Math.round(os.totalmem() / 1024 / 1024);
     const cpuPct = Math.min(100, Math.round(os.loadavg()[0] * 100 / os.cpus().length));
 
-    await sock.sendMessage(extra.from, {
+    await sock.sendMessage(from, {
       text:
         `╔═══════════════════════╗\n` +
         `  ⚡ *NovaSpark Status*  \n` +

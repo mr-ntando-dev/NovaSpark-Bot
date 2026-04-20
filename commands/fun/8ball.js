@@ -37,11 +37,11 @@ module.exports = {
   description: 'Ask the Magic 8-Ball a yes/no question',
   usage: '.8ball <question>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const question = args.join(' ');
-    if (!question) return extra.reply('❓ Ask me a yes/no question!\n\n_Example: .8ball Will I be rich?_');
+    if (!question) return reply('❓ Ask me a yes/no question!\n\n_Example: .8ball Will I be rich?_');
 
     const answer = RESPONSES[Math.floor(Math.random() * RESPONSES.length)];
-    await extra.reply(`🎱 *Magic 8-Ball*\n\n*Q:* ${question}\n\n${answer}`);
+    await reply(`🎱 *Magic 8-Ball*\n\n*Q:* ${question}\n\n${answer}`);
   },
 };

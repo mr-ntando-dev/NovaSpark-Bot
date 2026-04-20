@@ -30,7 +30,7 @@ module.exports = {
   description: 'Savage roast for a tagged member',
   usage: '.insult @user',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx       = msg.message?.extendedTextMessage?.contextInfo || {};
       const mentioned = ctx.mentionedJid || [];
@@ -39,15 +39,15 @@ module.exports = {
 
       if (target) {
         const tag = `@${target.split('@')[0]}`;
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           text: `😤 ${tag}\n\n${insult}`,
           mentions: [target],
         }, { quoted: msg });
       } else {
-        await extra.reply(`😤 ${insult}`);
+        await reply(`😤 ${insult}`);
       }
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

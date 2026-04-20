@@ -13,25 +13,25 @@ module.exports = {
   description: 'Get song lyrics',
   usage: '.lyrics <song name>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const song = args.join(' ');
-    if (!song) return extra.reply('🎵 Please enter a song name!\n\n_Example: .lyrics Bohemian Rhapsody_');
+    if (!song) return reply('🎵 Please enter a song name!\n\n_Example: .lyrics Bohemian Rhapsody_');
 
     try {
-      await extra.reply(`🎵 Searching lyrics for *${song}*...`);
+      await reply(`🎵 Searching lyrics for *${song}*...`);
       const { data } = await axios.get(
         `https://lyricsapi.fly.dev/api/lyrics?q=${encodeURIComponent(song)}`,
         { timeout: 15000 }
       );
 
       const lyrics = data?.result?.lyrics;
-      if (!lyrics) return extra.reply(`❌ Could not find lyrics for "${song}".`);
+      if (!lyrics) return reply(`❌ Could not find lyrics for "${song}".`);
 
       const maxLen = 4000;
       const out    = lyrics.length > maxLen ? lyrics.slice(0, maxLen) + '\n...(truncated)' : lyrics;
-      await extra.reply(`🎵 *${data.result?.title || song}*\n\n${out}`);
+      await reply(`🎵 *${data.result?.title || song}*\n\n${out}`);
     } catch (e) {
-      await extra.reply(`❌ Could not fetch lyrics: ${e.message}`);
+      await reply(`❌ Could not fetch lyrics: ${e.message}`);
     }
   },
 };

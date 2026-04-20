@@ -44,29 +44,29 @@ module.exports = {
   description: 'Chat with an AI character (luffy, naruto, goku, tony, sherlock, batman)',
   usage: '.character <name> <message>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const charName = (args[0] || '').toLowerCase();
     const message  = args.slice(1).join(' ');
 
     if (!charName) {
       const list = Object.keys(PRESETS).join(', ');
-      return extra.reply(`🎭 *Character AI*\n\nAvailable characters:\n${list}\n\n_Usage: .character naruto believe it!_`);
+      return reply(`🎭 *Character AI*\n\nAvailable characters:\n${list}\n\n_Usage: .character naruto believe it!_`);
     }
 
     const preset = PRESETS[charName];
     if (!preset) {
       const list = Object.keys(PRESETS).join(', ');
-      return extra.reply(`❌ Unknown character: *${charName}*\n\nAvailable: ${list}`);
+      return reply(`❌ Unknown character: *${charName}*\n\nAvailable: ${list}`);
     }
 
-    if (!message) return extra.reply(`💬 What do you want to say to *${charName}*?\n\n_Example: .character luffy are you hungry?_`);
+    if (!message) return reply(`💬 What do you want to say to *${charName}*?\n\n_Example: .character luffy are you hungry?_`);
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🎭', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '🎭', key: msg.key } });
       const reply = await chatAsCharacter(preset, message);
-      await extra.reply(`🎭 *${charName.charAt(0).toUpperCase() + charName.slice(1)}:*\n\n${reply}`);
+      await reply(`🎭 *${charName.charAt(0).toUpperCase() + charName.slice(1)}:*\n\n${reply}`);
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

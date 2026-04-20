@@ -15,15 +15,15 @@ module.exports = {
   description: 'Convert sticker to image/video',
   usage: '.simage (reply to sticker)',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx = msg.message?.extendedTextMessage?.contextInfo;
       if (!ctx?.quotedMessage?.stickerMessage) {
-        return extra.reply('📎 Reply to a *sticker* to convert it to an image!');
+        return reply('📎 Reply to a *sticker* to convert it to an image!');
       }
 
       const target = {
-        key:     { remoteJid: extra.from, id: ctx.stanzaId, participant: ctx.participant },
+        key:     { remoteJid: from, id: ctx.stanzaId, participant: ctx.participant },
         message: ctx.quotedMessage,
       };
 
@@ -32,13 +32,13 @@ module.exports = {
         reuploadRequest: sock.updateMediaMessage,
       });
 
-      if (!buf) return extra.reply('❌ Failed to download sticker.');
+      if (!buf) return reply('❌ Failed to download sticker.');
 
       const isAnimated = ctx.quotedMessage.stickerMessage?.isAnimated;
 
       if (isAnimated) {
         // Animated WebP → send as video/gif
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           video:    buf,
           mimetype: 'video/mp4',
           gifPlayback: true,
@@ -46,12 +46,12 @@ module.exports = {
       } else {
         // Static WebP → PNG
         const png = await sharp(buf).png().toBuffer();
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           image: png,
         }, { quoted: msg });
       }
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

@@ -13,13 +13,13 @@ module.exports = {
   description: 'Get a random joke',
   usage: '.joke',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const { data } = await axios.get(
         'https://official-joke-api.appspot.com/jokes/random',
         { timeout: 8000 }
       );
-      await extra.reply(`😂 *${data.setup}*\n\n🥁 ${data.punchline}`);
+      await reply(`😂 *${data.setup}*\n\n🥁 ${data.punchline}`);
     } catch {
       // fallback local jokes
       const jokes = [
@@ -30,7 +30,7 @@ module.exports = {
         { s: 'How does a penguin build its house?', p: 'Igloos it together! 🐧' },
       ];
       const j = jokes[Math.floor(Math.random() * jokes.length)];
-      await extra.reply(`😂 *${j.s}*\n\n🥁 ${j.p}`);
+      await reply(`😂 *${j.s}*\n\n🥁 ${j.p}`);
     }
   },
 };

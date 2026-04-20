@@ -40,30 +40,30 @@ module.exports = {
   description: 'Download Pinterest images/videos',
   usage: '.pin <Pinterest URL>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const url = (args[0] || args.join(' ')).trim();
-    if (!url) return extra.reply('📌 Provide a Pinterest URL!\n\n_Example: .pin https://pin.it/xxx_');
-    if (!PIN_PATTERNS.some(p => p.test(url))) return extra.reply('❌ That does not look like a Pinterest link.');
+    if (!url) return reply('📌 Provide a Pinterest URL!\n\n_Example: .pin https://pin.it/xxx_');
+    if (!PIN_PATTERNS.some(p => p.test(url))) return reply('❌ That does not look like a Pinterest link.');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '📌', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '📌', key: msg.key } });
 
       const data = await downloadPin(url);
 
       if (data.type === 'video') {
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           video:   { url: data.url },
           mimetype: 'video/mp4',
           caption: `📌 Pinterest Video\n_⚡ NovaSpark Bot_`,
         }, { quoted: msg });
       } else {
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           image:   { url: data.url },
           caption: `📌 Pinterest Image\n_⚡ NovaSpark Bot_`,
         }, { quoted: msg });
       }
     } catch (e) {
-      await extra.reply(`❌ Failed: ${e.message}`);
+      await reply(`❌ Failed: ${e.message}`);
     }
   },
 };

@@ -250,13 +250,13 @@ module.exports = {
       );
     }
 
-    // Main menu
+    // Main menu — send with anime image
     const now = new Date().toLocaleString('en-ZA', {
       timeZone: config.timezone, weekday:'short', month:'short', day:'numeric',
       hour:'2-digit', minute:'2-digit', hour12: false,
     });
 
-    return reply(
+    const menuText =
       `⚡ *NovaSpark Bot v${config.botVersion}*\n` +
       `_The Most Advanced WhatsApp MD Bot — 2026 Edition_\n` +
       `${'━'.repeat(35)}\n\n` +
@@ -297,7 +297,32 @@ module.exports = {
       `  📊 Activity stats & leaderboard\n\n` +
       `${'━'.repeat(35)}\n` +
       `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
-      `_${config.channelLink}_`
-    );
+      `_${config.channelLink}_`;
+
+    // Anime image URLs — rotates randomly each .menu call
+    const ANIME_IMAGES = [
+      'https://i.imgur.com/4M34hi2.png',   // anime bot girl
+      'https://i.pinimg.com/originals/9a/6c/1c/9a6c1c6b0e2d1c7be4a6c2f0e1c3a9b1.jpg',
+      'https://i.imgur.com/2yaf2fb.jpg',
+      'https://cdn.waifu.im/6f0b71f9c3e50dca.jpg',
+      'https://cdn.waifu.im/7f5b4e8c2a1d3f90.jpg',
+    ];
+    // Use waifu.im random endpoint (always returns a valid anime image)
+    const animeUrl = 'https://api.waifu.im/search?included_tags=waifu&is_nsfw=false&many=false';
+
+    try {
+      // Try to fetch a random waifu.im image URL
+      const axios = require('axios');
+      const res   = await axios.get(animeUrl, { timeout: 6000 });
+      const imgUrl = res.data?.images?.[0]?.url || ANIME_IMAGES[Math.floor(Math.random() * ANIME_IMAGES.length)];
+      await sock.sendMessage(from, {
+        image:   { url: imgUrl },
+        caption: menuText,
+        mimetype: 'image/jpeg',
+      }, { quoted: msg });
+    } catch {
+      // If image fetch fails, fall back to plain text menu
+      return reply(menuText);
+    }
   },
 };

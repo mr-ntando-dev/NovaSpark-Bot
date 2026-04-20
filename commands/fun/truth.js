@@ -30,8 +30,8 @@ module.exports = {
   description: 'Get a Truth question for Truth or Dare',
   usage: '.truth',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const q = TRUTHS[Math.floor(Math.random() * TRUTHS.length)];
-    await extra.reply(`🎯 *TRUTH*\n\n${q}`);
+    await reply(`🎯 *TRUTH*\n\n${q}`);
   },
 };

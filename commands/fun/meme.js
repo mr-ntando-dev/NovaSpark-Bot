@@ -13,19 +13,19 @@ module.exports = {
   description: 'Random meme from the internet',
   usage: '.meme',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
-      await extra.reply('😂 Fetching a meme...');
+      await reply('😂 Fetching a meme...');
       const { data } = await axios.get('https://meme-api.com/gimme', { timeout: 10000 });
 
-      if (!data?.url) return extra.reply('❌ Could not fetch a meme right now. Try again!');
+      if (!data?.url) return reply('❌ Could not fetch a meme right now. Try again!');
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         image:   { url: data.url },
         caption: `😂 *${data.title}*\n\n_r/${data.subreddit} — 👍 ${data.ups}_`,
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Meme API error: ${e.message}`);
+      await reply(`❌ Meme API error: ${e.message}`);
     }
   },
 };

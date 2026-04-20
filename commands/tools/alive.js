@@ -13,13 +13,13 @@ module.exports = {
   description: 'Check if the bot is alive',
   usage: '.alive',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const uptime = process.uptime();
     const h = Math.floor(uptime / 3600);
     const m = Math.floor((uptime % 3600) / 60);
     const s = Math.floor(uptime % 60);
 
-    await sock.sendMessage(extra.from, {
+    await sock.sendMessage(from, {
       text:
         `╔═══════════════════════════╗\n` +
         `  ⚡ *NovaSpark Bot — ALIVE!*  \n` +

@@ -24,13 +24,13 @@ module.exports = {
   description: 'Get a random inspirational quote',
   usage: '.quote',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const { data } = await axios.get('https://api.quotable.io/random', { timeout: 8000 });
-      await extra.reply(`💬 *"${data.content}"*\n\n— _${data.author}_`);
+      await reply(`💬 *"${data.content}"*\n\n— _${data.author}_`);
     } catch {
       const fb = FALLBACK[Math.floor(Math.random() * FALLBACK.length)];
-      await extra.reply(`💬 *"${fb.q}"*\n\n— _${fb.a}_`);
+      await reply(`💬 *"${fb.q}"*\n\n— _${fb.a}_`);
     }
   },
 };

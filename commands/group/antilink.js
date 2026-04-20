@@ -17,15 +17,15 @@ module.exports = {
   adminOnly: true,
   botAdminNeeded: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const opt = (args[0] || '').toLowerCase();
 
       if (!opt || opt === 'get') {
-        const s      = database.getGroupSettings(extra.from);
+        const s      = database.getGroupSettings(from);
         const status = s.antilink       ? '🟢 ON'   : '🔴 OFF';
         const action = s.antilinkAction || 'delete';
-        return extra.reply(
+        return reply(
           `🔗 *AntiLink — NovaSpark*\n\n` +
           `Status : *${status}*\n` +
           `Action : *${action}*\n\n` +
@@ -38,27 +38,27 @@ module.exports = {
       }
 
       if (opt === 'on') {
-        database.updateGroupSettings(extra.from, { antilink: true });
-        return extra.reply('🔗 *AntiLink is now ON* — links will be blocked.');
+        database.updateGroupSettings(from, { antilink: true });
+        return reply('🔗 *AntiLink is now ON* — links will be blocked.');
       }
 
       if (opt === 'off') {
-        database.updateGroupSettings(extra.from, { antilink: false });
-        return extra.reply('🔗 *AntiLink is now OFF*.');
+        database.updateGroupSettings(from, { antilink: false });
+        return reply('🔗 *AntiLink is now OFF*.');
       }
 
       if (opt === 'set') {
         const action = (args[1] || '').toLowerCase();
         if (!['delete', 'warn', 'kick'].includes(action)) {
-          return extra.reply('❌ Valid actions: *delete* | *warn* | *kick*');
+          return reply('❌ Valid actions: *delete* | *warn* | *kick*');
         }
-        database.updateGroupSettings(extra.from, { antilinkAction: action, antilink: true });
-        return extra.reply(`🔗 *AntiLink action set to* \`${action}\` and *turned ON*.`);
+        database.updateGroupSettings(from, { antilinkAction: action, antilink: true });
+        return reply(`🔗 *AntiLink action set to* \`${action}\` and *turned ON*.`);
       }
 
-      return extra.reply('❓ Usage: `.antilink on | off | set <delete|warn|kick> | get`');
+      return reply('❓ Usage: `.antilink on | off | set <delete|warn|kick> | get`');
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 

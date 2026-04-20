@@ -15,9 +15,9 @@ module.exports = {
   groupOnly: true,
   adminOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
-      const meta      = await sock.groupMetadata(extra.from);
+      const meta      = await sock.groupMetadata(from);
       const mentions  = meta.participants.map(p => p.id);
       const ctx       = msg.message?.extendedTextMessage?.contextInfo;
       const text      = args.join(' ') || '';
@@ -25,7 +25,7 @@ module.exports = {
       // If replying to media, forward it with hidden mentions
       if (ctx?.quotedMessage) {
         const quoted = {
-          key:     { remoteJid: extra.from, id: ctx.stanzaId, participant: ctx.participant },
+          key:     { remoteJid: from, id: ctx.stanzaId, participant: ctx.participant },
           message: ctx.quotedMessage,
         };
         const mediaMsg =
@@ -40,23 +40,23 @@ module.exports = {
           });
 
           if (quoted.message?.imageMessage) {
-            await sock.sendMessage(extra.from, { image: buf, caption: text || quoted.message.imageMessage.caption || '', mentions }, { quoted: msg });
+            await sock.sendMessage(from, { image: buf, caption: text || quoted.message.imageMessage.caption || '', mentions }, { quoted: msg });
           } else if (quoted.message?.videoMessage) {
-            await sock.sendMessage(extra.from, { video: buf, caption: text || quoted.message.videoMessage.caption || '', mentions }, { quoted: msg });
+            await sock.sendMessage(from, { video: buf, caption: text || quoted.message.videoMessage.caption || '', mentions }, { quoted: msg });
           } else {
-            await sock.sendMessage(extra.from, { sticker: buf, mentions }, { quoted: msg });
+            await sock.sendMessage(from, { sticker: buf, mentions }, { quoted: msg });
           }
           return;
         }
       }
 
       // Plain text hidden tag
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         text: text || '📌',
         mentions,
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

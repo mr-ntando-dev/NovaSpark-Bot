@@ -16,12 +16,12 @@ module.exports = {
   usage: '.topmembers',
   groupOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
-      const stats = database.getGroupStats ? database.getGroupStats(extra.from) : null;
+      const stats = database.getGroupStats ? database.getGroupStats(from) : null;
 
       if (!stats || !stats.users || Object.keys(stats.users).length === 0) {
-        return extra.reply('📊 No activity data yet! Start chatting to build the leaderboard.');
+        return reply('📊 No activity data yet! Start chatting to build the leaderboard.');
       }
 
       const sorted   = Object.entries(stats.users).sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -37,9 +37,9 @@ module.exports = {
 
       text += `\n_Total messages: ${total}_\n_⚡ NovaSpark Bot_`;
 
-      await sock.sendMessage(extra.from, { text, mentions }, { quoted: msg });
+      await sock.sendMessage(from, { text, mentions }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

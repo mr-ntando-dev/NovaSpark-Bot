@@ -12,20 +12,20 @@ module.exports = {
   usage: '.broadcast <message>',
   ownerOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const text = args.join(' ');
-    if (!text) return extra.reply('❌ Provide a message to broadcast!\n\n_Example: .broadcast Hello everyone!_');
+    if (!text) return reply('❌ Provide a message to broadcast!\n\n_Example: .broadcast Hello everyone!_');
 
     try {
       const groups = await sock.groupFetchAllParticipating();
       const jids   = Object.keys(groups);
 
-      if (!jids.length) return extra.reply('❌ Bot is not in any groups.');
+      if (!jids.length) return reply('❌ Bot is not in any groups.');
 
       let sent = 0;
       let fail = 0;
 
-      await extra.reply(`📡 Broadcasting to *${jids.length}* groups...`);
+      await reply(`📡 Broadcasting to *${jids.length}* groups...`);
 
       for (const jid of jids) {
         try {
@@ -37,9 +37,9 @@ module.exports = {
         } catch { fail++; }
       }
 
-      await extra.reply(`✅ Broadcast complete!\n\nSent: ${sent}\nFailed: ${fail}`);
+      await reply(`✅ Broadcast complete!\n\nSent: ${sent}\nFailed: ${fail}`);
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

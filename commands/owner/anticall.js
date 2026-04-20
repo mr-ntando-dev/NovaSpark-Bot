@@ -43,12 +43,12 @@ module.exports = {
   usage: '.anticall on | off | status',
   ownerOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const sub = (args[0] || '').toLowerCase();
 
     if (!sub || sub === 'status') {
       const state = readState();
-      return extra.reply(
+      return reply(
         `📵 *AntiCall*\n\n` +
         `Status: *${state.enabled ? '🟢 ON' : '🔴 OFF'}*\n\n` +
         `_When ON, all incoming calls are auto-rejected._`
@@ -58,15 +58,15 @@ module.exports = {
     if (sub === 'on') {
       writeState(true);
       anticallState.enabled = true;
-      return extra.reply('📵 *AntiCall enabled.* Incoming calls will be auto-rejected.');
+      return reply('📵 *AntiCall enabled.* Incoming calls will be auto-rejected.');
     }
 
     if (sub === 'off') {
       writeState(false);
       anticallState.enabled = false;
-      return extra.reply('📵 *AntiCall disabled.*');
+      return reply('📵 *AntiCall disabled.*');
     }
 
-    return extra.reply('❓ Usage: `.anticall on | off | status`');
+    return reply('❓ Usage: `.anticall on | off | status`');
   },
 };

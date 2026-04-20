@@ -31,7 +31,7 @@ module.exports = {
   description: 'Send a flirty pickup line to someone',
   usage: '.flirt @user',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx       = msg.message?.extendedTextMessage?.contextInfo || {};
       const mentioned = ctx.mentionedJid || [];
@@ -40,15 +40,15 @@ module.exports = {
 
       if (target) {
         const tag = `@${target.split('@')[0]}`;
-        await sock.sendMessage(extra.from, {
+        await sock.sendMessage(from, {
           text: `💌 Hey ${tag}!\n\n${line}`,
           mentions: [target],
         }, { quoted: msg });
       } else {
-        await extra.reply(`💌 ${line}`);
+        await reply(`💌 ${line}`);
       }
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };

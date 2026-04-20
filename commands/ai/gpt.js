@@ -49,16 +49,16 @@ module.exports = {
   description: 'Chat with AI (GPT-style)',
   usage: '.gpt <question>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const query = args.join(' ');
-    if (!query) return extra.reply('🤖 Ask me anything!\n\n_Example: .gpt What is the capital of Zimbabwe?_');
+    if (!query) return reply('🤖 Ask me anything!\n\n_Example: .gpt What is the capital of Zimbabwe?_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🤖', key: msg.key } });
+      await sock.sendMessage(from, { react: { text: '🤖', key: msg.key } });
       const answer = await askGPT(query);
-      await extra.reply(`🤖 *NovaSpark AI*\n\n${answer}`);
+      await reply(`🤖 *NovaSpark AI*\n\n${answer}`);
     } catch (e) {
-      await extra.reply(`❌ AI Error: ${e.message}`);
+      await reply(`❌ AI Error: ${e.message}`);
     }
   },
 };

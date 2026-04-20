@@ -156,39 +156,58 @@ module.exports = {
       rows: s.rows.slice(0, 10), // WhatsApp limits rows per section
     }));
 
+    // ── Real Baileys interactive buttons (works on MD / personal numbers) ──────
+    // listMessage only works on WhatsApp Business API numbers.
+    // For MD bots we use buttonsMessage which works on all accounts.
     try {
       await sock.sendMessage(from, {
-        listMessage: {
-          title: `⚡ NovaSpark Bot v5`,
-          description:
+        buttonsMessage: {
+          contentText:
             `👋 Hello *${num}*!\n` +
             `Plan: ${plan}  |  Uptime: ${uptimeStr}\n\n` +
-            `Select a category below to see commands:`,
-          footerText: `${config.botName} • ${config.prefix}menu for full text menu`,
-          buttonText: '📋 Browse Commands',
-          listType: 1,
-          sections,
+            `Tap a button to view that category:`,
+          footerText: `${config.botName} ⚡ | ${config.prefix}menu for full text`,
+          buttons: [
+            { buttonId: `${config.prefix}menu ai`,        buttonText: { displayText: '🤖 AI Commands'       }, type: 1 },
+            { buttonId: `${config.prefix}menu downloads`, buttonText: { displayText: '⬇️ Downloaders'        }, type: 1 },
+            { buttonId: `${config.prefix}menu games`,     buttonText: { displayText: '🎮 Games'               }, type: 1 },
+          ],
+          headerType: 1,
+        },
+      }, { quoted: msg });
+
+      // WhatsApp only supports 3 buttons per message — send a second set
+      await sock.sendMessage(from, {
+        buttonsMessage: {
+          contentText: `More categories:`,
+          footerText: `${config.botName} ⚡`,
+          buttons: [
+            { buttonId: `${config.prefix}menu social`,  buttonText: { displayText: '😂 Fun & Social'     }, type: 1 },
+            { buttonId: `${config.prefix}menu group`,   buttonText: { displayText: '🛡️ Group Management'  }, type: 1 },
+            { buttonId: `${config.prefix}menu tools`,   buttonText: { displayText: '🔧 Tools & Utilities' }, type: 1 },
+          ],
+          headerType: 1,
         },
       }, { quoted: msg });
     } catch (err) {
-      // Fallback: WhatsApp Business API only allows list messages from certain numbers
-      // Fall back to a clean text menu with emoji categories
+      // Final fallback — clean text menu with clickable command hints
       await reply(
-        `⚡ *NovaSpark Bot v5 — Quick Menu*\n` +
+        `⚡ *NovaSpark Bot — Quick Menu*\n` +
         `${'━'.repeat(32)}\n\n` +
-        `👋 Hello *${num}*! Plan: ${plan}\n\n` +
-        `📂 *Categories — use .menu <category>*\n\n` +
-        `🤖 \`.menu ai\`         — AI Commands\n` +
-        `📚 \`.menu tools\`      — Study & Utility\n` +
-        `⬇️ \`.menu downloads\`  — Downloaders\n` +
-        `🎮 \`.menu games\`      — Games\n` +
-        `😂 \`.menu social\`     — Fun & Social\n` +
-        `🛡️ \`.menu group\`      — Group Management\n` +
-        `💎 \`.menu premium\`    — Premium Commands\n\n` +
-        `🆕 *New Commands:*\n` +
+        `👋 Hello *${num}*!   Plan: ${plan}\n` +
+        `⏱️ Uptime: ${uptimeStr}\n\n` +
+        `📂 *Tap or type a category command:*\n\n` +
+        `🤖 \`${config.prefix}menu ai\`         — AI & Image AI\n` +
+        `⬇️ \`${config.prefix}menu downloads\`  — All downloaders\n` +
+        `🎮 \`${config.prefix}menu games\`       — Games & quizzes\n` +
+        `😂 \`${config.prefix}menu social\`      — Fun & Social\n` +
+        `🛡️ \`${config.prefix}menu group\`       — Group Management\n` +
+        `🔧 \`${config.prefix}menu tools\`       — Tools & Utilities\n` +
+        `👑 \`${config.prefix}menu owner\`        — Owner Commands\n\n` +
+        `🆕 *New in v5.1:*\n` +
         `  .flip  .dice  .horoscope  .riddle\n` +
-        `  .password  .countdown  .color  .nasa  .dare\n\n` +
-        `_Type .menu for the full detailed menu_`
+        `  .password  .countdown  .color  .nasa\n\n` +
+        `_${config.prefix}menu — Full detailed menu_`
       );
     }
   },

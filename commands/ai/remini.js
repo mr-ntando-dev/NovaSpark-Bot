@@ -54,7 +54,7 @@ module.exports = {
   description: 'Enhance/upscale an image using AI',
   usage: '.remini (reply to image or send URL)',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       let imageUrl = args[0] || null;
 
@@ -64,7 +64,7 @@ module.exports = {
         const imgMsg = ctx?.quotedMessage?.imageMessage || msg.message?.imageMessage;
 
         if (imgMsg) {
-          await extra.reply('📸 Uploading image for enhancement...');
+          await reply('📸 Uploading image for enhancement...');
           const stream = await downloadContentFromMessage(imgMsg, 'image');
           const chunks = [];
           for await (const chunk of stream) chunks.push(chunk);
@@ -74,20 +74,20 @@ module.exports = {
       }
 
       if (!imageUrl) {
-        return extra.reply('📸 Reply to an image or send `.remini <image URL>` to enhance it!');
+        return reply('📸 Reply to an image or send `.remini <image URL>` to enhance it!');
       }
 
-      await sock.sendMessage(extra.from, { react: { text: '✨', key: msg.key } });
-      await extra.reply('✨ Enhancing image with AI... this may take 15-30 seconds.');
+      await sock.sendMessage(from, { react: { text: '✨', key: msg.key } });
+      await reply('✨ Enhancing image with AI... this may take 15-30 seconds.');
 
       const resultUrl = await enhanceImage(imageUrl);
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         image:   { url: resultUrl },
         caption: `✨ *Image Enhanced!*\n_Powered by Remini AI_\n\n_⚡ NovaSpark Bot_`,
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Enhancement failed: ${e.message}`);
+      await reply(`❌ Enhancement failed: ${e.message}`);
     }
   },
 };

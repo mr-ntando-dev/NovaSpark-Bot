@@ -13,7 +13,7 @@ module.exports = {
   description: 'Show bot owner contact info',
   usage: '.owner',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const owners  = Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber];
     const names   = Array.isArray(config.ownerName)   ? config.ownerName   : [config.ownerName];
     const ownerJids = owners.map(n => `${n}@s.whatsapp.net`);
@@ -23,7 +23,7 @@ module.exports = {
       ownerList += `👑 *${names[i] || 'Owner'}* — wa.me/${num}\n`;
     });
 
-    await sock.sendMessage(extra.from, {
+    await sock.sendMessage(from, {
       text:
         `╔════════════════════════╗\n` +
         `  👑 *NovaSpark Owners*  \n` +

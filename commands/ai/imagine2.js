@@ -47,22 +47,22 @@ module.exports = {
   description: 'Generate an AI image from a text prompt',
   usage: '.imagine <prompt>',
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const prompt = args.join(' ');
-    if (!prompt) return extra.reply('🎨 Describe what you want to generate!\n\n_Example: .imagine a dragon flying over a city at sunset_');
+    if (!prompt) return reply('🎨 Describe what you want to generate!\n\n_Example: .imagine a dragon flying over a city at sunset_');
 
     try {
-      await sock.sendMessage(extra.from, { react: { text: '🎨', key: msg.key } });
-      await extra.reply(`🎨 Generating: _"${prompt}"_\n\n⏳ Please wait...`);
+      await sock.sendMessage(from, { react: { text: '🎨', key: msg.key } });
+      await reply(`🎨 Generating: _"${prompt}"_\n\n⏳ Please wait...`);
 
       const imgBuf = await generateImage(prompt);
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         image:   imgBuf,
         caption: `🎨 *AI Image*\n_Prompt: ${prompt}_\n\n_⚡ NovaSpark Bot_`,
       }, { quoted: msg });
     } catch (e) {
-      await extra.reply(`❌ Image generation failed: ${e.message}`);
+      await reply(`❌ Image generation failed: ${e.message}`);
     }
   },
 };

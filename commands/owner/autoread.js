@@ -33,26 +33,26 @@ module.exports = {
   usage: '.autoread on | off | status',
   ownerOnly: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     const sub = (args[0] || '').toLowerCase();
 
     if (!sub || sub === 'status') {
       const s = readState();
-      return extra.reply(`👁️ *AutoRead*\n\nStatus: *${s.enabled ? '🟢 ON' : '🔴 OFF'}*`);
+      return reply(`👁️ *AutoRead*\n\nStatus: *${s.enabled ? '🟢 ON' : '🔴 OFF'}*`);
     }
 
     if (sub === 'on') {
       writeState(true);
       autoreadState.enabled = true;
-      return extra.reply('👁️ *AutoRead ON* — all messages will be marked as read.');
+      return reply('👁️ *AutoRead ON* — all messages will be marked as read.');
     }
 
     if (sub === 'off') {
       writeState(false);
       autoreadState.enabled = false;
-      return extra.reply('👁️ *AutoRead OFF*.');
+      return reply('👁️ *AutoRead OFF*.');
     }
 
-    return extra.reply('❓ Usage: `.autoread on | off | status`');
+    return reply('❓ Usage: `.autoread on | off | status`');
   },
 };

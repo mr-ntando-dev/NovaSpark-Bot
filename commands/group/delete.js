@@ -14,21 +14,21 @@ module.exports = {
   adminOnly: true,
   botAdminNeeded: true,
 
-  async execute(sock, msg, args, extra) {
+  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
     try {
       const ctx = msg.message?.extendedTextMessage?.contextInfo;
-      if (!ctx?.stanzaId) return extra.reply('❌ Reply to the message you want to delete.');
+      if (!ctx?.stanzaId) return reply('❌ Reply to the message you want to delete.');
 
-      await sock.sendMessage(extra.from, {
+      await sock.sendMessage(from, {
         delete: {
-          remoteJid:   extra.from,
+          remoteJid:   from,
           id:          ctx.stanzaId,
           participant: ctx.participant,
           fromMe:      false,
         },
       });
     } catch (e) {
-      await extra.reply(`❌ Error: ${e.message}`);
+      await reply(`❌ Error: ${e.message}`);
     }
   },
 };
