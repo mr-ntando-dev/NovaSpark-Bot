@@ -1,7 +1,7 @@
 /**
  * ⚡ NovaSpark Bot v5 — 2026 Edition
  * MEGA MENU — .menu / .help
- * Full command listing with anime image — inspired by SubZero MD style
+ * Full command listing with NovaSpark branded image — all commands in one view
  * By Dev-Ntando
  */
 'use strict';
@@ -262,7 +262,7 @@ module.exports = {
     }
 
     // ── MAIN MENU ────────────────────────────────────────────────────────────
-    // Shows ALL commands in one message with an anime image caption (SubZero style)
+    // Shows ALL commands in one message with NovaSpark branded image caption
 
     const menuText =
       `╔═══════════════════════════╗\n` +
@@ -396,32 +396,17 @@ module.exports = {
       `_${config.channelLink || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'}_`;
 
     // ── IMAGE SOURCES ─────────────────────────────────────────────────────────
-    // Primary: waifu.im random SFW anime — same style as SubZero MD uses
-    // Fallback chain: local imgur mirrors → plain text
-    const FALLBACK_IMAGES = [
-      'https://cdn.waifu.im/6f0b71f9c3e50dca.jpg',
-      'https://cdn.waifu.im/7f5b4e8c2a1d3f90.jpg',
-      'https://i.imgur.com/4M34hi2.png',
-      'https://i.imgur.com/2yaf2fb.jpg',
+    // NovaSpark Bot branded menu image — AI-generated circuit/lightning logo
+    // Fallback chain: multiple CDN mirrors → plain text
+    const MENU_IMAGES = [
+      // NovaSpark themed cyberpunk/circuit bot images (no SubZero branding)
+      'https://image.pollinations.ai/prompt/novaspark%20bot%20logo%2C%20electric%20lightning%20bolt%20letter%20N%2C%20gold%20and%20electric%20blue%2C%20cyberpunk%20circuit%20board%2C%20dark%20background%2C%20glowing%20neon%2C%20professional%20logo%2C%204k%20sharp?width=512&height=768&nologo=true&seed=42',
+      'https://image.pollinations.ai/prompt/futuristic%20whatsapp%20bot%20menu%20screen%2C%20NovaSpark%20Bot%2C%20gold%20metallic%20logo%2C%20electric%20blue%20lightning%2C%20circuit%20board%20background%2C%20dark%20tech%20aesthetic%2C%20ultra%20HD?width=512&height=768&nologo=true&seed=77',
+      'https://image.pollinations.ai/prompt/N%20letter%20logo%2C%20electric%20spark%2C%20gold%20and%20blue%20neon%2C%20dark%20background%2C%20WhatsApp%20bot%2C%20cyberpunk%20futuristic%2C%20glowing%20circuit%20lines?width=512&height=768&nologo=true&seed=99',
     ];
 
     try {
-      const axios  = require('axios');
-      let imgUrl;
-
-      try {
-        const res = await axios.get(
-          'https://api.waifu.im/search?included_tags=waifu&is_nsfw=false&many=false',
-          { timeout: 6000 }
-        );
-        imgUrl = res.data?.images?.[0]?.url;
-      } catch {
-        // waifu.im timed out — use a fallback URL
-      }
-
-      if (!imgUrl) {
-        imgUrl = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-      }
+      const imgUrl = MENU_IMAGES[Math.floor(Math.random() * MENU_IMAGES.length)];
 
       await sock.sendMessage(
         from,
@@ -429,7 +414,7 @@ module.exports = {
         { quoted: msg }
       );
     } catch {
-      // If ALL image attempts fail, send plain text
+      // If image fails, send plain text
       return reply(menuText);
     }
   },

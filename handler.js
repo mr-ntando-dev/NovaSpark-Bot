@@ -135,6 +135,8 @@ const defineCmd       = require('./commands/tools/dictionary');
 const ipCmd           = require('./commands/tools/ip');
 const cryptoCmd       = require('./commands/tools/crypto');
 const shorturlCmd     = require('./commands/tools/shorturl');
+const bibleCmd        = require('./commands/tools/bible');
+const genmusicCmd     = require('./commands/ai/genmusic');
 
 // ── v5 OWNER COMMANDS ─────────────────────────────────────────────────────────
 const anticallCmd    = require('./commands/owner/anticall');
@@ -238,7 +240,9 @@ const ALL_COMMANDS = [
   // v5.2 fun
   twotruthCmd, wyrCmd,
   // v5.2 tools
-  defineCmd, ipCmd, cryptoCmd, shorturlCmd,
+  defineCmd, ipCmd, cryptoCmd, shorturlCmd, bibleCmd,
+  // v5.2 AI
+  genmusicCmd,
   // v5.1 owner commands
   ...(Array.isArray(banCmds)         ? banCmds.filter(c => c.name)         : [banCmds].filter(c => c && c.name)),
   ...(Array.isArray(shutdownCmds)    ? shutdownCmds                        : [shutdownCmds]),
