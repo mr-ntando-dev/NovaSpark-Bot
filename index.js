@@ -95,6 +95,28 @@ async function startBot() {
   const sessionDir = path.resolve(config.sessionName);
   if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
 
+  // ── Decode SESSION_ID BEFORE loading auth state ──────────────────────────
+  // CRITICAL: creds.json must exist on disk before useMultiFileAuthState()
+  // is called — otherwise the socket starts with empty credentials and
+  // WhatsApp issues a 401 (logged out) immediately.
+  const sessionPath = path.join(sessionDir, 'creds.json');
+  if (config.sessionID && config.sessionID !== '' && !fs.existsSync(sessionPath)) {
+    try {
+      const zlib = require('zlib');
+      const b64  = config.sessionID
+        .replace(/^NovaSpark!/, '')
+        .replace(/^KnightBot!/, '');
+      const buf          = Buffer.from(b64, 'base64');
+      const decompressed = zlib.gunzipSync(buf).toString('utf-8');
+      // Validate it's parseable JSON before writing
+      JSON.parse(decompressed);
+      fs.writeFileSync(sessionPath, decompressed);
+      orig.log('✅ Session loaded from SESSION_ID.');
+    } catch (e) {
+      orig.log('⚠️  Could not decode SESSION_ID — falling back to QR scan. Error: ' + e.message);
+    }
+  }
+
   const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
   const { version }          = await fetchLatestBaileysVersion();
 
@@ -103,14 +125,13 @@ async function startBot() {
     auth:   state,
     logger: pino({ level: 'silent' }),
     printQRInTerminal: false,
-    // Aggressive keep-alive for stability
-    keepAliveIntervalMs: 10000,
-    connectTimeoutMs:    60000,
+    keepAliveIntervalMs:   10000,
+    connectTimeoutMs:      60000,
     defaultQueryTimeoutMs: 30000,
     emitOwnEvents: false,
   });
 
-  // ── QR / Session string ──────────────────────────────────────────────────
+  // ── QR fallback (only when no SESSION_ID set) ────────────────────────────
   if (!config.sessionID || config.sessionID === '') {
     sock.ev.on('connection.update', ({ qr }) => {
       if (qr) {
@@ -118,21 +139,6 @@ async function startBot() {
         qrcode.generate(qr, { small: true });
       }
     });
-  } else {
-    // Session string provided — decode and save
-    const sessionPath = path.join(sessionDir, 'creds.json');
-    if (!fs.existsSync(sessionPath)) {
-      try {
-        const zlib = require('zlib');
-        const b64  = config.sessionID.replace(/^NovaSpark!/, '').replace(/^KnightBot!/, '');
-        const buf  = Buffer.from(b64, 'base64');
-        const decompressed = zlib.gunzipSync(buf).toString('utf-8');
-        fs.writeFileSync(sessionPath, decompressed);
-        orig.log('✅ Session loaded from SESSION_ID.');
-      } catch (e) {
-        orig.log('⚠️  Could not decode SESSION_ID. Falling back to QR scan.');
-      }
-    }
   }
 
   // ── Connection events ─────────────────────────────────────────────────────
