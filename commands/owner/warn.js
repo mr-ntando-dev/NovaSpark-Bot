@@ -1,161 +1,102 @@
 /**
- * NovaSpark Bot v3 — Warning System
- * .warn @user [reason]  — add a warning (admin or owner only)
- * .warns @user           — check warning count
- * .clearwarn @user       — clear all warnings (owner only)
- * Auto-removes user from group at 3 warnings
+ * ⚡ NovaSpark v4 — Warn System
+ * .warn @user [reason] | .warns @user | .clearwarn @user
+ * Configurable max warns per group (.setwarnlimit N)
  * By Dev-Ntando
  */
 'use strict';
-
 const database = require('../../database');
-const config   = require('../../config');
 
-const MAX_WARNINGS = 3;
+module.exports = [
+  {
+    name: 'warn',
+    aliases: [],
+    description: '⚠️ Warn a group member (auto-kick at max warns)',
+    category: 'owner',
+    adminOnly: true,
 
-// ── Warn storage helpers ──────────────────────────────────────────────────────
-function getWarns(userId) {
-  const db  = database.getSetting('warns') || {};
-  const num = userId.includes('@') ? userId.split('@')[0] : userId;
-  return db[num] || { count: 0, reasons: [], lastAt: null };
-}
+    execute: async ({ sock, msg, from, sender, args, reply, isAdmin, isBotAdmin, mentions }) => {
+      if (!isBotAdmin) return reply('🤖 I need admin rights!');
+      if (!isAdmin)    return reply('🛡️ Admins only!');
+      const target = mentions?.[0];
+      if (!target) return reply('⚠️ Tag the user to warn: `.warn @user [reason]`');
+      const reason  = args.filter(a => !a.startsWith('@')).join(' ') || 'No reason given';
+      const gs      = database.getGroupSettings(from);
+      const maxWarn = gs.maxWarn || 3;
+      const count   = database.addWarn(from, target, reason);
+      const num     = target.split('@')[0];
 
-function setWarns(userId, data) {
-  const db  = database.getSetting('warns') || {};
-  const num = userId.includes('@') ? userId.split('@')[0] : userId;
-  db[num]   = data;
-  database.setSetting('warns', db);
-}
-
-function clearWarns(userId) {
-  const db  = database.getSetting('warns') || {};
-  const num = userId.includes('@') ? userId.split('@')[0] : userId;
-  delete db[num];
-  database.setSetting('warns', db);
-}
-
-// ── .warn ─────────────────────────────────────────────────────────────────────
-const warnCmd = {
-  name:    'warn',
-  aliases: [],
-  description: '(Admin) Warn a user — 3 warnings = auto-kick from group',
-  category: 'owner',
-
-  execute: async ({ sock, from, sender, args, msg, isOwner, isAdmin, isGroup, reply }) => {
-    if (!isGroup)  return reply('👥 This command only works in groups.');
-    if (!isOwner && !isAdmin) return reply('🛡️ Admins and the bot owner only.');
-
-    const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-    const target    = mentioned[0] || null;
-
-    if (!target) {
-      return reply(
-        '⚠️ *Warn User*\n\n' +
-        'Usage: *.warn @user [reason]*\n\n' +
-        'Example:\n  .warn @user spamming the group'
-      );
-    }
-
-    const reason     = args.filter(a => !a.startsWith('@') && !/^\d+@/.test(a)).join(' ').trim() || 'No reason given';
-    const targetNum  = target.split('@')[0];
-    const warnsData  = getWarns(target);
-
-    warnsData.count++;
-    warnsData.reasons.push({ reason, by: sender.split('@')[0], at: Date.now() });
-    warnsData.lastAt = Date.now();
-    setWarns(target, warnsData);
-
-    const warnIcons = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣'];
-    const icon      = warnIcons[(warnsData.count - 1)] || `${warnsData.count}.`;
-
-    if (warnsData.count >= MAX_WARNINGS) {
-      // Auto-kick
-      try {
-        await sock.groupParticipantsUpdate(from, [target], 'remove');
-        clearWarns(target);
-        return reply(
-          `🚫 *User Removed*\n\n` +
-          `@${targetNum} has been removed after receiving *${MAX_WARNINGS} warnings*.\n\n` +
-          `*Last reason:* ${reason}\n\n` +
-          `_Nova AI ⚡_`,
-          { mentions: [target] }
-        );
-      } catch {
-        return reply(
-          `⚠️ *Warning ${icon} issued to @${targetNum}*\n\n` +
-          `*Reason:* ${reason}\n` +
-          `*Total:* ${warnsData.count}/${MAX_WARNINGS} ⚠️\n\n` +
-          `❌ Tried to remove but I\'m not an admin in this group.\n_Nova AI ⚡_`
-        );
+      if (count >= maxWarn) {
+        try { await sock.groupParticipantsUpdate(from, [target], 'remove'); } catch {}
+        database.clearWarns(from, target);
+        return sock.sendMessage(from, {
+          text: `🚫 @${num} reached *${maxWarn} warns* and was removed.\n_Reason: ${reason}_`,
+          mentions: [target],
+        });
       }
-    }
 
-    const remaining = MAX_WARNINGS - warnsData.count;
-    await reply(
-      `⚠️ *Warning ${icon} issued!*\n\n` +
-      `👤 User: @${targetNum}\n` +
-      `📋 Reason: ${reason}\n` +
-      `📊 Warnings: ${warnsData.count}/${MAX_WARNINGS}\n` +
-      `${remaining === 1 ? '🚨 *One more warning = auto-kick!*' : `⚠️ ${remaining} warnings left before kick`}\n\n` +
-      `_Nova AI ⚡_`
-    );
+      return sock.sendMessage(from, {
+        text:
+          `⚠️ *Warning ${count}/${maxWarn}*\n\n` +
+          `@${num} — *${reason}*\n\n` +
+          `_${maxWarn - count} warn(s) left before removal._`,
+        mentions: [target],
+      });
+    },
   },
-};
 
-// ── .warns ────────────────────────────────────────────────────────────────────
-const warnsCmd = {
-  name:    'warns',
-  aliases: ['checkwarn', 'warncount'],
-  description: 'Check how many warnings a user has',
-  category: 'owner',
+  {
+    name: 'warns',
+    aliases: ['checkwarn'],
+    description: '📋 Check a user\'s warning count',
+    category: 'owner',
+    adminOnly: true,
 
-  execute: async ({ sock, from, sender, args, msg, isGroup, reply }) => {
-    if (!isGroup) return reply('👥 Groups only.');
-
-    const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-    const target    = mentioned[0] || sender;
-    const targetNum = target.split('@')[0];
-    const warnsData = getWarns(target);
-
-    if (warnsData.count === 0) {
-      return reply(`✅ @${targetNum} has *no warnings*. Clean record! 👍\n\n_Nova AI ⚡_`);
-    }
-
-    const reasonList = warnsData.reasons
-      .slice(-3)
-      .map((w, i) => `  ${i + 1}. ${w.reason} _(by +${w.by})_`)
-      .join('\n');
-
-    await reply(
-      `⚠️ *Warnings for @${targetNum}*\n` +
-      `${'─'.repeat(25)}\n\n` +
-      `📊 *Total:* ${warnsData.count}/${MAX_WARNINGS}\n\n` +
-      `*Recent reasons:*\n${reasonList}\n\n` +
-      `${warnsData.count >= MAX_WARNINGS ? '🚨 *At limit — will be removed on next warn!*' : `${MAX_WARNINGS - warnsData.count} warning${MAX_WARNINGS - warnsData.count > 1 ? 's' : ''} remaining`}\n\n` +
-      `_Nova AI ⚡_`
-    );
+    execute: async ({ sock, msg, from, args, reply, mentions }) => {
+      const target = mentions?.[0];
+      if (!target) return reply('Tag the user: `.warns @user`');
+      const list = database.getWarns(from, target);
+      const gs   = database.getGroupSettings(from);
+      const max  = gs.maxWarn || 3;
+      if (!list.length) return reply(`✅ @${target.split('@')[0]} has no warnings.`);
+      const detail = list.map((w, i) => `  ${i+1}. ${w.reason || 'No reason'}`).join('\n');
+      return sock.sendMessage(from, {
+        text: `⚠️ *Warns for @${target.split('@')[0]}*: *${list.length}/${max}*\n\n${detail}`,
+        mentions: [target],
+      });
+    },
   },
-};
 
-// ── .clearwarn ────────────────────────────────────────────────────────────────
-const clearwarnCmd = {
-  name:    'clearwarn',
-  aliases: ['resetwarn', 'unwarn'],
-  description: '(Owner) Clear all warnings for a user',
-  category: 'owner',
+  {
+    name: 'clearwarn',
+    aliases: ['resetwarn'],
+    description: '✅ Clear all warnings for a user',
+    category: 'owner',
+    adminOnly: true,
 
-  execute: async ({ sock, from, sender, args, msg, isOwner, isGroup, reply }) => {
-    if (!isGroup)  return reply('👥 Groups only.');
-    if (!isOwner)  return reply(config.messages.ownerOnly);
-
-    const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-    const target    = mentioned[0] || null;
-    if (!target) return reply('Usage: *.clearwarn @user*');
-
-    const targetNum = target.split('@')[0];
-    clearWarns(target);
-    await reply(`✅ All warnings for @${targetNum} have been cleared.\n\n_Nova AI ⚡_`);
+    execute: async ({ sock, msg, from, reply, mentions }) => {
+      const target = mentions?.[0];
+      if (!target) return reply('Tag the user: `.clearwarn @user`');
+      database.clearWarns(from, target);
+      return sock.sendMessage(from, {
+        text: `✅ Warnings cleared for @${target.split('@')[0]}.`,
+        mentions: [target],
+      });
+    },
   },
-};
 
-module.exports = [warnCmd, warnsCmd, clearwarnCmd];
+  {
+    name: 'setwarnlimit',
+    aliases: ['maxwarn', 'warnlimit'],
+    description: '⚙️ Set max warnings before auto-kick',
+    category: 'owner',
+    adminOnly: true,
+
+    execute: async ({ from, args, reply }) => {
+      const n = parseInt(args[0]);
+      if (!n || n < 1 || n > 20) return reply('Usage: `.setwarnlimit <1-20>`\nExample: `.setwarnlimit 5`');
+      database.updateGroupSettings(from, { maxWarn: n });
+      return reply(`⚙️ Warn limit set to *${n}*. Members will be kicked after ${n} warnings.`);
+    },
+  },
+];

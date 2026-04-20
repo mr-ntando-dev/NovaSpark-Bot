@@ -1,46 +1,30 @@
 /**
- * ⚡ NovaSpark Bot — Main Entry Point
- * WhatsApp MD Bot | AutoChat Edition
- * By Dev-Ntando
+ * ⚡ NovaSpark Bot v4 — 2026 EDITION
+ * Main Entry Point — WhatsApp MD AutoChat Bot
+ * Powered by Baileys | By Dev-Ntando
  */
-
 'use strict';
 
-// ── Disable Puppeteer before anything loads ───────────────────────────────────
 process.env.PUPPETEER_SKIP_DOWNLOAD          = 'true';
 process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
-process.env.PUPPETEER_CACHE_DIR              =
-  process.env.PUPPETEER_CACHE_DIR || '/tmp/puppeteer_cache_disabled';
 
-// ── Init temp & cleanup systems ───────────────────────────────────────────────
 const { initializeTempSystem } = require('./utils/tempManager');
-const { startCleanup, cleanupOldFiles } = require('./utils/cleanup');
+const { startCleanup }         = require('./utils/cleanup');
 initializeTempSystem();
 startCleanup();
 
-// ── Console noise filter — suppress Baileys internals ────────────────────────
-const originalConsoleLog   = console.log;
-const originalConsoleError = console.error;
-const originalConsoleWarn  = console.warn;
-
-const FORBIDDEN_PATTERNS = [
-  'closing session', 'closing open session', 'sessionentry',
-  'prekey bundle', 'pendingprekey', '_chains', 'registrationid',
-  'currentratchet', 'chainkey', 'ratchet', 'signal protocol',
-  'ephemeralkeypair', 'indexinfo', 'basekey', 'ratchetkey',
-];
-
-const shouldSuppress = (...args) => {
-  const msg = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ').toLowerCase();
-  return FORBIDDEN_PATTERNS.some(p => msg.includes(p));
+// ── Console filter ─────────────────────────────────────────────────────────────
+const orig = { log: console.log, error: console.error, warn: console.warn };
+const SUPPRESS = ['sessionentry','prekey','ratchet','_chains','signal protocol','chainkey','currentratchet','registrationid'];
+const shouldHide = (...a) => {
+  const m = a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ').toLowerCase();
+  return SUPPRESS.some(s => m.includes(s));
 };
+console.log   = (...a) => { if (!shouldHide(...a)) orig.log.apply(console, a); };
+console.error = (...a) => { if (!shouldHide(...a)) orig.error.apply(console, a); };
+console.warn  = (...a) => { if (!shouldHide(...a)) orig.warn.apply(console, a); };
 
-console.log   = (...args) => { if (!shouldSuppress(...args)) originalConsoleLog.apply(console, args); };
-console.error = (...args) => { if (!shouldSuppress(...args)) originalConsoleError.apply(console, args); };
-console.warn  = (...args) => { if (!shouldSuppress(...args)) originalConsoleWarn.apply(console, args); };
-
-// ── Dependencies ──────────────────────────────────────────────────────────────
-const pino = require('pino');
+const pino   = require('pino');
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -52,281 +36,176 @@ const config  = require('./config');
 const handler = require('./handler');
 const fs      = require('fs');
 const path    = require('path');
-const zlib    = require('zlib');
 const os      = require('os');
 
-// ── Startup banner ────────────────────────────────────────────────────────────
+// ── Banner ─────────────────────────────────────────────────────────────────────
 function printBanner() {
   const owners = Array.isArray(config.ownerName) ? config.ownerName.join(', ') : config.ownerName;
-  originalConsoleLog([
+  orig.log([
     '',
-    '╔══════════════════════════════════════════╗',
-    '  ⚡  N O V A S P A R K  B O T  ⚡',
-    '  🤖  AutoChat Edition — WhatsApp MD',
-    '╚══════════════════════════════════════════╝',
+    '╔══════════════════════════════════════════════╗',
+    '  ⚡   N O V A S P A R K   B O T   v4  ⚡',
+    '       2 0 2 6  E D I T I O N',
+    '╚══════════════════════════════════════════════╝',
     '',
-    `   📦  Bot    : ${config.botName}`,
-    `   🏷️  Ver    : 1.0.0`,
-    `   ⚡  Prefix : ${config.prefix}`,
-    `   👑  Owner  : ${owners}`,
+    `   📦  Version : ${config.botVersion}`,
+    `   ⚡  Prefix  : ${config.prefix}`,
+    `   👑  Owner   : ${owners}`,
     '',
-    '   ⏳  Starting up — please wait...',
+    '   🌙 Night Mode   ✅ | 👻 Ghost Mode  ✅',
+    '   🧠 Anti-Toxic   ✅ | ⭐ VIP Mode    ✅',
+    '   🎮 Wordle/Trivia ✅ | 🎵 TikTok DL  ✅',
+    '   🖼️  Remove BG   ✅ | 💕 Ship Score  ✅',
+    '',
+    '   ⏳ Starting up...',
     '',
   ].join('\n'));
 }
 
-// ── Connected banner ──────────────────────────────────────────────────────────
-function printConnectedBanner(sock) {
-  const owners    = Array.isArray(config.ownerName) ? config.ownerName.join(', ') : config.ownerName;
-  const botNumber = sock.user.id.split(':')[0];
-  const now       = new Date().toLocaleString('en-ZA', {
-    timeZone: 'Africa/Harare', hour12: false,
+function printOnline(sock) {
+  const owners  = Array.isArray(config.ownerName) ? config.ownerName.join(', ') : config.ownerName;
+  const botNum  = sock.user.id.split(':')[0];
+  const now     = new Date().toLocaleString('en-ZA', {
+    timeZone: config.timezone, hour12: false,
     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
-  originalConsoleLog([
+  orig.log([
     '',
-    '╔══════════════════════════════════════════╗',
-    '  ✅  N O V A S P A R K  O N L I N E  !',
-    '╚══════════════════════════════════════════╝',
+    '╔══════════════════════════════════════════════╗',
+    '  ✅  N O V A S P A R K   O N L I N E !',
+    '╚══════════════════════════════════════════════╝',
     '',
-    `   🤖  Bot    : ${config.botName}`,
-    `   📱  Number : +${botNumber}`,
+    `   🤖  Bot    : ${config.botName} v${config.botVersion}`,
+    `   📱  Number : +${botNum}`,
     `   ⚡  Prefix : ${config.prefix}`,
     `   👑  Owner  : ${owners}`,
     `   🕐  Time   : ${now}`,
     '',
-    '   🟢  Ready — AutoChat is standing by!',
-    '   🔥  Powered by Dev-Ntando',
-    '',
-    '╰────────────────────────────────────────╯',
+    '   🟢  Ready! Type .menu in WhatsApp.',
+    '   🔥  Powered by Dev-Ntando | NovaSpark 2026',
     '',
   ].join('\n'));
 }
 
-// ── Puppeteer cache remover ───────────────────────────────────────────────────
-function cleanupPuppeteerCache() {
-  try {
-    const cacheDir = path.join(os.homedir(), '.cache', 'puppeteer');
-    if (fs.existsSync(cacheDir)) {
-      fs.rmSync(cacheDir, { recursive: true, force: true });
-    }
-  } catch { /* ignore */ }
-}
-
-// ── In-memory message store ───────────────────────────────────────────────────
-const store = {
-  messages:   new Map(),
-  maxPerChat: 20,
-  bind(ev) {
-    ev.on('messages.upsert', ({ messages }) => {
-      for (const msg of messages) {
-        if (!msg.key?.id) continue;
-        const jid = msg.key.remoteJid;
-        if (!store.messages.has(jid)) store.messages.set(jid, new Map());
-        const chatMsgs = store.messages.get(jid);
-        chatMsgs.set(msg.key.id, msg);
-        if (chatMsgs.size > store.maxPerChat) chatMsgs.delete(chatMsgs.keys().next().value);
-      }
-    });
-  },
-  loadMessage: async (jid, id) => store.messages.get(jid)?.get(id) || null,
-};
-
-// ── Message deduplication ─────────────────────────────────────────────────────
-const processedMessages = new Set();
-setInterval(() => processedMessages.clear(), 5 * 60 * 1000);
-
-// ── Suppressed Pino logger ────────────────────────────────────────────────────
-function createLogger() {
-  try {
-    return pino({ level: 'silent' });
-  } catch {
-    return { info: () => {}, debug: () => {}, warn: () => {}, error: () => {}, trace: () => {} };
-  }
-}
-
-// ── JID filter ────────────────────────────────────────────────────────────────
-const isSystemJid = (jid) =>
-  !jid ||
-  jid.includes('@broadcast') ||
-  jid.includes('status.broadcast') ||
-  jid.includes('@newsletter');
-
-// ── Main bot function ─────────────────────────────────────────────────────────
+// ── Connect ────────────────────────────────────────────────────────────────────
 async function startBot() {
-  const sessionFolder = `./${config.sessionName}`;
-  const sessionFile   = path.join(sessionFolder, 'creds.json');
+  printBanner();
 
-  // Decode session from NovaSpark! format
-  if (config.sessionID && config.sessionID.startsWith('NovaSpark!')) {
-    try {
-      const b64data = config.sessionID.split('!')[1];
-      if (!b64data) throw new Error('Missing session payload');
-      const compressed   = Buffer.from(b64data, 'base64');
-      const decompressed = zlib.gunzipSync(compressed);
-      if (!fs.existsSync(sessionFolder)) fs.mkdirSync(sessionFolder, { recursive: true });
-      fs.writeFileSync(sessionFile, decompressed, 'utf8');
-      console.log('📡 Session : 🔑 Restored from NovaSpark session string');
-    } catch (e) {
-      console.error('📡 Session : ❌', e.message);
-    }
-  }
+  const sessionDir = path.resolve(config.sessionName);
+  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
 
-  // Also support legacy KnightBot! session strings
-  if (config.sessionID && config.sessionID.startsWith('KnightBot!')) {
-    try {
-      const b64data = config.sessionID.split('!')[1];
-      if (!b64data) throw new Error('Missing session payload');
-      const compressed   = Buffer.from(b64data, 'base64');
-      const decompressed = zlib.gunzipSync(compressed);
-      if (!fs.existsSync(sessionFolder)) fs.mkdirSync(sessionFolder, { recursive: true });
-      fs.writeFileSync(sessionFile, decompressed, 'utf8');
-      console.log('📡 Session : 🔑 Restored (KnightBot legacy)');
-    } catch (e) {
-      console.error('📡 Session : ❌', e.message);
-    }
-  }
-
-  const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
+  const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
   const { version }          = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
     version,
-    logger:              createLogger(),
-    printQRInTerminal:   false,
-    browser:             ['Chrome', 'Windows', '10.0'],
-    auth:                state,
-    syncFullHistory:     false,
-    downloadHistory:     false,
-    markOnlineOnConnect: false,
-    getMessage:          async () => undefined,
+    auth:   state,
+    logger: pino({ level: 'silent' }),
+    printQRInTerminal: false,
+    // Aggressive keep-alive for stability
+    keepAliveIntervalMs: 10000,
+    connectTimeoutMs:    60000,
+    defaultQueryTimeoutMs: 30000,
+    emitOwnEvents: false,
   });
 
-  store.bind(sock.ev);
-
-  // ── Watchdog (reconnect after 30min inactivity) ───────────────────────────
-  let lastActivity = Date.now();
-  sock.ev.on('messages.upsert', () => { lastActivity = Date.now(); });
-
-  const watchdog = setInterval(async () => {
-    if (Date.now() - lastActivity > 30 * 60 * 1000 && sock.ws?.readyState === 1) {
-      console.log('⚠️  30min inactivity — reconnecting...');
-      await sock.end(undefined, undefined, { reason: 'inactive' });
-      clearInterval(watchdog);
-      setTimeout(startBot, 5000);
+  // ── QR / Session string ──────────────────────────────────────────────────
+  if (!config.sessionID || config.sessionID === '') {
+    sock.ev.on('connection.update', ({ qr }) => {
+      if (qr) {
+        orig.log('\n📱 Scan this QR code to connect:\n');
+        qrcode.generate(qr, { small: true });
+      }
+    });
+  } else {
+    // Session string provided — decode and save
+    const sessionPath = path.join(sessionDir, 'creds.json');
+    if (!fs.existsSync(sessionPath)) {
+      try {
+        const zlib = require('zlib');
+        const b64  = config.sessionID.replace(/^NovaSpark!/, '').replace(/^KnightBot!/, '');
+        const buf  = Buffer.from(b64, 'base64');
+        const decompressed = zlib.gunzipSync(buf).toString('utf-8');
+        fs.writeFileSync(sessionPath, decompressed);
+        orig.log('✅ Session loaded from SESSION_ID.');
+      } catch (e) {
+        orig.log('⚠️  Could not decode SESSION_ID. Falling back to QR scan.');
+      }
     }
-  }, 5 * 60 * 1000);
+  }
 
   // ── Connection events ─────────────────────────────────────────────────────
-  sock.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect, qr } = update;
-
-    if (connection === 'open')  lastActivity = Date.now();
-    if (connection === 'close') clearInterval(watchdog);
-
-    if (qr) {
-      console.log('\n📱 Scan this QR code with WhatsApp:\n');
-      qrcode.generate(qr, { small: true });
-    }
-
-    if (connection === 'close') {
-      const code    = lastDisconnect?.error?.output?.statusCode;
-      const msg     = lastDisconnect?.error?.message || 'Unknown error';
-      const reconnect = code !== DisconnectReason.loggedOut;
-      console.log(`❌ Disconnected: ${msg} (${code}) | reconnect=${reconnect}`);
-      if (reconnect) setTimeout(startBot, 5000);
-      else { console.log('🚪 Logged out.'); process.exit(0); }
-    }
-
+  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
     if (connection === 'open') {
-      printConnectedBanner(sock);
+      printOnline(sock);
+    }
+    if (connection === 'close') {
+      const code = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = code !== DisconnectReason.loggedOut;
+      orig.log(`\n🔴 Disconnected (code ${code}). ${shouldReconnect ? 'Reconnecting in 5s...' : 'Logged out.'}`);
+      if (shouldReconnect) setTimeout(startBot, 5000);
     }
   });
 
+  // ── Creds save ────────────────────────────────────────────────────────────
   sock.ev.on('creds.update', saveCreds);
 
-  // ── Incoming messages ─────────────────────────────────────────────────────
-  sock.ev.on('messages.upsert', ({ messages, type }) => {
+  // ── Messages ──────────────────────────────────────────────────────────────
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return;
-
     for (const msg of messages) {
-      if (!msg.message || !msg.key?.id) continue;
+      if (!msg.message || msg.key.fromMe) continue;
+      try {
+        // Cache for antidelete
+        if (handler.cacheMessage) handler.cacheMessage(msg);
+        await handler(sock, msg);
+      } catch (e) {
+        orig.error('[HANDLER ERROR]', e.message);
+      }
+    }
+  });
 
-      const from = msg.key.remoteJid;
-      if (!from || isSystemJid(from)) continue;
+  // ── Message delete ────────────────────────────────────────────────────────
+  sock.ev.on('messages.delete', async (update) => {
+    try {
+      if (handler.handleDelete) await handler.handleDelete(sock, update);
+    } catch {}
+  });
 
-      const msgId = msg.key.id;
-      if (processedMessages.has(msgId)) continue;
+  // ── Group participant events ──────────────────────────────────────────────
+  sock.ev.on('group-participants.update', async ({ id, participants, action }) => {
+    try {
+      const gs = require('./database').getGroupSettings(id);
 
-      // Drop messages older than 5 minutes
-      if (msg.messageTimestamp && Date.now() - msg.messageTimestamp * 1000 > 5 * 60 * 1000) continue;
-
-      processedMessages.add(msgId);
-
-      // Cache message
-      if (!store.messages.has(from)) store.messages.set(from, new Map());
-      const chatMsgs = store.messages.get(from);
-      chatMsgs.set(msgId, msg);
-      if (chatMsgs.size > store.maxPerChat) {
-        const sorted = Array.from(chatMsgs.entries()).sort((a, b) =>
-          (a[1].messageTimestamp || 0) - (b[1].messageTimestamp || 0));
-        sorted.slice(0, sorted.length - store.maxPerChat).forEach(([k]) => chatMsgs.delete(k));
+      if (action === 'add' && gs.welcome) {
+        const meta = await sock.groupMetadata(id).catch(() => null);
+        const count = meta?.participants?.length || 0;
+        for (const jid of participants) {
+          const num = jid.split('@')[0];
+          let txt = gs.welcomeMsg || `👋 Welcome to *${meta?.subject || 'the group'}*, @${num}! 🎉\nWe now have *${count}* members.`;
+          txt = txt
+            .replace(/@user/g, `@${num}`)
+            .replace(/@group/g, meta?.subject || 'the group')
+            .replace(/@count/g, count)
+            .replace(/@date/g, new Date().toLocaleDateString('en-ZA'));
+          await sock.sendMessage(id, { text: txt, mentions: [jid] });
+        }
       }
 
-      // Handle message (non-blocking)
-      handler.handleMessage(sock, msg).catch(err => {
-        if (!err.message?.includes('rate-overlimit') && !err.message?.includes('not-authorized')) {
-          console.error('❌ Message error:', err.message);
+      if (action === 'remove' && gs.goodbye) {
+        const meta = await sock.groupMetadata(id).catch(() => null);
+        for (const jid of participants) {
+          const num = jid.split('@')[0];
+          let txt = gs.goodbyeMsg || `👋 @${num} has left the group. Goodbye!`;
+          txt = txt.replace(/@user/g, `@${num}`).replace(/@group/g, meta?.subject || 'the group');
+          await sock.sendMessage(id, { text: txt, mentions: [jid] });
         }
-      });
-    }
-  });
-
-  // ── Anti-delete: catch message-delete events ─────────────────────────────
-  const antideleteCmd = require('./commands/owner/antidelete');
-  sock.ev.on('messages.update', (updates) => {
-    const deletes = updates.filter(u => u.update?.messageStubType === 1 || u.update?.revoke);
-    if (deletes.length) {
-      antideleteCmd.handleDelete(sock, { keys: deletes.map(d => d.key) }).catch(() => {});
-    }
-  });
-
-  // ── Swallow non-critical events ───────────────────────────────────────────
-  sock.ev.on('message-receipt.update', () => {});
-  sock.ev.on('error', (err) => {
-    const code = err?.output?.statusCode;
-    if ([515, 503, 408].includes(code)) return;
-    console.error('⚡ Socket error:', err.message || err);
+      }
+    } catch {}
   });
 
   return sock;
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
-printBanner();
-cleanupPuppeteerCache();
-
-startBot().catch(err => {
-  console.error('❌ Fatal boot error:', err);
-  process.exit(1);
-});
-
-// ── Process-level error guards ────────────────────────────────────────────────
-process.on('uncaughtException', (err) => {
-  if (err.code === 'ENOSPC' || err.errno === -28 || err.message?.includes('no space left')) {
-    console.error('⚠️ ENOSPC — attempting cleanup...');
-    try { cleanupOldFiles(); } catch { /* ignore */ }
-    return;
-  }
-  console.error('⚠️ Uncaught:', err.message || err);
-});
-
-process.on('unhandledRejection', (reason) => {
-  const msg = reason?.message || String(reason);
-  if (msg.includes('rate-overlimit') || msg.includes('not-authorized')) return;
-  console.error('⚠️ Unhandled rejection:', msg);
-});
-
-process.on('SIGINT',  () => { console.log('\n👋 NovaSpark Bot stopped.'); process.exit(0); });
-process.on('SIGTERM', () => { console.log('\n👋 NovaSpark Bot stopped.'); process.exit(0); });
+startBot().catch(e => { console.error('Fatal error:', e); process.exit(1); });

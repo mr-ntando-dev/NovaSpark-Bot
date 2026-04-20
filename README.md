@@ -1,158 +1,195 @@
-# ⚡ NovaSpark Bot v3 — WhatsApp MD AutoChat Bot
+<div align="center">
 
-**By Dev-Ntando** | Powered by [Baileys](https://github.com/WhiskeySockets/Baileys)
+# ⚡ NovaSpark Bot v4 — 2026 Edition
 
-[![Node](https://img.shields.io/badge/Node.js-20%2B-green)](https://nodejs.org/)
-[![Baileys](https://img.shields.io/badge/Baileys-latest-blue)](https://github.com/WhiskeySockets/Baileys)
+**The most advanced WhatsApp MD bot ever built.**
+
+*By Dev-Ntando | Powered by [Baileys](https://github.com/WhiskeySockets/Baileys)*
+
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org)
+[![Baileys](https://img.shields.io/badge/Baileys-7.x-blue)](https://github.com/WhiskeySockets/Baileys)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-4.0.0-red)](package.json)
+
+</div>
 
 ---
 
-## ✨ What is NovaSpark Bot v3?
-
-NovaSpark Bot is a feature-packed WhatsApp MD bot built on Baileys. Version 3 is a **complete upgrade** — every feature is real and works exactly as advertised. No fake poll images. No placeholder voice notes. Everything fires live.
-
-**Two tiers:**
-- 🆓 **Free Plan** — powerful tools for everyone
-- 💎 **Premium Plan** — advanced features for power users
-
----
-
-## 🚀 What's New in v3
+## ✨ What's New in v4 (Never Seen Before)
 
 | Feature | What it does |
-|---|---|
-| 🖼️ `.sticker` | Converts images & videos to real WhatsApp stickers (sharp + WebP) |
-| 📰 `.news [topic]` | Live headlines from BBC RSS — world, tech, sports, africa, zim |
-| 📲 `.qr <text>` | Generates & sends a scannable QR code as an image |
-| 🎨 `.imagine <prompt>` | FREE AI image generation via Pollinations (no key needed) |
-| 🎙️ `.tts [lang] <text>` | Real voice notes via Google TTS — en, fr, sw, zu, sn, ar, hi & more |
-| 💱 `.currency 100 USD ZAR` | Real-time exchange rates (150+ currencies, zero API key) |
-| 📊 `.poll Q \| A \| B \| C` | Native WhatsApp polls (not fake text polls) |
-| 🧠 `.fact` | Random verified interesting facts from live API |
-| 📖 `.urban <word>` | Urban Dictionary slang lookup with vote counts |
-| ⚖️ `.bmi <kg> <cm>` | BMI calculator + personalised health advice |
-| 👥 `.groupinfo` | Rich group analytics — members, admins, age, settings |
-| 🔥 `.roast @user` | AI-generated personalised roast (funny, not cruel) |
-| 🛡️ `.antidelete on/off` | Catches deleted messages, forwards to owner DM |
-| ⚠️ `.warn @user` | Warning system with auto-kick at 3 warnings |
-| 💾 Persistent Memory | AI conversation memory survives bot restarts (file-backed) |
-| ✅ Auto cache | Every message auto-cached for antidelete |
+|---------|-------------|
+| 👻 `.ghost on/off` | **Ghost Mode** — Bot acts totally invisible. No typing indicators, no read receipts. Still processes all commands silently. |
+| 🧠 `.antitoxic on/off` | **AI Anti-Toxic Filter** — Heuristic AI scans every message for hate speech & threats. Deletes and auto-warns. No API key needed. |
+| 🌙 `.nightmode on [22:00] [06:00]` | **Night Mode** — Auto-mutes group at your set time and unmutes at wake time. Runs on a background scheduler. |
+| ⭐ `.vip on/off` | **VIP Mode** — Only VIP members (+ admins) can send messages. Comes with `.vip add/remove/list`. |
+| 😄 `.autoreact on [random/mood]` | **Auto React** — Bot reacts to messages with emojis. Mood mode matches sentiment. Completely unique. |
+| 🟩 `.wordle` | **Wordle in WhatsApp** — Full 5-letter word guessing game with colour-coded feedback. Per-user sessions. |
+| 🧠 `.trivia` | **Live Trivia** — Fetches real questions from Open Trivia DB. Score tracked in your profile. |
+| 🪢 `.hangman` | **Hangman game** — Classic hangman with ASCII art stages. |
+| 🪨 `.rps rock/paper/scissors` | **RPS with score tracking** — Win/loss/tie record per user. |
+| 🖼️ `.removebg` | **AI Background Remover** — Reply to any image. AI removes background instantly. |
+| 🎵 `.tiktok <url>` | **TikTok Downloader** — Downloads TikTok videos without watermark. |
+| ▶️ `.yt <query>` | **YouTube Search** — Top result with thumbnail, views, duration. |
+| ✍️ `.textart <style> <text>` | **Fancy Text Art** — 7 Unicode styles: bold, italic, bubble, square, flip, mirror, tiny. |
+| 💕 `.ship @user1 @user2` | **Compatibility Score** — Love compatibility calculator with emoji bar. Deterministic & shareable. |
+| 🤔 `.truth` / `.dare` | **Truth or Dare** — 10 curated truths and dares. |
+| 🌸 `.compliment [@user]` | **AI Compliment** — Tags someone with a genuine compliment. |
+| 😈 `.insult [@user]` | **Savage Roast** — Funny (not cruel) roasts. |
+| 📊 `.groupstats` | **Group Analytics Dashboard** — Top chatters, message counts, command usage, all active features. |
+| 🔢 `.calc <expr>` | **Scientific Calculator** — sin, cos, sqrt, log, pi, ^ — all supported. |
+| 🕐 `.time [tz]` | **World Clock** — Shows 10 major cities or any custom timezone. |
+| 💪 `.motivate [@user]` | **Live Motivation** — Real quotes from quotable.io. Tag a friend with it. |
+| 🪪 `.profile [@user]` | **Profile Card** — Stats, plan, game scores, join date, all in one. |
+| 👋 `.welcome on/off [msg]` | **Custom Welcome Messages** — Supports `@user`, `@group`, `@count`, `@date` variables. |
+| 🔤 `.antiword on/off/add/remove` | **Per-Group Bad Word Filter** — Custom word list per group. |
+| ⚙️ `.setwarnlimit N` | **Configurable Warn Limit** — Set auto-kick threshold per group. |
 
 ---
 
-## 🆓 Free Plan Features
+## 🆓 Free Plan Commands
 
 | Command | Description |
-|---|---|
-| `.math <problem>` | Solve any math with full step-by-step working |
-| `.weather <city>` | Real-time weather for any city |
+|---------|-------------|
+| `.menu [group/ai/games/media/social/tools]` | Categorized command menu |
 | `.homework <question>` | Detailed AI answer |
 | `.essay <topic>` | Full structured essay |
-| `.summarize <text>` | Bullet-point summary |
-| `.translate <lang> <text>` | Translate to any language |
-| `.studytips <subject>` | AI-powered study tips |
-| `.pdf <title> \| <subject>` | Generate a school project PDF |
-| `.sticker` | Reply to image/video to make a real sticker |
-| `.news [topic]` | Live headlines (world · tech · sports · africa · zim) |
-| `.qr <text>` | Generate a scannable QR code |
-| `.imagine <prompt>` | AI image generation — FREE, no API key |
-| `.tts [lang] <text>` | Text to real voice note audio |
-| `.currency <amt> <from> <to>` | Real-time currency conversion |
-| `.poll <Q> \| A \| B \| C` | Native WhatsApp poll (up to 12 options) |
-| `.fact` | Verified random interesting fact |
-| `.urban <word>` | Urban Dictionary slang lookup |
-| `.bmi <kg> <cm>` | BMI + personalised health advice |
-| `.groupinfo` | Group analytics (groups only) |
-| `.roast @user` | AI-generated personalised roast |
-| `.myplan` | Full command menu + plan status |
-| `.autochat off/on` | Mute / unmute bot in this chat |
-| `.autochat reset` | Clear conversation memory |
-| `.autochat persona <name>` | friendly · professional · savage · tutor · motivator |
+| `.summarize <text>` | Bullet summary |
+| `.translate <lang> <text>` | Translate anything |
+| `.studytips <subject>` | AI study tips |
+| `.math <problem>` | Step-by-step math |
+| `.sticker` | Reply to image/video → sticker |
+| `.imagine <prompt>` | Free AI image generation |
+| `.tts [lang] <text>` | Real voice note |
+| `.news [topic]` | Live headlines |
+| `.qr <text>` | QR code generator |
+| `.currency 100 USD ZAR` | Real-time exchange |
+| `.poll Q | A | B | C` | Native WhatsApp poll |
+| `.fact` | Verified random fact |
+| `.urban <word>` | Urban Dictionary |
+| `.bmi <kg> <cm>` | BMI calculator |
+| `.groupinfo` | Group analytics |
+| `.roast @user` | AI roast |
+| `.weather <city>` | 3-day weather forecast 🆕 |
+| `.calc <expr>` | Scientific calculator 🆕 |
+| `.time [tz]` | World clock 🆕 |
+| `.wordle` | Wordle game 🆕 |
+| `.trivia` | Live trivia 🆕 |
+| `.hangman` | Hangman 🆕 |
+| `.rps rock` | Rock Paper Scissors 🆕 |
+| `.tiktok <url>` | TikTok downloader 🆕 |
+| `.yt <query>` | YouTube search 🆕 |
+| `.removebg` | Remove image background 🆕 |
+| `.textart <style> <text>` | Fancy text styles 🆕 |
+| `.ship @u1 @u2` | Love compatibility 🆕 |
+| `.truth` / `.dare` | Truth or Dare 🆕 |
+| `.compliment [@user]` | Compliment 🆕 |
+| `.insult [@user]` | Savage roast 🆕 |
+| `.motivate [@user]` | Live motivation 🆕 |
+| `.profile [@user]` | Profile card 🆕 |
 
----
-
-## 💎 Premium Plan Features
+## 💎 Premium Plan Commands
 
 | Command | Description |
-|---|---|
-| `.examprep <subject>` | Full exam revision notes |
-| `.code <language> <task>` | Generate working code in any language |
-| `.remind <time> <msg>` | Set real reminders (30s, 5m, 2h, 1d) |
-| `.mystats` | Personal usage analytics dashboard |
-| `.autostudy on <subject>` | Auto daily study tips |
-| `.setpersona <description>` | Fully custom AI persona |
-| All Free features | Everything above, with priority AI |
+|---------|-------------|
+| `.examprep <subject>` | Full exam revision |
+| `.code <lang> <task>` | Generate working code |
+| `.remind <time> <msg>` | Real reminders |
+| `.mystats` | Personal analytics |
+| `.autostudy on <subject>` | Daily study tips |
+| `.setpersona <desc>` | Custom AI persona |
 
----
+## 🛡️ Group Admin Commands
+
+| Command | Description |
+|---------|-------------|
+| `.warn @user [reason]` | Warn member |
+| `.warns @user` | Check warns |
+| `.clearwarn @user` | Clear warns |
+| `.setwarnlimit N` | Set warn limit 🆕 |
+| `.kick @user` | Remove member 🆕 |
+| `.promote @user` | Make admin 🆕 |
+| `.demote @user` | Remove admin 🆕 |
+| `.mute / .unmute` | Lock/unlock group 🆕 |
+| `.tagall [msg]` | Tag all members 🆕 |
+| `.antilink on/off` | Block links |
+| `.antiword on/off/add/remove` | Bad word filter 🆕 |
+| `.antitoxic on/off` | AI toxic filter 🆕 |
+| `.nightmode on/off` | Night schedule 🆕 |
+| `.vip on/off/add/remove/list` | VIP mode 🆕 |
+| `.ghost on/off` | Ghost mode 🆕 |
+| `.autoreact on/off` | Auto-react 🆕 |
+| `.welcome on/off [msg]` | Welcome messages 🆕 |
+| `.goodbye on/off [msg]` | Goodbye messages 🆕 |
+| `.groupstats` | Analytics dashboard 🆕 |
 
 ## 👑 Owner Commands
 
 | Command | Description |
-|---|---|
-| `.setpremium add @user` | Grant Premium |
-| `.setpremium remove @user` | Revoke Premium |
-| `.setpremium list` | List all Premium users |
-| `.antidelete on/off` | Catch deleted messages → forward to your DM |
-| `.warn @user [reason]` | Warn a user (auto-kicks at 3 warnings) |
-| `.warns @user` | Check a user's warning count |
-| `.clearwarn @user` | Reset all warnings for a user |
-| `.botstats` | Bot usage & server info |
+|---------|-------------|
+| `.setpremium add/remove/list @user` | Manage premium |
+| `.antidelete on/off` | Catch deleted messages |
+| `.botstats` | Full server stats |
 
 ---
 
 ## 🚀 Setup
 
 ### 1. Clone the repo
+
 ```bash
 git clone https://github.com/dev-modder/NovaSpark-Bot.git
 cd NovaSpark-Bot
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
-> **Note:** `sharp` requires a C++ build environment. On most servers/VPS this is pre-installed. On Render, it works out of the box.
+### 3. Configure `config.js`
 
-### 3. Add your session string
-
-Edit `config.js`:
 ```js
-sessionID: 'NovaSpark!H4....'
+ownerNumber: ['YOUR_NUMBER'],   // without +
+ownerName:   ['Your Name'],
+botName:     'NovaSpark Bot',
+prefix:      '.',
+sessionID:   'NovaSpark!...',   // or leave '' to scan QR
 ```
-Or set `SESSION_ID` as an environment variable.
 
 ### 4. Run
+
 ```bash
 node index.js
 ```
 
-### 5. Deploy on Render / Heroku / VPS
+### 5. Deploy on Render / Heroku / VPS / Panel
 
-Set environment variables:
+Set env vars:
 - `SESSION_ID` — your session string
-- `OPENAI_API_KEY` — optional, improves AI quality
-- `DEEPAI_API_KEY` — optional
+- `OPENAI_API_KEY` — optional (improves AI quality)
+- `REMOVE_BG_API_KEY` — optional (remove.bg for background removal)
 
 ---
 
-## ⚙️ Configuration (`config.js`)
+## ⚙️ Configuration Keys
 
 | Key | Description |
-|---|---|
+|-----|-------------|
 | `ownerNumber` | Your number(s) without `+` |
 | `ownerName` | Your name(s) |
 | `botName` | Display name |
 | `prefix` | Command prefix (default `.`) |
 | `sessionID` | Session string |
+| `channelLink` | Your WhatsApp channel link |
+| `rateLimitPerMinute` | Commands per minute before throttle |
 
 ---
 
 ## ⚠️ Warning
 
-- Educational / personal use only
+- For educational / personal use only
 - **NOT** an official WhatsApp product
 - May violate WhatsApp ToS — use at your own risk
 
@@ -161,3 +198,11 @@ Set environment variables:
 ## 📄 License
 
 MIT © 2026 Dev-Ntando
+
+---
+
+<div align="center">
+
+**⚡ Built different. Runs different. NovaSpark v4 — 2026.**
+
+</div>

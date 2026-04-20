@@ -1,55 +1,46 @@
+/**
+ * ⚡ NovaSpark v4 — Set Premium (Owner)
+ * .setpremium add @user | remove @user | list
+ * By Dev-Ntando
+ */
 'use strict';
 const database = require('../../database');
 
 module.exports = {
   name: 'setpremium',
-  aliases: ['addpremium', 'givepremium'],
-  description: '[OWNER] Grant or remove premium access for a user',
+  aliases: ['premium'],
+  description: '💎 Manage premium users',
   category: 'owner',
-  execute: async ({ sock, msg, from, sender, args, isOwner, reply }) => {
-    if (!isOwner) return reply('👑 This command is only for the bot owner.');
+  ownerOnly: true,
 
-    const sub  = (args[0] || '').toLowerCase();
-    const raw  = args[1] || '';
-
-    // Extract number from mention or raw number
-    let target = raw.replace(/[^0-9]/g, '');
-
-    // Try quoted mention
-    const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
-    if (mentioned) target = mentioned.split('@')[0];
+  execute: async ({ sock, msg, from, args, reply, mentions }) => {
+    const sub = (args[0] || '').toLowerCase();
 
     if (sub === 'list') {
       const list = database.listPremium();
       if (!list.length) return reply('💎 No premium users yet.');
-      return reply(`💎 *Premium Users (${list.length}):*\n\n${list.map((n, i) => `${i + 1}. ${n}`).join('\n')}`);
+      return reply(`💎 *Premium Users (${list.length})*\n\n` + list.map((j,i) => `${i+1}. +${j.split('@')[0]}`).join('\n'));
     }
 
-    if (!target || target.length < 7) {
-      return reply(
-        '👑 *Premium Manager*\n\n' +
-        'Usage:\n' +
-        '  *.setpremium add @user* — grant premium\n' +
-        '  *.setpremium remove @user* — revoke premium\n' +
-        '  *.setpremium add 263786831091* — by number\n' +
-        '  *.setpremium list* — list all premium users'
-      );
+    if (sub === 'add') {
+      const targets = mentions?.length ? mentions : [];
+      if (!targets.length) return reply('Tag user(s): `.setpremium add @user`');
+      targets.forEach(j => database.addPremium(j));
+      return reply(`💎 Premium granted to: ${targets.map(j => '+' + j.split('@')[0]).join(', ')}`);
     }
 
-    if (sub === 'add' || sub === 'grant' || sub === 'give') {
-      database.setPremium(target);
-      await reply(`💎 *Premium granted!*\n\nUser *${target}* now has Premium access.\nThey can use all Premium features.`);
-      // Notify the user
-      try {
-        await sock.sendMessage(`${target}@s.whatsapp.net`, {
-          text: `🎉 *Congratulations!*\n\nYou have been upgraded to *NovaSpark Premium*! 💎\n\nYou now have access to:\n• Exam Prep AI (.examprep)\n• Code Generator (.code)\n• Math Solver (.math)\n• Reminder System (.remind)\n• Analytics (.mystats)\n• Auto Study Mode (.autostudy)\n• Custom AI Persona (.setpersona)\n• Priority AI responses\n\nType *.myplan* to see all your features!\n\n_NovaSpark Bot ⚡_`
-        });
-      } catch { /* user might not have a chat open */ }
-    } else if (sub === 'remove' || sub === 'revoke' || sub === 'take') {
-      database.removePremium(target);
-      await reply(`🔒 Premium *revoked* for user *${target}*.`);
-    } else {
-      await reply('❓ Use: *.setpremium add/remove @user* or *.setpremium list*');
+    if (sub === 'remove') {
+      const targets = mentions?.length ? mentions : [];
+      if (!targets.length) return reply('Tag user(s): `.setpremium remove @user`');
+      targets.forEach(j => database.removePremium(j));
+      return reply(`✅ Premium removed from: ${targets.map(j => '+' + j.split('@')[0]).join(', ')}`);
     }
+
+    return reply(
+      '💎 *Premium Manager*\n\n' +
+      '`.setpremium add @user` — Grant premium\n' +
+      '`.setpremium remove @user` — Revoke premium\n' +
+      '`.setpremium list` — List all premium users'
+    );
   },
 };

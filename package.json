@@ -1,7 +1,7 @@
 {
   "name": "novaspark-bot",
-  "version": "3.0.0",
-  "description": "NovaSpark Bot v3 — The WhatsApp MD bot that actually works. By Dev-Ntando.",
+  "version": "4.0.0",
+  "description": "⚡ NovaSpark Bot v4 — 2026 Edition. The most advanced WhatsApp MD bot ever built. By Dev-Ntando.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -9,8 +9,10 @@
     "dev": "nodemon index.js"
   },
   "keywords": [
-    "whatsapp bot", "novaspark", "autochat", "baileys", "md",
-    "sticker maker", "ai image", "tts", "news bot", "qr code"
+    "whatsapp", "bot", "novaspark", "autochat", "baileys", "md",
+    "sticker", "ai", "tts", "news", "qr", "trivia", "wordle",
+    "hangman", "nightmode", "antitoxic", "ghostmode", "vipmode",
+    "removebg", "tiktok", "youtube", "2026"
   ],
   "author": "Dev-Ntando",
   "license": "MIT",
