@@ -146,11 +146,48 @@ async function startBot() {
     if (connection === 'open') {
       printOnline(sock);
     }
+
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
-      const shouldReconnect = code !== DisconnectReason.loggedOut;
-      orig.log(`\n🔴 Disconnected (code ${code}). ${shouldReconnect ? 'Reconnecting in 5s...' : 'Logged out.'}`);
-      if (shouldReconnect) setTimeout(startBot, 5000);
+
+      // ── 401: Hard logout ────────────────────────────────────────────────
+      // WhatsApp revoked the session. Do NOT reconnect — the session is dead.
+      // User must generate a new SESSION_ID from the pairing site.
+      if (code === DisconnectReason.loggedOut) {
+        orig.log('\n🔴 Disconnected (code 401). Logged out.');
+        orig.log('⚠️  Session revoked by WhatsApp. Generate a new SESSION_ID from the pairing site.');
+        process.exit(0); // Let Render restart the process after user updates SESSION_ID
+        return;
+      }
+
+      // ── 515: Restart required ───────────────────────────────────────────
+      // Normal after a successful pairing (especially on WhatsApp Business).
+      // WhatsApp sends this to tell us to reconnect with the now-saved creds.
+      // We must restart startBot() so it re-reads creds.json from disk.
+      if (code === DisconnectReason.restartRequired) {
+        orig.log('\n🔄 Restart required by WhatsApp — reconnecting with saved session...');
+        setTimeout(startBot, 2000);
+        return;
+      }
+
+      // ── 408 / stream error / all other codes: temporary disconnect ──────
+      // Use increasing backoff to avoid rapid reconnect loops that trigger
+      // WhatsApp Business account bans.
+      const delay = [5000, 10000, 15000, 30000];
+      const attempt = (startBot._attempt || 0);
+      startBot._attempt = Math.min(attempt + 1, delay.length - 1);
+      const wait = delay[startBot._attempt - 1] || 5000;
+
+      orig.log(`\n🔴 Disconnected (code ${code}). Reconnecting in ${wait / 1000}s...`);
+      setTimeout(() => {
+        startBot._attempt = Math.max((startBot._attempt || 1) - 1, 0); // reduce on success
+        startBot();
+      }, wait);
+    }
+
+    // Reset backoff counter on successful connection
+    if (connection === 'open') {
+      startBot._attempt = 0;
     }
   });
 
