@@ -30,7 +30,7 @@
     "qrcode": "^1.5.4",
     "rss-parser": "^3.13.0",
     "yt-search": "^2.10.4",
-    "ruhend-scraper": "^1.0.0"
+    "ruhend-scraper": "*"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
