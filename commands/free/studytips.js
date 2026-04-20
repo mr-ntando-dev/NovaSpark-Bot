@@ -17,7 +17,7 @@ module.exports = {
 Give 5-7 practical, specific study tips for the subject. Include memory tricks, time management advice, and motivation. Use WhatsApp bold (*) for tip titles.`;
     try {
       const tips = await APIs.chatAI(`Give study tips for: ${subject}`, system);
-      await reply(`📖 *Study Tips: ${subject}*\n\n${tips}\n\n_NovaSpark Bot ⚡_`);
+      await reply(`📖 *Study Tips: ${subject}*\n\n${tips}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Couldn\'t get tips right now. Try again!');
     }

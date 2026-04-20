@@ -55,7 +55,9 @@ Keep it concise and energetic. Use WhatsApp bold (*) for tip titles.`;
       try {
         const tips = await APIs.chatAI(`Give daily study tips for: ${subject}`, system);
         await sock.sendMessage(from, {
-          text: `📚 *Daily Study Tips: ${subject}*\n\n${tips}\n\n_Auto Study Mode — NovaSpark Bot ⚡_`
+          text: `📚 *Daily Study Tips: ${subject}*\n\n${tips}\n\n_Auto Study Mode_
+
+_Nova AI ⚡_`
         });
       } catch { /* silent */ }
     };

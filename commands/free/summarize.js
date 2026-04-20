@@ -22,7 +22,7 @@ module.exports = {
     const system = 'You are NovaSpark, an expert summarizer. Summarize the following text into clear, concise bullet points. Use WhatsApp bold (*) for key points. Keep it brief but complete.';
     try {
       const summary = await APIs.chatAI(`Summarize this:\n\n${text}`, system);
-      await reply(`📋 *Summary*\n\n${summary}\n\n_NovaSpark Bot ⚡_`);
+      await reply(`📋 *Summary*\n\n${summary}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Couldn\'t summarize right now. Try again!');
     }

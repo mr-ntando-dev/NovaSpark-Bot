@@ -25,7 +25,7 @@ Format using WhatsApp bold (*) for section labels. Be thorough but easy to under
 If it is a math/science problem, show all working. If it is an essay question, give a full outline.`;
     try {
       const answer = await APIs.chatAI(question, system);
-      await reply(`📚 *Homework Helper*\n\n*Q:* ${question}\n\n${answer}\n\n_NovaSpark Bot ⚡_`);
+      await reply(`📚 *Homework Helper*\n\n*Q:* ${question}\n\n${answer}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Could not get an answer right now. Try again in a moment!');
     }

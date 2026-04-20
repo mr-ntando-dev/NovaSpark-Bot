@@ -62,7 +62,9 @@ module.exports = {
       `🔔 *Reminder Set!*\n\n` +
       `📌 Message: _${message}_\n` +
       `⏰ In: *${timeLabel(time)}*\n\n` +
-      `_I'll ping you when it's time! — NovaSpark Bot ⚡_`
+      `_I'll ping you when it's time!_
+
+_Nova AI ⚡_`
     );
   },
 };

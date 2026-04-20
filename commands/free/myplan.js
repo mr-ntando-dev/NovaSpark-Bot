@@ -14,23 +14,24 @@ module.exports = {
     const ownerNum = Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber;
 
     const freeFeatures = [
-      '⚡ AutoChat AI (smart replies, memory, personas)',
-      '📚 Homework Helper (.homework)',
-      '✍️ Essay Writer (.essay)',
-      '📋 Summarizer (.summarize)',
-      '🌍 Translator (.translate)',
-      '📖 Study Tips (.studytips)',
+      '⚡ AutoChat AI — always on, no activation needed',
+      '🔢 Math Solver — auto-detected + .math command',
+      '🌤️ Weather — real-time via .weather or just ask',
+      '📚 Homework Helper — auto-detected + .homework',
+      '✍️ Essay Writer — auto-detected + .essay',
+      '📋 Summarizer — auto-detected + .summarize',
+      '🌍 Translator — auto-detected + .translate',
+      '📖 Study Tips — auto-detected + .studytips',
       '📄 Project PDF Generator (.pdf)',
       '🎭 5 AI Personas',
       '🖼️ Auto Image Generation & Analysis',
-      '📝 OCR (read text from images)',
+      '📝 OCR — reads & solves math from photos',
     ];
 
     const premiumFeatures = [
       '💎 Everything in Free',
       '🎓 Exam Prep AI (.examprep)',
       '💻 Code Generator (.code)',
-      '🔢 Math Solver (.math)',
       '🔔 Reminder System (.remind)',
       '📊 Analytics Dashboard (.mystats)',
       '📚 Auto Study Mode (.autostudy)',
@@ -44,7 +45,7 @@ module.exports = {
         `💎 *${profile?.name || 'You\'re on'} Premium Plan!*\n\n` +
         `🎉 You have access to ALL features:\n\n` +
         premiumFeatures.map(f => `  ${f}`).join('\n') +
-        `\n\n_Thank you for supporting NovaSpark Bot! ⚡_`
+        `\n\n_Thank you for supporting NovaSpark Bot!_\n\n_Nova AI ⚡_`
       );
     } else {
       await reply(
@@ -53,7 +54,7 @@ module.exports = {
         `🔒 *Unlock Premium:*\n${premiumFeatures.map(f => `  ${f}`).join('\n')}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `💬 *To upgrade, contact:*\nwa.me/${ownerNum}\n\n` +
-        `_NovaSpark Bot ⚡ by Dev-Ntando_`
+        `_Nova AI ⚡_`
       );
     }
   },

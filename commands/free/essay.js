@@ -31,7 +31,7 @@ Use WhatsApp bold (*) for section titles. Write in clear, academic English.`;
 
     try {
       const essay = await APIs.chatAI(`Write a full essay on: "${topic}"`, system);
-      await reply(`✍️ *Essay: ${topic}*\n\n${essay}\n\n_Written by NovaSpark Bot ⚡_`);
+      await reply(`✍️ *Essay: ${topic}*\n\n${essay}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Couldn\'t write the essay right now. Try again!');
     }

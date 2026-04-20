@@ -22,11 +22,12 @@ const translateCmd = require('./commands/free/translate');
 const studytipsCmd = require('./commands/free/studytips');
 const pdfCmd       = require('./commands/free/pdf');
 const myplanCmd    = require('./commands/free/myplan');
+const mathCmd      = require('./commands/free/math');      // math is now FREE
+const weatherCmd   = require('./commands/free/weather');   // new free weather command
 
 // Premium commands
 const examprepCmd     = require('./commands/premium/examprep');
 const codeCmd         = require('./commands/premium/code');
-const mathCmd         = require('./commands/premium/math');
 const mystatsCmd      = require('./commands/premium/mystats');
 const remindCmd       = require('./commands/premium/remind');
 const autostudyCmd    = require('./commands/premium/autostudy');
@@ -40,7 +41,8 @@ const botstatsCmd   = require('./commands/owner/botstats');
 const ALL_COMMANDS = [
   autochatCmd,
   homeworkCmd, essayCmd, summarizeCmd, translateCmd, studytipsCmd, pdfCmd, myplanCmd,
-  examprepCmd, codeCmd, mathCmd, mystatsCmd, remindCmd, autostudyCmd, custompersonaCmd,
+  mathCmd, weatherCmd,                                       // free — math & weather
+  examprepCmd, codeCmd, mystatsCmd, remindCmd, autostudyCmd, custompersonaCmd,
   setpremiumCmd, botstatsCmd,
 ];
 
@@ -175,16 +177,18 @@ const handleMessage = async (sock, msg) => {
       if (!autochatSession?.enabled) {
         await ctx.reply(
           `❓ Unknown command. Here are the available commands:\n\n` +
-          `*Free:*\n` +
-          `  .autochat on/off/status\n` +
-          `  .homework .essay .summarize\n` +
-          `  .translate .studytips .pdf\n` +
-          `  .myplan\n\n` +
-          `*Premium 💎:*\n` +
-          `  .examprep .code .math\n` +
-          `  .remind .mystats .autostudy\n` +
-          `  .setpersona\n\n` +
-          `_Type .myplan to see your plan & upgrade info._`
+          `*🆓 Free (always active — auto-detected):*\n` +
+          `  🔢 .math  🌤️ .weather  📚 .homework\n` +
+          `  ✍️ .essay  📝 .summarize  🌍 .translate\n` +
+          `  📖 .studytips  📄 .pdf  📋 .myplan\n\n` +
+          `*⚙️ AutoChat:*\n` +
+          `  .autochat off/on/status/reset\n` +
+          `  .autochat persona <name>\n\n` +
+          `*💎 Premium:*\n` +
+          `  .examprep .code .remind .mystats\n` +
+          `  .autostudy .setpersona\n\n` +
+          `_Type .myplan to see your plan & upgrade info._\n\n` +
+          `_Nova AI ⚡_`
         );
       }
       return;

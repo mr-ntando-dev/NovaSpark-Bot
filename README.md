@@ -34,25 +34,47 @@ This personalizes all AI responses and puts your name on generated PDFs.
 
 ---
 
+## ⚡ Always-On Smart Detection (v6)
+
+AutoChat is **always active** — no `.autochat on` needed. The bot reads every message and automatically routes it to the right tool:
+
+| What you send | What happens |
+|---|---|
+| A math equation / word problem | 🔢 Auto-solved with full step-by-step working |
+| "weather in Harare" | 🌤️ Real-time weather fetched instantly |
+| A homework / school question | 📚 Homework helper answers it |
+| "write an essay on…" | ✍️ Full structured essay generated |
+| "translate X to French" | 🌍 Instant translation |
+| "summarize this…" | 📝 Clean bullet-point summary |
+| "study tips for chemistry" | 📖 Personalised study tips |
+| A photo of a math problem | 🖼️ OCR reads it → auto-solved |
+| Any other text | 💬 AI chat with memory & persona |
+
+> Every reply ends with `_Nova AI ⚡_` — NovaSpark's signature tag.
+
+---
+
 ## 🆓 Free Plan Features
 
 | Command | Description |
 |---|---|
-| `.autochat on/off` | Enable/disable AutoChat AI in this chat |
+| `.math <problem>` | Solve any math problem with full working *(also auto-detected)* |
+| `.weather <city>` | Real-time weather for any city *(also auto-detected)* |
+| `.homework <question>` | Detailed AI answer *(also auto-detected)* |
+| `.essay <topic>` | Full structured essay *(also auto-detected)* |
+| `.summarize <text>` | Summarize any text *(also auto-detected)* |
+| `.translate <lang> <text>` | Translate to any language *(also auto-detected)* |
+| `.studytips <subject>` | AI-powered study tips *(also auto-detected)* |
+| `.pdf <title> \| <subject>` | Generate a school project PDF |
+| `.myplan` | Check your plan and see Premium features |
+| `.autochat off/on` | Mute / unmute the bot in this chat |
 | `.autochat reset` | Clear conversation memory |
 | `.autochat status` | Show current settings and stats |
 | `.autochat persona <name>` | Switch personality: friendly, professional, savage, tutor, motivator |
 | `.autochat delay <ms>` | Set reply delay (300–8000ms) |
 | `.autochat imggen on\|off` | Toggle auto image generation |
 | `.autochat analyze on\|off` | Toggle auto image analysis |
-| `.autochat ocr on\|off` | Toggle OCR (read text from images) |
-| `.homework <question>` | Detailed AI answer to any homework question |
-| `.essay <topic>` | Full structured essay on any topic |
-| `.summarize <text>` | Summarize any text (or reply to a message) |
-| `.translate <lang> <text>` | Translate to any language |
-| `.studytips <subject>` | AI-powered study tips for any subject |
-| `.pdf <title> \| <subject>` | Generate a school project PDF |
-| `.myplan` | Check your plan and see Premium features |
+| `.autochat ocr on\|off` | Toggle OCR + image math solving |
 
 ---
 
@@ -62,7 +84,6 @@ This personalizes all AI responses and puts your name on generated PDFs.
 |---|---|
 | `.examprep <subject>` | Full exam revision notes — topics, definitions, Q&A, memory tips |
 | `.code <language> <task>` | Generate working code in any language |
-| `.math <problem>` | Solve math problems with full step-by-step working |
 | `.remind <time> <msg>` | Set reminders (30s, 5m, 2h, 1d) |
 | `.mystats` | View your personal usage analytics dashboard |
 | `.autostudy on <subject>` | Auto-send daily study tips on a schedule |

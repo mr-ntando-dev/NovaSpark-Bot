@@ -28,7 +28,9 @@ module.exports = {
       `*Last Active:* ${lastSeen}\n\n` +
       `*🏆 Top Commands:*\n${topCmds}\n\n` +
       (favSubject ? `*Most Used:* .${favSubject[0]} (${favSubject[1]}x)\n\n` : '') +
-      `_Keep it up! Knowledge is power 💪 — NovaSpark Bot ⚡_`
+      `_Keep it up! Knowledge is power 💪_
+
+_Nova AI ⚡_`
     );
   },
 };

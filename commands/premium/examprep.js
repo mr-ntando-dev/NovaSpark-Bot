@@ -28,7 +28,7 @@ Create comprehensive exam revision notes. Include:
 Use WhatsApp bold (*) for all headings. Be thorough and exam-focused.`;
     try {
       const notes = await APIs.chatAI(`Create full exam revision notes for: ${subject}`, system);
-      await reply(`🎓 *Exam Prep: ${subject}*\n\n${notes}\n\n_Good luck! You got this! 💪 — NovaSpark Bot ⚡_`);
+      await reply(`🎓 *Exam Prep: ${subject}*\n\n${notes}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Failed to generate notes. Try again!');
     }

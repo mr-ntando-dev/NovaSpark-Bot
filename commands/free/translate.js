@@ -16,7 +16,7 @@ module.exports = {
     const system = `You are NovaSpark, an expert translator. Translate the given text to ${lang}. Provide only the translation, nothing else.`;
     try {
       const result = await APIs.chatAI(`Translate to ${lang}: "${text}"`, system);
-      await reply(`🌍 *Translation to ${lang}:*\n\n${result}\n\n_Original: ${text}_`);
+      await reply(`🌍 *Translation to ${lang}:*\n\n${result}\n\n_Original: ${text}_\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Translation failed. Try again!');
     }

@@ -25,7 +25,7 @@ Include:
 - Example output if applicable`;
     try {
       const result = await APIs.chatAI(`Write ${lang} code to: ${task}`, system);
-      await reply(`💻 *Code Generator*\n\n*Task:* ${task}\n*Language:* ${lang}\n\n${result}\n\n_NovaSpark Bot ⚡_`);
+      await reply(`💻 *Code Generator*\n\n*Task:* ${task}\n*Language:* ${lang}\n\n${result}\n\n_Nova AI ⚡_`);
     } catch {
       await reply('❌ Code generation failed. Try again!');
     }
