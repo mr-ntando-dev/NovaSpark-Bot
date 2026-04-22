@@ -381,22 +381,21 @@ module.exports = async (sock, msg) => {
   _sock = sock;
 
   if (!msg?.message) return;
-  // Allow fromMe only if it is an owner command (owner using the bot on their own device)
-  const _from_raw   = msg.key.remoteJid;
-  const _isGroup_raw = _from_raw?.endsWith('@g.us');
-  const _sender_raw  = _isGroup_raw
-    ? (msg.key.participant || _from_raw)
-    : _from_raw;
-  const _senderNum   = (_sender_raw || '').split('@')[0].split(':')[0];
-  const _ownerNums   = Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber];
-  const _isSenderOwner = _ownerNums.includes(_senderNum);
-  if (msg.key.fromMe && !_isSenderOwner) return;
+  // index.js already gates fromMe — only owner commands reach here.
+  // fromMe=true means the owner typed the command on their own device.
+  // We simply allow all messages that arrive here through.
 
   const from   = msg.key.remoteJid;
   const isGroup = from?.endsWith('@g.us');
+
+  // For fromMe messages in a DM: remoteJid is the CHAT (other person or self),
+  // but we need the sender to be the owner's number for isOwner() to pass.
+  // index.js patches _ownerOverride for this exact case.
   const sender  = isGroup
     ? (msg.key.participant || from)
-    : from;
+    : (msg._ownerOverride || (msg.key.fromMe
+        ? `${(Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber)}@s.whatsapp.net`
+        : from));
   const senderNorm = normalizeJid(sender);
 
   // ── Cache message for anti-delete ────────────────────────────────────────

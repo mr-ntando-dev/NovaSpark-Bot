@@ -220,7 +220,50 @@ async function startBot() {
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return;
     for (const msg of messages) {
-      if (!msg.message || msg.key.fromMe) continue;
+      if (!msg.message) continue;
+
+      // ── fromMe gate — allow owner's own messages through ──────────────────
+      // When fromMe=true the bot sent the message, BUT in Baileys multi-device
+      // the owner's commands typed on THEIR phone also arrive with fromMe=true.
+      // We must let owner messages through; drop everything else that is fromMe.
+      if (msg.key.fromMe) {
+        // Get the bot's own number so we can compare
+        const botNum = sock.user?.id ? sock.user.id.split(':')[0].split('@')[0] : '';
+        const ownerNums = (Array.isArray(config.ownerNumber)
+          ? config.ownerNumber
+          : [config.ownerNumber]
+        ).map(n => String(n).replace(/\D/g, ''));
+
+        // For fromMe messages the "sender" is the bot itself (sock.user.id).
+        // BUT in multi-device, when the OWNER types on their phone and the bot
+        // is on another device, the message arrives with fromMe=true and
+        // remoteJid = the chat they are in (not the owner's own number).
+        // The only reliable way to identify owner-typed commands:
+        // check if the message body starts with the prefix (it's a command)
+        // AND the bot's number matches an owner number.
+        const prefix = config.prefix || '.';
+        const body =
+          msg.message?.conversation ||
+          msg.message?.extendedTextMessage?.text ||
+          msg.message?.imageMessage?.caption ||
+          msg.message?.videoMessage?.caption || '';
+
+        const isCommand = body.trim().startsWith(prefix);
+        const botIsOwner = ownerNums.includes(botNum.replace(/\D/g, ''));
+
+        // Let through ONLY if: it's a command AND the bot number is an owner
+        if (!(isCommand && botIsOwner)) continue;
+
+        // Patch the message so handler treats sender as the owner's JID
+        // Use remoteJid for DMs (that IS the owner chatting with the bot)
+        // For groups, participant will be set correctly by Baileys
+        if (!msg.key.remoteJid?.endsWith('@g.us') && !msg.key.participant) {
+          // In a DM with themselves or bot — set participant to owner JID
+          // so handler's isOwner() check works correctly
+          msg._ownerOverride = `${ownerNums[0]}@s.whatsapp.net`;
+        }
+      }
+
       // AutoRead (v5)
       if (autoreadMod.autoreadState?.enabled) {
         try { await sock.readMessages([msg.key]); } catch {}
