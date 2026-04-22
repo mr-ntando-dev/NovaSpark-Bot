@@ -38,6 +38,11 @@ const fs      = require('fs');
 const path    = require('path');
 const os      = require('os');
 
+// ── v5.3 owner auto-commands — startup hooks ──────────────────────────────────
+const autoonlineCmd = require('./commands/owner/autoonline');
+const autobackupCmd = require('./commands/owner/autobackup');
+const autoleaveCmd  = require('./commands/owner/autoleave');
+
 // ── Banner ─────────────────────────────────────────────────────────────────────
 function printBanner() {
   const owners = Array.isArray(config.ownerName) ? config.ownerName.join(', ') : config.ownerName;
@@ -145,6 +150,11 @@ async function startBot() {
   sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
     if (connection === 'open') {
       printOnline(sock);
+      // ── v5.3: start owner auto-loops on connect ────────────────────────────
+      const ownerNum = Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber;
+      const ownerJid = `${ownerNum}@s.whatsapp.net`;
+      try { autoonlineCmd.startOnlineLoop(sock); } catch {}
+      try { autobackupCmd.startBackupLoop(sock, ownerJid); } catch {}
     }
 
     if (connection === 'close') {
@@ -234,6 +244,10 @@ async function startBot() {
 
   // ── Group participant events ──────────────────────────────────────────────
   sock.ev.on('group-participants.update', async ({ id, participants, action }) => {
+    try {
+      // ── v5.3 Auto Leave ──────────────────────────────────────────────────────
+      await autoleaveCmd.checkAutoLeave(sock, { id, participants, action });
+    } catch {}
     try {
       const gs = require('./database').getGroupSettings(id);
 

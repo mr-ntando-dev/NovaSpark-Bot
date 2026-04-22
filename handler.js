@@ -159,6 +159,13 @@ const { getModeState } = require('./commands/owner/maintenance');
 const broadcastCmd   = require('./commands/owner/broadcast');
 const autoreadCmd    = require('./commands/owner/autoread');
 
+// ── v5.3 OWNER AUTO-COMMANDS ──────────────────────────────────────────────────
+const autotypingCmd  = require('./commands/owner/autotyping');
+const autoonlineCmd  = require('./commands/owner/autoonline');
+const autoreplyCmd   = require('./commands/owner/autoreply');
+const autoleaveCmd   = require('./commands/owner/autoleave');
+const autobackupCmd  = require('./commands/owner/autobackup');
+
 // ── v5 TOOLS ─────────────────────────────────────────────────────────────────
 const pingCmd        = require('./commands/tools/ping');
 const aliveCmd       = require('./commands/tools/alive');
@@ -253,6 +260,8 @@ const ALL_COMMANDS = [
   cleardbCmd,
   ...(Array.isArray(announceCmds)    ? announceCmds                        : [announceCmds]),
   dmCmd,
+  // v5.3 owner auto-commands
+  autotypingCmd, autoonlineCmd, autoreplyCmd, autoleaveCmd, autobackupCmd,
 ];
 
 const cmdMap = new Map();
@@ -332,8 +341,12 @@ const normalizeJid = (jid) => {
 };
 
 const isOwner = (jid) => {
-  const num = jid.split('@')[0].split(':')[0];
-  return (Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber]).includes(num);
+  if (!jid) return false;
+  // Strip device suffix (multi-device: 263786831091:12@s.whatsapp.net → 263786831091)
+  const num = jid.split('@')[0].split(':')[0].replace(/\D/g, '');
+  const owners = (Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber])
+    .map(n => String(n).replace(/\D/g, ''));
+  return owners.includes(num);
 };
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -341,7 +354,16 @@ module.exports = async (sock, msg) => {
   _sock = sock;
 
   if (!msg?.message) return;
-  if (msg.key.fromMe) return;
+  // Allow fromMe only if it is an owner command (owner using the bot on their own device)
+  const _from_raw   = msg.key.remoteJid;
+  const _isGroup_raw = _from_raw?.endsWith('@g.us');
+  const _sender_raw  = _isGroup_raw
+    ? (msg.key.participant || _from_raw)
+    : _from_raw;
+  const _senderNum   = (_sender_raw || '').split('@')[0].split(':')[0];
+  const _ownerNums   = Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber];
+  const _isSenderOwner = _ownerNums.includes(_senderNum);
+  if (msg.key.fromMe && !_isSenderOwner) return;
 
   const from   = msg.key.remoteJid;
   const isGroup = from?.endsWith('@g.us');
@@ -478,6 +500,11 @@ module.exports = async (sock, msg) => {
       } catch {}
       return;
     }
+    // ── v5.3 Auto PM Reply (away mode) ───────────────────────────────────────
+    try {
+      const handled = await autoreplyCmd.checkAutoPM(sock, msg, from, body);
+      if (handled) return;
+    } catch {}
     // Autochat
     const gs = database.getGroupSettings(from);
     if (gs?.autochat !== false) {
@@ -508,7 +535,7 @@ module.exports = async (sock, msg) => {
   }
 
   // ── Typing indicator (unless ghost mode) ─────────────────────────────────
-  if (!groupSettings.ghostMode) {
+  if (!groupSettings.ghostMode || autotypingCmd.autotypingState?.enabled) {
     try { await sock.sendPresenceUpdate('composing', from); } catch {}
   }
 

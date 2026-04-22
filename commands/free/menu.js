@@ -279,6 +279,12 @@ module.exports = {
         `• .antidelete on/off\n` +
         `• .autoread on/off\n` +
         `• .pmblocker on/off\n\n` +
+        `🤖 *Auto Commands (v5.3)*\n` +
+        `• .autotyping on/off  — Show typing indicator always\n` +
+        `• .autoonline on/off  — Stay online continuously\n` +
+        `• .autopm on/off/set  — Away auto-reply to DMs\n` +
+        `• .autoleave on/off  — Auto-leave unauthorized groups\n` +
+        `• .autobackup on/off/now  — DM yourself a DB backup\n\n` +
         `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
@@ -431,7 +437,9 @@ module.exports = {
       `• .listgroups / .leavegroup\n` +
       `• .joingroup / .botstats\n` +
       `• .cleardb / .anticall\n` +
-      `• .autoread / .pmblocker\n\n` +
+      `• .autoread / .pmblocker\n` +
+      `🤖 *Auto:* .autotyping / .autoonline\n` +
+      `🤖 *Auto:* .autopm / .autoleave / .autobackup\n\n` +
 
       `${'━'.repeat(32)}\n` +
       `📋 *.bmenu* — *Interactive tap menu*\n` +
