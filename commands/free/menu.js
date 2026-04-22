@@ -1,7 +1,9 @@
 /**
- * ⚡ NovaSpark Bot v5 — 2026 Edition
+ * ⚡ NovaSpark Bot v5.3 — 2026 Edition
  * MEGA MENU — .menu / .help
  * Full command listing with NovaSpark branded image — all commands in one view
+ * Updated: Added advice, dadjoke, catfact, dogfact, numfact, emoji, age, encode/decode,
+ *          complimentme, vibe/spiritlevel, waifu, roulette, tagadmins, membercount
  * By Dev-Ntando
  */
 'use strict';
@@ -46,7 +48,10 @@ module.exports = {
         `• .delete  _(reply to msg)_\n\n` +
         `📢 *Tag & Announce*\n` +
         `• .tagall [msg]\n` +
-        `• .hidetag [msg]\n\n` +
+        `• .hidetag [msg]\n` +
+        `• .tagadmins [msg]  — Mention all admins  🆕\n\n` +
+        `📊 *Info*\n` +
+        `• .membercount  — Member breakdown  🆕\n\n` +
         `🔒 *Protection*\n` +
         `• .antilink on/off/set\n` +
         `• .antiword on/off/add/remove\n` +
@@ -163,6 +168,12 @@ module.exports = {
         `• .horoscope <sign>\n` +
         `• .riddle\n` +
         `• .dare\n\n` +
+        `🆕 *v5.3 Fun*\n` +
+        `• .complimentme  — Hype yourself\n` +
+        `• .vibe [@user]  — Vibe check\n` +
+        `• .waifu  — Random anime image\n` +
+        `• .roulette  — Russian roulette (1 in 6)\n` +
+        `• .dadjoke  — Dad joke / pun\n\n` +
         `💕 *Social*\n` +
         `• .ship @user1 @user2\n` +
         `• .compliment [@user]\n` +
@@ -179,6 +190,7 @@ module.exports = {
       return reply(
         `🔧 *TOOLS & UTILITIES*\n` +
         `${'━'.repeat(32)}\n\n` +
+        `⚙️ *Basic*\n` +
         `• .ping\n` +
         `• .alive\n` +
         `• .vv  — View-once revealer\n` +
@@ -209,8 +221,18 @@ module.exports = {
         `• .define <word>\n` +
         `• .ip <address> / .myip\n` +
         `• .crypto <symbol>\n` +
-      `• .bible [John 3:16/search]  🆕\n` +
+        `• .bible [John 3:16/search]\n` +
         `• .short <url> / .unshort <url>\n\n` +
+        `🆕 *v5.3 Tools*\n` +
+        `• .advice  — Random life advice\n` +
+        `• .dadjoke  — Dad joke / pun\n` +
+        `• .catfact  — Random cat fact\n` +
+        `• .dogfact  — Random dog fact\n` +
+        `• .numfact [number]  — Number trivia\n` +
+        `• .emoji <name>  — Emoji lookup\n` +
+        `• .age <YYYY-MM-DD>  — Age calculator\n` +
+        `• .encode <type> <text>  — base64/hex/reverse/morse\n` +
+        `• .decode <type> <text>  — base64/hex/morse\n\n` +
         `💎 *Premium*\n` +
         `• .remind <time> <msg>\n` +
         `• .mystats\n\n` +
@@ -265,18 +287,26 @@ module.exports = {
     // Shows ALL commands in one message with NovaSpark branded image caption
 
     const menuText =
-      `╔═══════════════════════════╗\n` +
-      `║  ⚡ *NOVASPARK BOT v${config.botVersion}*  ║\n` +
-      `╚═══════════════════════════╝\n` +
-      `_The Most Advanced WhatsApp MD Bot_\n\n` +
+      `╔════════════════════════════════╗\n` +
+      `║  ⚡ *NOVASPARK BOT v${config.botVersion}* ⚡  ║\n` +
+      `║    *2026 EDITION — Dev-Ntando*   ║\n` +
+      `╚════════════════════════════════╝\n` +
+      `_✨ The Most Advanced WhatsApp MD Bot ✨_\n\n` +
 
-      `┌─[ 👤 *USER INFO* ]\n` +
-      `│ • User   : +${num}\n` +
-      `│ • Plan   : ${plan}\n` +
-      `│ • Prefix : [ ${config.prefix} ]\n` +
-      `│ • Time   : ${now}\n` +
-      `│ • Uptime : ${uptimeStr}  💾 ${memMB}MB\n` +
-      `└──────────────────────────\n\n` +
+      `┌─────────────────────────────────\n` +
+      `│  👤 *USER INFO*\n` +
+      `├─────────────────────────────────\n` +
+      `│ 📱 *User   :* +${num}\n` +
+      `│ 💎 *Plan   :* ${plan}\n` +
+      `│ ⌨️  *Prefix :* [ *${config.prefix}* ]\n` +
+      `│ 🕐 *Time   :* ${now}\n` +
+      `│ ⚡ *Uptime :* ${uptimeStr}  💾 ${memMB}MB\n` +
+      `│ 🤖 *Bot    :* ${config.botName}\n` +
+      `│ 🌐 *Ver    :* v${config.botVersion}\n` +
+      `└─────────────────────────────────\n\n` +
+
+      `📌 *Sub-menus:* .menu group | .menu ai | .menu downloads\n` +
+      `        .menu games | .menu social | .menu tools | .menu owner\n\n` +
 
       `${'━'.repeat(32)}\n` +
       `🧠 *AI & GPT*\n` +
@@ -330,6 +360,10 @@ module.exports = {
       `• .8ball <question>\n` +
       `• .flirt / .insult / .roast [@user]\n` +
       `• .compliment [@user]\n` +
+      `• .complimentme  — Hype yourself  🆕\n` +
+      `• .vibe [@user]  — Vibe check  🆕\n` +
+      `• .waifu  — Anime image  🆕\n` +
+      `• .roulette  — Russian roulette  🆕\n` +
       `• .ship @user1 @user2\n` +
       `• .gayrate [@user]\n` +
       `• .flip / .dice\n` +
@@ -345,6 +379,8 @@ module.exports = {
       `• .kick / .promote / .demote\n` +
       `• .mute / .unmute\n` +
       `• .tagall / .hidetag\n` +
+      `• .tagadmins [msg]  — Mention all admins  🆕\n` +
+      `• .membercount  — Member breakdown  🆕\n` +
       `• .antilink / .antiword\n` +
       `• .antitoxic / .antiflood\n` +
       `• .antiraid / .antidelete\n` +
@@ -371,6 +407,14 @@ module.exports = {
       `• .color #HEX / .nasa\n` +
       `• .define / .ip / .myip\n` +
       `• .crypto / .short / .unshort\n` +
+      `• .advice  — Random life advice  🆕\n` +
+      `• .dadjoke  — Dad joke / pun  🆕\n` +
+      `• .catfact / .dogfact  🆕\n` +
+      `• .numfact [number]  — Number trivia  🆕\n` +
+      `• .emoji <name>  — Emoji lookup  🆕\n` +
+      `• .age <YYYY-MM-DD>  🆕\n` +
+      `• .encode <type> <text>  🆕\n` +
+      `• .decode <type> <text>  🆕\n` +
       `💎 .remind / .mystats\n\n` +
 
       `${'━'.repeat(32)}\n` +
@@ -390,9 +434,15 @@ module.exports = {
       `• .autoread / .pmblocker\n\n` +
 
       `${'━'.repeat(32)}\n` +
-      `📋 *.bmenu* — Interactive tap menu\n` +
+      `📋 *.bmenu* — *Interactive tap menu*\n` +
       `${'━'.repeat(32)}\n\n` +
-      `_⚡ Powered by Dev-Ntando | NovaSpark Bot_\n` +
+      `🆕 *v5.3 New Commands:*\n` +
+      `• .advice • .dadjoke • .catfact • .dogfact\n` +
+      `• .numfact • .emoji • .age • .encode • .decode\n` +
+      `• .complimentme • .vibe • .waifu • .roulette\n` +
+      `• .tagadmins • .membercount\n\n` +
+      `${'━'.repeat(32)}\n` +
+      `_⚡ Powered by *Dev-Ntando* | *NovaSpark Bot v${config.botVersion}*_\n` +
       `_${config.channelLink || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'}_`;
 
     // ── IMAGE SOURCES ─────────────────────────────────────────────────────────

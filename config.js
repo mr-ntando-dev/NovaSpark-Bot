@@ -12,7 +12,7 @@ module.exports = {
 
   // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
-  botVersion:  '5.0.0',
+  botVersion:  '5.3.0',
   prefix:      '.',
   sessionName: process.env.SESSION_DIR || 'session',
   sessionID:   process.env.SESSION_ID  || '',
