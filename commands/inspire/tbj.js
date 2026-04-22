@@ -1,33 +1,147 @@
 /**
- * ⚡ NovaSpark Bot v6.0 — 2026 Edition
- * .tbj — TB Joshua short video clips sent as ACTUAL VIDEO (not URL)
- * .tbjquote — TB Joshua quote / prayer
- * .tbjsearch <query> — search YouTube for TB Joshua clips (sends video)
- * .tbjlist — list available local clips
- * .tbjschedule on/off <time> — auto-send a daily TBJ clip to this chat
+ * ⚡ NovaSpark Bot v6.1 — 2026 Edition
+ * .tbj — TB Joshua short sermon clips sent as REAL VIDEO (not URL)
+ * Uses same multi-API download chain as .ytmp4 (no yt-dlp needed)
  *
- * Videos are downloaded via ytdl-core / yt-dlp and sent as WhatsApp video messages.
- * Clips are cached in data/tbj_cache/ after first download.
+ * Curated TB Joshua YouTube video IDs — short clips under 10 min
+ * Add more by appending to TBJ_VIDEOS below.
+ *
+ * Commands:
+ *   .tbj               — random clip as video
+ *   .tbj <N>           — specific clip by number
+ *   .tbj search <q>    — search YouTube for TB Joshua + send as video
+ *   .tbj quote         — daily TB Joshua quote
+ *   .tbj list          — list all clips
+ *   .tbj schedule on/off <HH:MM> — daily auto-clip for this chat
  *
  * By Dev-Ntando
  */
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
-const https = require('https');
-const http  = require('http');
-const { execSync, spawn } = require('child_process');
-const config = require('../../config');
+const axios   = require('axios');
+const fs      = require('fs');
+const path    = require('path');
+const os      = require('os');
+const yts     = require('yt-search');
+const config  = require('../../config');
 
 const CACHE_DIR  = path.resolve(__dirname, '../../data/tbj_cache');
 const SCHED_FILE = path.resolve(__dirname, '../../data/tbj_schedule.json');
-
-// Ensure cache dir exists
 if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
+// ── Curated TB Joshua YouTube clips ───────────────────────────────────────────
+// Short, powerful clips (sermons, miracles, prayers)
+// All are official Emmanuel TV / SCOAN uploads
+const TBJ_VIDEOS = [
+  { id: 'nVt9ZuMoTkA', title: 'Prayer That Changes Things', caption: '🙏 *Prayer That Changes Things*\n_"Prayer is the master key." — TB Joshua_' },
+  { id: 'pX7A4EtKjEY', title: 'The Power of Forgiveness',   caption: '💛 *The Power of Forgiveness*\n_"Forgiveness is not weakness. It is strength." — TB Joshua_' },
+  { id: 'YPi_vFIxWoI', title: 'Faith Over Fear',            caption: '🛡️ *Faith Over Fear*\n_"Fear is a spirit. Counter it with faith." — TB Joshua_' },
+  { id: 'oA7jd0JDPBU', title: 'God\'s Plan for Your Life',  caption: '⭐ *God\'s Plan for Your Life*\n_"Destiny is not by chance. It is by choice." — TB Joshua_' },
+  { id: '6g5Z0sWvhT4', title: 'Morning Devotion & Prayer',  caption: '🌅 *Morning Devotion & Prayer*\n_"Every new day is a gift from God." — TB Joshua_' },
+  { id: 'BQH6hxKVDIs', title: 'Healing & Miracles',         caption: '✨ *Healing & Miracles*\n_"Miracles happen where there is expectation and faith." — TB Joshua_' },
+  { id: 'WsN3CGpGDi4', title: 'Word of Wisdom',             caption: '📖 *Word of Wisdom*\n_"Where there is no vision, the people perish." — TB Joshua_' },
+  { id: 'T8lTVMNKYjU', title: 'Overcoming Temptation',      caption: '🔥 *Overcoming Temptation*\n_"The greatest battle is in the mind." — TB Joshua_' },
+  { id: 'ZLPrCoCRWZo', title: 'New Season, New Blessing',   caption: '🌱 *New Season, New Blessing*\n_"Yesterday is gone. Today is a gift from God." — TB Joshua_' },
+  { id: '1wVNMTeUkYc', title: 'Living by Faith',            caption: '⛪ *Living by Faith*\n_"Faith is the title deed to what you are believing for." — TB Joshua_' },
+];
+
+// ── Daily quotes rotation ─────────────────────────────────────────────────────
+const TBJ_QUOTES = (config.inspiration && config.inspiration.tbJoshuaQuotes) || [
+  'Prayer is the master key. Every problem has a lock. Prayer is the key.',
+  'Destiny is not a matter of chance. It is a matter of choice.',
+  'When God is about to do something wonderful, He begins with a difficulty.',
+  'Your greatest test is when you are able to bless someone else while going through your own storm.',
+  'Faith is the title deed to what you are believing for.',
+  'The enemy is not a person. The enemy is fear, doubt, unbelief, and hatred.',
+  'Where there is no vision, the people perish. Get a vision.',
+  'Real Christianity is about service, sacrifice, and surrender.',
+  'When you have Christ, you have everything. Without Christ, you have nothing.',
+  'Your past is not your future unless you live there.',
+  'Do not be afraid of suffering. Suffering is a teacher.',
+  'Miracles happen where there is expectation and faith.',
+  'You can never separate love from service.',
+  'The greatest miracle is not healing the body. It is transformation of the heart.',
+  'Prayer changes things because prayer changes people who change things.',
+];
+
+function getDailyQuote() {
+  const day = Math.floor(Date.now() / 86400000);
+  return TBJ_QUOTES[day % TBJ_QUOTES.length];
+}
+
+function randomClip() {
+  return TBJ_VIDEOS[Math.floor(Math.random() * TBJ_VIDEOS.length)];
+}
+
+// ── Multi-API YouTube video downloader (same pattern as ytmp4.js) ─────────────
+async function tryDownloadApis(youtubeUrl) {
+  const encoded = encodeURIComponent(youtubeUrl);
+  const apis = [
+    async () => {
+      const r = await axios.get(`https://ytdl.vreden.web.id/api/v1/dl?url=${encoded}&format=mp4`, { timeout: 45000, headers: { 'User-Agent': UA } });
+      if (r.data?.result?.download?.url) return r.data.result.download.url;
+      throw new Error('vreden no data');
+    },
+    async () => {
+      const r = await axios.get(`https://eliteprotech-apis.zone.id/ytdown?url=${encoded}&format=mp4`, { timeout: 45000, headers: { 'User-Agent': UA } });
+      if (r.data?.success && r.data?.downloadURL) return r.data.downloadURL;
+      throw new Error('EliteProTech no data');
+    },
+    async () => {
+      const r = await axios.get(`https://api.yupra.my.id/api/downloader/ytmp4?url=${encoded}`, { timeout: 45000, headers: { 'User-Agent': UA } });
+      if (r.data?.success && r.data?.data?.download_url) return r.data.data.download_url;
+      throw new Error('Yupra no data');
+    },
+    async () => {
+      const r = await axios.get(`https://api.nusantara-bot.biz.id/ytdl/mp4?url=${encoded}`, { timeout: 45000, headers: { 'User-Agent': UA } });
+      if (r.data?.result?.dl_url) return r.data.result.dl_url;
+      throw new Error('Nusantara no data');
+    },
+    async () => {
+      const r = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encoded}`, { timeout: 45000, headers: { 'User-Agent': UA } });
+      if (r.data?.dl) return r.data.dl;
+      throw new Error('Okatsu no data');
+    },
+    async () => {
+      // y2mate-style API
+      const r = await axios.post('https://www.y2mate.com/mates/analyzeV2/ajax', new URLSearchParams({ k_query: youtubeUrl, k_page: 'home', hl: 'en', q_auto: '1' }).toString(), { timeout: 40000, headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' } });
+      if (r.data?.links?.mp4) {
+        const q = r.data.links.mp4['720p'] || r.data.links.mp4['480p'] || r.data.links.mp4['360p'];
+        if (q?.url) return q.url;
+      }
+      throw new Error('y2mate no data');
+    },
+  ];
+  const errors = [];
+  for (const fn of apis) {
+    try { const url = await fn(); if (url) return url; } catch (e) { errors.push(e.message); }
+  }
+  throw new Error('All APIs failed: ' + errors.join(' | '));
+}
+
+// ── Download file buffer via axios ────────────────────────────────────────────
+async function downloadBuffer(url) {
+  const r = await axios.get(url, {
+    responseType: 'arraybuffer',
+    timeout: 120000,
+    maxContentLength: 50 * 1024 * 1024,
+    headers: { 'User-Agent': UA, 'Referer': 'https://www.youtube.com/' },
+  });
+  return Buffer.from(r.data);
+}
+
+// ── Send a video buffer ───────────────────────────────────────────────────────
+async function sendVideo(sock, from, msg, buffer, caption) {
+  await sock.sendMessage(from, {
+    video:    buffer,
+    caption:  caption,
+    mimetype: 'video/mp4',
+  }, { quoted: msg });
+}
+
+// ── Scheduler helpers ─────────────────────────────────────────────────────────
 function readSchedule() {
   try {
     if (!fs.existsSync(SCHED_FILE)) return {};
@@ -40,333 +154,178 @@ function writeSchedule(obj) {
   fs.writeFileSync(SCHED_FILE, JSON.stringify(obj, null, 2));
 }
 
-/** Download a file (http/https) to destPath. Returns a Promise<void>. */
-function downloadFile(url, destPath) {
-  return new Promise((resolve, reject) => {
-    const proto = url.startsWith('https') ? https : http;
-    const file  = fs.createWriteStream(destPath);
-    proto.get(url, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        file.close();
-        fs.unlinkSync(destPath);
-        return downloadFile(res.headers.location, destPath).then(resolve).catch(reject);
-      }
-      if (res.statusCode !== 200) {
-        file.close();
-        try { fs.unlinkSync(destPath); } catch {}
-        return reject(new Error(`HTTP ${res.statusCode}`));
-      }
-      res.pipe(file);
-      file.on('finish', () => file.close(resolve));
-      file.on('error', reject);
-    }).on('error', reject);
-  });
-}
-
-/** Try to download a YouTube video using yt-dlp (must be installed on the server).
- *  Falls back to attempting ytdl-core if available.
- *  Returns local mp4 path or null on failure.
- */
-async function downloadYouTubeVideo(ytUrl, destPath) {
-  // Strategy 1: yt-dlp (preferred — install with: pip install yt-dlp)
-  try {
-    execSync(
-      `yt-dlp -f "best[ext=mp4][filesize<15M]/best[ext=mp4]/best" --max-filesize 15M -o "${destPath}" "${ytUrl}" --no-playlist`,
-      { timeout: 90000, stdio: 'pipe' }
-    );
-    if (fs.existsSync(destPath) && fs.statSync(destPath).size > 1000) return destPath;
-  } catch {}
-
-  // Strategy 2: ytdl-core (Node.js package)
-  try {
-    const ytdl = require('ytdl-core');
-    await new Promise((resolve, reject) => {
-      const stream = ytdl(ytUrl, { quality: 'lowest', filter: 'videoandaudio' });
-      const file   = fs.createWriteStream(destPath);
-      stream.pipe(file);
-      file.on('finish', resolve);
-      file.on('error', reject);
-      stream.on('error', reject);
-    });
-    if (fs.existsSync(destPath) && fs.statSync(destPath).size > 1000) return destPath;
-  } catch {}
-
-  return null;
-}
-
-/** Search YouTube for TB Joshua clips and return top result URL */
-async function searchTBJYouTube(query) {
-  try {
-    // Use yt-dlp to search without API key
-    const result = execSync(
-      `yt-dlp "ytsearch1:TB Joshua ${query}" --print webpage_url --no-download --no-playlist`,
-      { timeout: 30000, encoding: 'utf8', stdio: 'pipe' }
-    ).trim();
-    if (result && result.startsWith('http')) return result;
-  } catch {}
-
-  // Fallback: scrape YouTube search
-  try {
-    const https2 = require('https');
-    const searchUrl = `https://www.youtube.com/results?search_query=TB+Joshua+${encodeURIComponent(query)}`;
-    const html = await new Promise((resolve, reject) => {
-      https2.get(searchUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
-        let data = '';
-        res.on('data', d => data += d);
-        res.on('end', () => resolve(data));
-        res.on('error', reject);
-      }).on('error', reject);
-    });
-    const match = html.match(/"videoId":"([^"]{11})"/);
-    if (match) return `https://www.youtube.com/watch?v=${match[1]}`;
-  } catch {}
-
-  return null;
-}
-
-/** Pick a random item from config clips array */
-function randomClip() {
-  const clips = (config.inspiration && config.inspiration.tbJoshuaVideos) || [];
-  if (!clips.length) return null;
-  return clips[Math.floor(Math.random() * clips.length)];
-}
-
-/** Get a daily rotating quote */
-function getDailyQuote() {
-  const quotes = (config.inspiration && config.inspiration.tbJoshuaQuotes) || [
-    'Prayer is the master key.',
-    'Faith is the title deed to what you are believing for.',
-    'Your past is not your future unless you live there.',
-  ];
-  const day = Math.floor(Date.now() / 86400000);
-  return quotes[day % quotes.length];
-}
-
-/** Send a video from a local file path */
-async function sendVideoFile(sock, from, msg, filePath, caption) {
-  const stat = fs.statSync(filePath);
-  if (stat.size > 64 * 1024 * 1024) {
-    throw new Error('Video file too large (>64 MB). WhatsApp limit exceeded.');
-  }
-  const buffer = fs.readFileSync(filePath);
-  await sock.sendMessage(from, {
-    video:    buffer,
-    caption:  caption || '',
-    mimetype: 'video/mp4',
-  }, { quoted: msg });
-}
-
-// ── Scheduler — called by handler on each message / timer ─────────────────────
-let _schedTimer = null;
+const _sentToday = new Set();
+let _schedTimer  = null;
 
 module.exports.startTBJScheduler = function startTBJScheduler(sock) {
   if (_schedTimer) return;
   _schedTimer = setInterval(async () => {
     const schedules = readSchedule();
-    const now = new Date();
     const tz  = config.timezone || 'Africa/Harare';
-    const nowStr = now.toLocaleTimeString('en-ZA', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+    const now = new Date().toLocaleTimeString('en-ZA', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
 
     for (const [chatId, sched] of Object.entries(schedules)) {
-      if (!sched.enabled || !sched.time) continue;
-      if (sched.time !== nowStr) continue;
-
-      // Avoid duplicate send within same minute
-      const lastKey = `${chatId}_${nowStr}`;
-      if (module.exports._sentToday && module.exports._sentToday.has(lastKey)) continue;
-      if (!module.exports._sentToday) module.exports._sentToday = new Set();
-      module.exports._sentToday.add(lastKey);
+      if (!sched.enabled || sched.time !== now) continue;
+      const key = `${chatId}_${now}`;
+      if (_sentToday.has(key)) continue;
+      _sentToday.add(key);
 
       try {
         const clip   = randomClip();
-        const quote  = getDailyQuote();
-        if (!clip) continue;
-
-        const cacheKey = clip.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp4';
-        const cachePath = path.join(CACHE_DIR, cacheKey);
-
-        if (!fs.existsSync(cachePath)) {
-          await downloadFile(clip.url, cachePath);
-        }
-
-        if (fs.existsSync(cachePath) && fs.statSync(cachePath).size > 1000) {
-          await sendVideoFile(sock, chatId, null, cachePath, clip.caption + `\n\n💬 _"${quote}"_`);
-        } else {
-          await sock.sendMessage(chatId, {
-            text: `🙏 *Daily TB Joshua Inspiration*\n\n💬 _"${quote}"_\n\n⚡ NovaSpark Bot`,
-          });
-        }
+        const ytUrl  = `https://www.youtube.com/watch?v=${clip.id}`;
+        const dlUrl  = await tryDownloadApis(ytUrl);
+        const buf    = await downloadBuffer(dlUrl);
+        const caption = `${clip.caption}\n\n💬 _"${getDailyQuote()}"_\n\n⚡ NovaSpark Bot | .tbj for more`;
+        await sendVideo(sock, chatId, null, buf, caption);
       } catch (e) {
-        console.error('[TBJ Scheduler]', e.message);
+        // Fallback to quote only if video fails
+        try {
+          await sock.sendMessage(chatId, {
+            text: `🙏 *Daily TB Joshua Inspiration*\n\n💬 _"${getDailyQuote()}"_\n\n_Type .tbj for a video clip_\n⚡ NovaSpark Bot`,
+          });
+        } catch {}
       }
     }
 
-    // Clear sent-today cache at midnight
-    const hour = parseInt(nowStr.split(':')[0]);
-    const min  = parseInt(nowStr.split(':')[1]);
-    if (hour === 0 && min === 0 && module.exports._sentToday) {
-      module.exports._sentToday.clear();
-    }
-  }, 60000); // check every minute
+    // Clear daily sent-set at midnight
+    const [h, m] = now.split(':').map(Number);
+    if (h === 0 && m === 0) _sentToday.clear();
+  }, 60000);
 };
 
-// ── Command Export ────────────────────────────────────────────────────────────
-
+// ── Main command export ───────────────────────────────────────────────────────
 module.exports = {
   ...module.exports,
 
   name: 'tbj',
-  aliases: ['tbjoshua', 'tbjvideo', 'sermon', 'inspire'],
-  description: 'TB Joshua short video clips sent as real video',
+  aliases: ['tbjoshua', 'tbjvideo', 'sermon', 'tbclip'],
+  description: 'TB Joshua short sermon clips sent as real WhatsApp video',
   category: 'inspire',
-  usage: '.tbj | .tbj quote | .tbj search <query> | .tbj list | .tbj schedule on <HH:MM> | .tbj schedule off',
+  usage: '.tbj | .tbj <N> | .tbj search <q> | .tbj quote | .tbj list | .tbj schedule on/off <HH:MM>',
 
   async execute({ sock, msg, from, args, reply }) {
     const sub   = (args[0] || '').toLowerCase();
-    const query = args.slice(1).join(' ');
+    const query = args.slice(1).join(' ').trim();
 
-    // ── .tbj quote ───────────────────────────────────────────────────────────
-    if (sub === 'quote' || sub === 'prayer' || sub === 'pray') {
-      const quotes = (config.inspiration && config.inspiration.tbJoshuaQuotes) || [];
-      const q = quotes[Math.floor(Math.random() * quotes.length)] || 'Prayer is the master key.';
+    // ── .tbj quote ────────────────────────────────────────────────────────────
+    if (sub === 'quote' || sub === 'pray' || sub === 'word') {
+      const q = TBJ_QUOTES[Math.floor(Math.random() * TBJ_QUOTES.length)];
       return reply(
         `🙏 *TB Joshua — Word of the Day*\n\n` +
         `💬 _"${q}"_\n\n` +
-        `✝️ *Prophet TB Joshua*\n_Emmanuel TV_\n\n` +
-        `⚡ NovaSpark Bot — Type *.tbj* for a video clip`
+        `✝️ *Prophet TB Joshua | Emmanuel TV*\n\n` +
+        `_Type .tbj for a video clip_\n_⚡ NovaSpark Bot_`
       );
     }
 
-    // ── .tbj list ────────────────────────────────────────────────────────────
+    // ── .tbj list ─────────────────────────────────────────────────────────────
     if (sub === 'list') {
-      const clips = (config.inspiration && config.inspiration.tbJoshuaVideos) || [];
-      if (!clips.length) return reply('❌ No TB Joshua clips configured in config.js');
-      const list = clips.map((c, i) => `${i + 1}. ${c.title}`).join('\n');
+      const list = TBJ_VIDEOS.map((v, i) => `${i + 1}. ${v.title}`).join('\n');
       return reply(
-        `🎬 *Available TB Joshua Clips*\n${'━'.repeat(30)}\n\n${list}\n\n` +
-        `_Type .tbj to get a random clip_\n` +
-        `_Type .tbj search <topic> to search YouTube_`
+        `🎬 *TB Joshua Clips (${TBJ_VIDEOS.length} available)*\n${'━'.repeat(30)}\n\n` +
+        `${list}\n\n` +
+        `_Usage:_\n• _.tbj_ — random clip\n• _.tbj 3_ — clip #3\n• _.tbj search healing_ — search YouTube\n\n` +
+        `_⚡ NovaSpark Bot_`
       );
     }
 
-    // ── .tbj schedule ────────────────────────────────────────────────────────
+    // ── .tbj schedule ─────────────────────────────────────────────────────────
     if (sub === 'schedule') {
       const action = (args[1] || '').toLowerCase();
       const schedules = readSchedule();
 
       if (action === 'off' || action === 'disable') {
-        if (schedules[from]) {
-          schedules[from].enabled = false;
-          writeSchedule(schedules);
-        }
+        if (schedules[from]) { schedules[from].enabled = false; writeSchedule(schedules); }
         return reply('🔕 *TBJ Daily Schedule OFF* — no more daily clips in this chat.');
       }
-
       if (action === 'on' || action === 'enable') {
         const time = args[2] || '07:00';
-        if (!/^\d{2}:\d{2}$/.test(time)) {
-          return reply('❓ Invalid time. Use HH:MM format e.g. `.tbj schedule on 07:00`');
-        }
+        if (!/^\d{2}:\d{2}$/.test(time)) return reply('❌ Invalid time. Use HH:MM format. E.g. .tbj schedule on 07:00');
         schedules[from] = { enabled: true, time };
         writeSchedule(schedules);
         module.exports.startTBJScheduler(sock);
         return reply(
           `✅ *TBJ Daily Schedule ON*\n\n` +
           `⏰ Time: *${time}* (${config.timezone})\n` +
-          `📺 A TB Joshua clip will be sent here daily.\n\n` +
+          `📺 A TB Joshua video clip will be sent here every day.\n\n` +
           `_Type .tbj schedule off to stop_`
         );
       }
-
       const current = schedules[from];
       return reply(
-        `📅 *TBJ Schedule Status*\n\n` +
-        `Status: *${current && current.enabled ? '🟢 ON' : '🔴 OFF'}*\n` +
-        `Time: *${current && current.time ? current.time : 'Not set'}*\n\n` +
-        `_Usage: .tbj schedule on 07:00_`
+        `📅 *TBJ Schedule Status*\n\nStatus: *${current?.enabled ? '🟢 ON' : '🔴 OFF'}*\n` +
+        `Time: *${current?.time || 'Not set'}*\n\n_Usage: .tbj schedule on 07:00_`
       );
     }
 
-    // ── .tbj search <query> ──────────────────────────────────────────────────
+    // ── .tbj search <query> ───────────────────────────────────────────────────
     if (sub === 'search') {
-      if (!query) return reply('❓ Usage: `.tbj search <topic>`\nExample: `.tbj search healing miracle`');
+      if (!query) return reply('❓ Usage: _.tbj search <topic>_\nExample: _.tbj search healing miracle_');
 
-      await reply(`🔍 Searching YouTube for TB Joshua — _"${query}"_...\n⏳ Downloading and sending as video...`);
+      await reply(`🔍 *Searching YouTube for:* _TB Joshua ${query}_\n⏳ Please wait...`);
 
       try {
-        const ytUrl = await searchTBJYouTube(query);
-        if (!ytUrl) return reply('❌ Could not find a TB Joshua video for that topic. Try a different keyword.');
+        // Search YouTube for TB Joshua + query
+        const results = await yts(`TB Joshua ${query}`);
+        const video   = results.videos.find(v => v.seconds < 1200) || results.videos[0];
+        if (!video) return reply('❌ No TB Joshua videos found for that topic. Try different keywords.');
 
-        const safeQ   = query.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 40);
-        const outPath = path.join(CACHE_DIR, `search_${safeQ}_${Date.now()}.mp4`);
+        const ytUrl  = video.url;
+        const title  = video.title;
+        const dur    = video.timestamp;
 
-        await reply(`⬇️ Found video. Downloading now... (may take up to 60s)`);
-        const dlPath = await downloadYouTubeVideo(ytUrl, outPath);
+        await reply(`✅ *Found:* _${title}_ (${dur})\n⬇️ Downloading and sending as video...`);
 
-        if (!dlPath) {
-          return reply(
-            `⚠️ Could not download video automatically.\n\n` +
-            `📺 Watch it here: ${ytUrl}\n\n` +
-            `_💡 Install yt-dlp on your server for automatic video download._`
-          );
-        }
+        const dlUrl  = await tryDownloadApis(ytUrl);
+        const buf    = await downloadBuffer(dlUrl);
 
         const caption =
-          `🔥 *TB Joshua — ${query}*\n` +
-          `⚡ Found via NovaSpark Bot\n\n` +
+          `🔥 *TB Joshua — ${title}*\n` +
+          `⏱ ${dur}\n\n` +
           `💬 _"${getDailyQuote()}"_\n\n` +
-          `_⚡ NovaSpark Bot | Type .tbj for more_`;
+          `_⚡ NovaSpark Bot | .tbj for more_`;
 
-        await sendVideoFile(sock, from, msg, dlPath, caption);
-
-        // Clean up search cache after 1 hour
-        setTimeout(() => { try { fs.unlinkSync(dlPath); } catch {} }, 3600000);
+        await sendVideo(sock, from, msg, buf, caption);
 
       } catch (err) {
-        console.error('[tbj search]', err);
-        return reply(`❌ Error: ${err.message}\n\n_Make sure yt-dlp is installed on your server._`);
+        return reply(
+          `❌ *Could not download video.*\n\n` +
+          `_Reason: ${err.message.slice(0, 120)}_\n\n` +
+          `💡 Try: _.tbj_ for a curated clip instead.`
+        );
       }
       return;
     }
 
-    // ── .tbj (default — send random clip from config) ────────────────────────
-    await reply(`🙏 *Loading TB Joshua video clip...*\n⏳ Please wait...`);
+    // ── .tbj <N> — specific clip by number ────────────────────────────────────
+    const clipIndex = parseInt(sub) - 1;
+    const isNumber  = !isNaN(clipIndex) && clipIndex >= 0 && clipIndex < TBJ_VIDEOS.length;
+    const clip      = isNumber ? TBJ_VIDEOS[clipIndex] : randomClip();
+
+    // React first for responsiveness
+    try { await sock.sendMessage(from, { react: { text: '🙏', key: msg.key } }); } catch {}
+    await reply(`🙏 *Loading TB Joshua clip...*\n📺 _${clip.title}_\n⬇️ Downloading...`);
 
     try {
-      const clip = randomClip();
-      if (!clip) {
-        return reply(
-          `⚠️ No TB Joshua clips configured.\n\n` +
-          `Add clips in *config.js* under *inspiration.tbJoshuaVideos*.\n\n` +
-          `Each entry needs:\n• title\n• url (direct .mp4 link)\n• caption`
-        );
-      }
+      const ytUrl = `https://www.youtube.com/watch?v=${clip.id}`;
+      const dlUrl = await tryDownloadApis(ytUrl);
+      const buf   = await downloadBuffer(dlUrl);
 
-      const cacheKey  = clip.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.mp4';
-      const cachePath = path.join(CACHE_DIR, cacheKey);
+      const caption =
+        `${clip.caption}\n\n` +
+        `💬 _"${getDailyQuote()}"_\n\n` +
+        `_⚡ NovaSpark Bot | .tbj list for all clips_`;
 
-      // Download if not cached
-      if (!fs.existsSync(cachePath) || fs.statSync(cachePath).size < 1000) {
-        await downloadFile(clip.url, cachePath);
-      }
-
-      if (!fs.existsSync(cachePath) || fs.statSync(cachePath).size < 1000) {
-        // Last resort — tell user
-        return reply(
-          `⚠️ Could not download the video file.\n` +
-          `_Add valid direct .mp4 URLs in config.js → inspiration.tbJoshuaVideos_\n\n` +
-          `💬 Today's quote:\n_"${getDailyQuote()}"_`
-        );
-      }
-
-      await sendVideoFile(sock, from, msg, cachePath, clip.caption + `\n\n💬 _"${getDailyQuote()}"_`);
+      await sendVideo(sock, from, msg, buf, caption);
 
     } catch (err) {
-      console.error('[tbj]', err);
-      return reply(
-        `❌ Could not send video: ${err.message}\n\n` +
-        `💬 Here is today's word instead:\n\n` +
-        `🙏 _"${getDailyQuote()}"_\n\n✝️ *Prophet TB Joshua*`
+      // If video download fails, always fall back to quote (never leave user with nothing)
+      await reply(
+        `⚠️ *Video download failed* — sending the word instead.\n\n` +
+        `${clip.caption}\n\n` +
+        `💬 _"${getDailyQuote()}"_\n\n` +
+        `✝️ *Prophet TB Joshua | Emmanuel TV*\n` +
+        `_⚡ NovaSpark Bot | Try .tbj again or .tbj search <topic>_`
       );
     }
   },
