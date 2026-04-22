@@ -186,6 +186,15 @@ const membercountCmd = require('./commands/group/membercount');
 const waprotectCmd   = require('./commands/owner/waprotect');
 const tempnumberCmd  = require('./commands/tools/tempnumber');
 
+// ── v6.0 INSPIRE / FAITH ─────────────────────────────────────────────────────
+const tbjCmd         = require('./commands/inspire/tbj');
+const prayerCmd      = require('./commands/inspire/prayer');
+
+// ── v6.0 OWNER SCHEDULERS ────────────────────────────────────────────────────
+const autogmCmd      = require('./commands/owner/autogoodmorning');
+const autoverseCmd   = require('./commands/owner/autoverse');
+const autoprayerCmd  = require('./commands/owner/autoprayer');
+
 // ── v5 TOOLS ─────────────────────────────────────────────────────────────────
 const pingCmd        = require('./commands/tools/ping');
 const aliveCmd       = require('./commands/tools/alive');
@@ -289,6 +298,10 @@ const ALL_COMMANDS = [
   tagadminsCmd, membercountCmd,
   // v5.3 new features
   waprotectCmd, tempnumberCmd,
+  // v6.0 inspire / faith
+  tbjCmd, prayerCmd,
+  // v6.0 owner schedulers
+  autogmCmd, autoverseCmd, autoprayerCmd,
 ];
 
 const cmdMap = new Map();
@@ -376,9 +389,21 @@ const isOwner = (jid) => {
   return owners.includes(num);
 };
 
+// ── v6.0 Scheduler startup (called once on first message) ─────────────────────
+let _v6SchedulersStarted = false;
+function startV6Schedulers(sock) {
+  if (_v6SchedulersStarted) return;
+  _v6SchedulersStarted = true;
+  try { tbjCmd.startTBJScheduler && tbjCmd.startTBJScheduler(sock); } catch {}
+  try { autogmCmd.startAutoGMScheduler && autogmCmd.startAutoGMScheduler(sock); } catch {}
+  try { autoverseCmd.startAutoVerseScheduler && autoverseCmd.startAutoVerseScheduler(sock); } catch {}
+  try { autoprayerCmd.startAutoPrayerScheduler && autoprayerCmd.startAutoPrayerScheduler(sock); } catch {}
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 module.exports = async (sock, msg) => {
   _sock = sock;
+  startV6Schedulers(sock);
 
   if (!msg?.message) return;
   // index.js already gates fromMe — only owner commands reach here.

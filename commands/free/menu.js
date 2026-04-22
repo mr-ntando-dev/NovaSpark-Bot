@@ -1,19 +1,20 @@
 /**
- * ⚡ NovaSpark Bot v5.3 — 2026 Edition
- * MEGA MENU — .menu / .help
- * Full command listing with NovaSpark branded image — all commands in one view
- * Updated: Added advice, dadjoke, catfact, dogfact, numfact, emoji, age, encode/decode,
- *          complimentme, vibe/spiritlevel, waifu, roulette, tagadmins, membercount
+ * ⚡ NovaSpark Bot v6.0 — 2026 Edition
+ * MEGA MENU — .menu — Ultra-fast, sharply categorised command menu
+ * Sub-menus: group | ai | games | media | downloads | tools | fun | inspire | auto | owner | premium
  * By Dev-Ntando
  */
 'use strict';
 const config   = require('../../config');
 const database = require('../../database');
 
+const BAR  = '━'.repeat(33);
+const DIVL = '┄'.repeat(33);
+
 module.exports = {
   name: 'menu',
-  aliases: ['help', 'cmds', 'commands', 'start'],
-  description: 'Full command menu with image — all commands listed',
+  aliases: ['help', 'cmds', 'commands', 'start', 'h'],
+  description: 'Complete command menu — all categories',
   category: 'free',
 
   execute: async ({ sock, msg, from, sender, args, reply }) => {
@@ -21,471 +22,268 @@ module.exports = {
     const isPrem = database.isPremium ? database.isPremium(sender) : false;
     const num    = sender.split('@')[0];
     const plan   = isPrem ? '💎 Premium' : '🆓 Free';
-    const uptime = process.uptime();
-    const uptimeStr = `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`;
-    const memMB  = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+
+    const uptime    = process.uptime();
+    const uptimeStr = `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${Math.floor(uptime % 60)}s`;
+    const memMB     = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+    const memTotal  = Math.round(process.memoryUsage().heapTotal / 1024 / 1024);
+    const P         = config.prefix || '.';
 
     const now = new Date().toLocaleString('en-ZA', {
-      timeZone: config.timezone || 'Africa/Johannesburg',
+      timeZone: config.timezone || 'Africa/Harare',
       weekday: 'short', month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: false,
     });
 
-    // ── SUB-MENU HANDLERS (kept for .menu group / .menu ai etc) ─────────────
-
+    // ── sub-menu: group ───────────────────────────────────────────────────────
     if (sub === 'group') {
       return reply(
-        `🛡️ *GROUP MANAGEMENT*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `📋 *Moderation*\n` +
-        `• .warn @user [reason]\n` +
-        `• .warns @user\n` +
-        `• .clearwarn @user\n` +
-        `• .setwarnlimit <N>\n` +
-        `• .kick @user\n` +
-        `• .promote @user\n` +
-        `• .demote @user\n` +
-        `• .delete  _(reply to msg)_\n\n` +
-        `📢 *Tag & Announce*\n` +
-        `• .tagall [msg]\n` +
-        `• .hidetag [msg]\n` +
-        `• .tagadmins [msg]  — Mention all admins  🆕\n\n` +
-        `📊 *Info*\n` +
-        `• .membercount  — Member breakdown  🆕\n\n` +
-        `🔒 *Protection*\n` +
-        `• .antilink on/off/set\n` +
-        `• .antiword on/off/add/remove\n` +
-        `• .antitoxic on/off\n` +
-        `• .antiflood on [limit]\n` +
-        `• .antiraid on [limit]\n\n` +
-        `⚙️ *Settings*\n` +
-        `• .welcome on/off [msg]\n` +
-        `• .goodbye on/off [msg]\n` +
-        `• .mute / .unmute\n` +
-        `• .nightmode on/off\n` +
-        `• .vip on/off/add/remove/list\n` +
-        `• .ghost on/off\n` +
-        `• .autoreact on/off [random/mood]\n` +
-        `• .autoreply add <kw> | <reply>\n` +
-        `• .autokick join <min>\n` +
-        `• .autonudge on <days>\n` +
-        `• .grouplink\n` +
-        `• .resetlink\n\n` +
-        `📊 *Analytics*\n` +
-        `• .groupstats\n` +
-        `• .groupinfo\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `🛡️ *GROUP MANAGEMENT*\n${BAR}\n\n` +
+        `📋 *Moderation*\n• ${P}warn @user [reason]\n• ${P}warns @user\n• ${P}clearwarn @user\n` +
+        `• ${P}setwarnlimit <N>\n• ${P}kick @user\n• ${P}promote @user\n` +
+        `• ${P}demote @user\n• ${P}delete  _(reply to msg)_\n• ${P}ban @user\n\n` +
+        `📢 *Tag & Announce*\n• ${P}tagall [msg]\n• ${P}hidetag [msg]\n• ${P}tagadmins [msg]\n\n` +
+        `📊 *Info*\n• ${P}groupinfo\n• ${P}groupstats\n• ${P}membercount\n• ${P}topmembers\n\n` +
+        `🔒 *Protection*\n• ${P}antilink on/off\n• ${P}antiword on/off/add/remove\n` +
+        `• ${P}antitoxic on/off\n• ${P}antiflood on [limit]\n• ${P}antiraid on [limit]\n\n` +
+        `⚙️ *Settings*\n• ${P}welcome on/off [msg]\n• ${P}goodbye on/off [msg]\n` +
+        `• ${P}mute / ${P}unmute\n• ${P}nightmode on [22:00] [06:00]\n` +
+        `• ${P}vip on/off/add/remove/list\n• ${P}ghost on/off\n` +
+        `• ${P}autoreact on/off [random/mood]\n• ${P}autoreply add <kw> | <reply>\n` +
+        `• ${P}autokick join <min>\n• ${P}autonudge on <days>\n` +
+        `• ${P}grouplink\n• ${P}resetlink\n\n` +
+        `_⚡ NovaSpark v${config.botVersion} — Dev-Ntando_`
       );
     }
 
+    // ── sub-menu: ai ─────────────────────────────────────────────────────────
     if (sub === 'ai') {
       return reply(
-        `🧠 *AI & GPT COMMANDS*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `💬 *Chat AI*\n` +
-        `• .gpt <question>\n` +
-        `• .gemini <question>\n` +
-        `• .character <name> <msg>\n` +
-        `  ↳ luffy · naruto · goku · tony · sherlock · batman\n` +
-        `• .autochat on/off\n` +
-        `• .autochat persona <name>\n` +
-        `• .autochat reset\n\n` +
-        `🎨 *Image AI*\n` +
-        `• .imagine <prompt>\n` +
-      `• .genmusic <prompt>  🆕\n` +
-        `• .remini  _(reply to photo)_\n` +
-        `• .removebg  _(reply to photo)_\n\n` +
-        `📚 *Study AI*\n` +
-        `• .homework <question>\n` +
-        `• .essay <topic>\n` +
-        `• .summarize <text>\n` +
-        `• .studytips <subject>\n` +
-        `• .math <problem>\n` +
-        `• .pdf <title> | <subject>\n\n` +
-        `💎 *Premium AI*\n` +
-        `• .examprep <subject>\n` +
-        `• .code <lang> <task>\n` +
-        `• .setpersona <description>\n` +
-        `• .autostudy on <subject>\n` +
-        `• .mystats\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `🧠 *AI & GPT*\n${BAR}\n\n` +
+        `💬 *Chat AI*\n• ${P}gpt <question>\n• ${P}gemini <question>\n` +
+        `• ${P}character <name> <msg>\n  ↳ luffy · naruto · goku · tony · sherlock · batman\n` +
+        `• ${P}autochat on/off\n• ${P}autochat persona <name>\n• ${P}autochat reset\n\n` +
+        `🎨 *Image AI*\n• ${P}imagine <prompt>\n• ${P}imagine2 <prompt>\n• ${P}genmusic <prompt>\n` +
+        `• ${P}remini  _(reply to photo)_\n• ${P}removebg  _(reply to photo)_\n\n` +
+        `📚 *Study AI*\n• ${P}homework <question>\n• ${P}essay <topic>\n• ${P}summarize <text>\n` +
+        `• ${P}studytips <subject>\n• ${P}math <problem>\n• ${P}translate <lang> <text>\n\n` +
+        `💎 *Premium AI*\n• ${P}examprep <subject>\n• ${P}code <lang> <task>\n` +
+        `• ${P}setpersona <description>\n• ${P}autostudy on <subject>\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
       );
     }
 
-    if (sub === 'downloads') {
-      return reply(
-        `⬇️ *DOWNLOADERS*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `🎵 *Audio*\n` +
-        `• .song <name/URL>  — YouTube MP3\n` +
-        `• .spotify <URL>  — Spotify track\n\n` +
-        `🎬 *Video*\n` +
-        `• .video <name/URL>  — YouTube MP4\n` +
-        `• .yt <query>  — YouTube search\n` +
-        `• .tiktok <URL>  — TikTok no-watermark\n` +
-        `• .fb <URL>  — Facebook video\n\n` +
-        `📸 *Images & Social*\n` +
-        `• .ig <URL>  — Instagram photo/reel\n` +
-        `• .pin <URL>  — Pinterest image/video\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
-      );
-    }
-
+    // ── sub-menu: games ───────────────────────────────────────────────────────
     if (sub === 'games') {
       return reply(
-        `🎮 *GAMES & FUN*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `🕹️ *Games*\n` +
-        `• .wordle\n` +
-        `• .trivia\n` +
-        `• .hangman\n` +
-        `• .rps rock/paper/scissors\n\n` +
-        `🤔 *Party Games*\n` +
-        `• .2truth  — Two Truths & A Lie\n` +
-        `• .wyr  — Would You Rather\n` +
-        `• .truth / .dare\n` +
-        `• .riddle\n\n` +
-        `_All scores saved to your profile!_\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `🎮 *GAMES*\n${BAR}\n\n` +
+        `🟩 ${P}wordle — 5-letter word guessing game\n` +
+        `🧠 ${P}trivia — Live trivia (Open Trivia DB)\n` +
+        `🪢 ${P}hangman — Classic hangman (ASCII art)\n` +
+        `🪨 ${P}rps rock/paper/scissors — Score tracked\n` +
+        `🎱 ${P}8ball <question> — Magic 8 ball\n` +
+        `🎲 ${P}dice [sides] — Roll a die\n` +
+        `🪙 ${P}flip — Coin flip\n` +
+        `🎡 ${P}roulette — Russian roulette\n` +
+        `🤔 ${P}truth — Truth question\n` +
+        `😈 ${P}dare — Dare challenge\n` +
+        `💕 ${P}ship @u1 @u2 — Love compatibility\n` +
+        `🌀 ${P}wouldyourather — WYR?\n` +
+        `🎭 ${P}twotruth — Two truths and a lie\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
       );
     }
 
-    if (sub === 'social') {
+    // ── sub-menu: media ───────────────────────────────────────────────────────
+    if (sub === 'media') {
       return reply(
-        `💬 *SOCIAL & FUN*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `😂 *Fun*\n` +
-        `• .joke\n` +
-        `• .meme\n` +
-        `• .quote\n` +
-        `• .lyrics <song>\n` +
-        `• .8ball <question>\n` +
-        `• .flirt [@user]\n` +
-        `• .insult [@user]\n` +
-        `• .gayrate [@user]\n` +
-        `• .flip\n` +
-        `• .dice [n] [sides]\n` +
-        `• .horoscope <sign>\n` +
-        `• .riddle\n` +
-        `• .dare\n\n` +
-        `🆕 *v5.3 Fun*\n` +
-        `• .complimentme  — Hype yourself\n` +
-        `• .vibe [@user]  — Vibe check\n` +
-        `• .waifu  — Random anime image\n` +
-        `• .roulette  — Russian roulette (1 in 6)\n` +
-        `• .dadjoke  — Dad joke / pun\n\n` +
-        `💕 *Social*\n` +
-        `• .ship @user1 @user2\n` +
-        `• .compliment [@user]\n` +
-        `• .truth\n` +
-        `• .roast @user\n` +
-        `• .poll Q | A | B | C\n` +
-        `• .fact\n` +
-        `• .urban <word>\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `🎬 *MEDIA & STICKERS*\n${BAR}\n\n` +
+        `🖼️ *Images & Stickers*\n• ${P}sticker  _(reply to image/video)_\n• ${P}simage <url>\n` +
+        `• ${P}removebg  _(reply to image)_\n• ${P}remini  _(reply to photo)_\n` +
+        `• ${P}imagine <prompt> — AI image\n• ${P}waifu — Anime art\n\n` +
+        `📸 *Screenshot*\n• ${P}ssweb <url>\n\n` +
+        `🎵 *Audio*\n• ${P}tts [lang] <text> — Voice note\n• ${P}ytmp3 <query/url>\n• ${P}spotify <query>\n\n` +
+        `📺 *Video*\n• ${P}ytmp4 <query/url>\n• ${P}tiktok <url>\n• ${P}instagram <url>\n` +
+        `• ${P}facebook <url>\n• ${P}pinterest <url>\n\n` +
+        `🙏 *Inspiration Video*\n• ${P}tbj — TB Joshua sermon clip (real video)\n• ${P}tbj search <topic>\n\n` +
+        `🎨 *Text Effects*\n• ${P}textart <style> <text>\n  ↳ bold · italic · bubble · square · flip · mirror · tiny\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
       );
     }
 
+    // ── sub-menu: downloads ───────────────────────────────────────────────────
+    if (sub === 'downloads' || sub === 'dl') {
+      return reply(
+        `⬇️ *DOWNLOADS*\n${BAR}\n\n` +
+        `🎵 *Audio*\n• ${P}ytmp3 <query or YouTube URL>\n• ${P}spotify <search>\n\n` +
+        `📺 *Video*\n• ${P}ytmp4 <query or YouTube URL>\n• ${P}tiktok <TikTok URL>\n` +
+        `• ${P}instagram <IG URL>\n• ${P}facebook <FB URL>\n• ${P}pinterest <URL>\n\n` +
+        `🙏 *Faith Videos*\n• ${P}tbj — Random TB Joshua clip (real video)\n` +
+        `• ${P}tbj search <topic> — Search & send as video\n• ${P}tbj list — List clips\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
+      );
+    }
+
+    // ── sub-menu: tools ───────────────────────────────────────────────────────
     if (sub === 'tools') {
       return reply(
-        `🔧 *TOOLS & UTILITIES*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `⚙️ *Basic*\n` +
-        `• .ping\n` +
-        `• .alive\n` +
-        `• .vv  — View-once revealer\n` +
-        `• .ss <url>  — Screenshot\n` +
-        `• .sticker  — Image → sticker\n` +
-        `• .simage  — Sticker → image\n` +
-        `• .tts <text>  — Text to speech\n` +
-        `• .translate <lang> <text>\n` +
-        `• .currency 100 USD ZAR\n` +
-        `• .bmi <kg> <cm>\n` +
-        `• .calc <expression>\n` +
-        `• .weather <city>\n` +
-        `• .time [timezone]\n` +
-        `• .news [topic]\n` +
-        `• .qr <text>\n` +
-        `• .getpp [@user]\n` +
-        `• .profile [@user]\n` +
-        `• .motivate [@user]\n` +
-        `• .myactivity\n` +
-        `• .topmembers\n` +
-        `• .owner\n\n` +
-        `🆕 *v5.1 Tools*\n` +
-        `• .password [length]\n` +
-        `• .countdown <date> [name]\n` +
-        `• .color #HEX\n` +
-        `• .nasa\n\n` +
-        `🆕 *v5.2 Tools*\n` +
-        `• .define <word>\n` +
-        `• .ip <address> / .myip\n` +
-        `• .crypto <symbol>\n` +
-        `• .bible [John 3:16/search]\n` +
-        `• .short <url> / .unshort <url>\n\n` +
-        `🆕 *v5.3 Tools*\n` +
-        `• .advice  — Random life advice\n` +
-        `• .dadjoke  — Dad joke / pun\n` +
-        `• .catfact  — Random cat fact\n` +
-        `• .dogfact  — Random dog fact\n` +
-        `• .numfact [number]  — Number trivia\n` +
-        `• .emoji <name>  — Emoji lookup\n` +
-        `• .age <YYYY-MM-DD>  — Age calculator\n` +
-        `• .encode <type> <text>  — base64/hex/reverse/morse\n` +
-        `• .decode <type> <text>  — base64/hex/morse\n` +
-        `• .tempnumber [country]  — Free temp SMS number  🆕\n\n` +
-        `💎 *Premium*\n` +
-        `• .remind <time> <msg>\n` +
-        `• .mystats\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `🔧 *TOOLS & UTILITIES*\n${BAR}\n\n` +
+        `🌐 *Web & Info*\n• ${P}news [topic]\n• ${P}weather <city>\n• ${P}qr <text>\n` +
+        `• ${P}shorturl <url>\n• ${P}ssweb <url>\n• ${P}ip <address>\n` +
+        `• ${P}crypto <coin>\n• ${P}currency 100 USD ZAR\n\n` +
+        `📊 *Calculators*\n• ${P}calc <expr> — Scientific\n• ${P}bmi <kg> <cm>\n• ${P}age <birthdate>\n\n` +
+        `🕐 *Time*\n• ${P}time [timezone]\n• ${P}countdown <date>\n• ${P}remind <time> <msg> 💎\n\n` +
+        `📝 *Text*\n• ${P}translate <lang> <text>\n• ${P}textart <style> <text>\n• ${P}tts [lang] <text>\n` +
+        `• ${P}encode base64/url/morse <text>\n• ${P}define <word>\n• ${P}urban <word>\n\n` +
+        `🔐 *Security*\n• ${P}password [length]\n• ${P}tempnumber\n\n` +
+        `📱 *Profile*\n• ${P}getpp @user\n• ${P}viewonce\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
       );
     }
 
+    // ── sub-menu: fun ─────────────────────────────────────────────────────────
+    if (sub === 'fun') {
+      return reply(
+        `😂 *FUN & SOCIAL*\n${BAR}\n\n` +
+        `😄 *Reactions*\n• ${P}roast @user\n• ${P}insult @user\n• ${P}compliment [@user]\n` +
+        `• ${P}complimentme\n• ${P}flirt [@user]\n• ${P}ship @u1 @u2\n\n` +
+        `😁 *Humor*\n• ${P}joke\n• ${P}joke2 (dad joke)\n• ${P}meme\n• ${P}riddle\n` +
+        `• ${P}fact\n• ${P}catfact\n• ${P}dogfact\n• ${P}numberfact <N>\n• ${P}urban <word>\n\n` +
+        `🌟 *Inspiration*\n• ${P}motivate [@user]\n• ${P}quote\n• ${P}advice\n• ${P}horoscope <sign>\n• ${P}vibe\n\n` +
+        `📊 *Fun Stats*\n• ${P}gayrate [@user]\n• ${P}profile [@user]\n• ${P}myactivity\n• ${P}mystats 💎\n\n` +
+        `_⚡ NovaSpark v${config.botVersion}_`
+      );
+    }
+
+    // ── sub-menu: inspire / faith ─────────────────────────────────────────────
+    if (sub === 'inspire' || sub === 'faith' || sub === 'church') {
+      return reply(
+        `🙏 *INSPIRATION & FAITH*\n${BAR}\n\n` +
+        `✝️ *TB Joshua Clips* (sent as real video)\n` +
+        `• ${P}tbj — Random TB Joshua short video\n` +
+        `• ${P}tbj search <topic> — Search & download\n` +
+        `• ${P}tbj quote — Today's TB Joshua quote\n` +
+        `• ${P}tbj list — List local clips\n` +
+        `• ${P}tbj schedule on <HH:MM> — Daily auto-clip\n` +
+        `• ${P}tbj schedule off\n\n` +
+        `📖 *Bible*\n• ${P}bible <reference> — Any verse (KJV)\n• ${P}verse — Today's verse\n` +
+        `• ${P}autoverse on <HH:MM> — Daily verse _(Owner)_\n\n` +
+        `🙏 *Prayer*\n• ${P}prayer — Daily devotional prayer\n` +
+        `• ${P}autoprayer on <HH:MM> — Daily prayer _(Owner)_\n\n` +
+        `🌅 *Daily Greetings* _(Owner)_\n` +
+        `• ${P}autogm gm on <HH:MM> — Good Morning\n• ${P}autogm gn on <HH:MM> — Good Night\n\n` +
+        `_⚡ NovaSpark v${config.botVersion} — Dev-Ntando_`
+      );
+    }
+
+    // ── sub-menu: auto ────────────────────────────────────────────────────────
+    if (sub === 'auto' || sub === 'autos') {
+      return reply(
+        `⚙️ *ALL AUTO-FEATURES*\n${BAR}\n\n` +
+        `🟢 *Presence*\n• ${P}autoonline on/off\n• ${P}autotyping on/off\n• ${P}autoread on/off\n\n` +
+        `💬 *Messaging*\n• ${P}autopm on/off/set\n• ${P}autoreply\n• ${P}autoreplykw\n` +
+        `• ${P}autostatus on/off [interval]\n• ${P}autoannounce on/off [interval]\n\n` +
+        `🌅 *Schedulers*\n• ${P}autogm gm on <HH:MM> — Good Morning\n• ${P}autogm gn on <HH:MM> — Good Night\n` +
+        `• ${P}autoverse on <HH:MM> — Daily verse\n• ${P}autoprayer on <HH:MM> — Daily prayer\n` +
+        `• ${P}tbj schedule on <HH:MM> — TB Joshua clip\n\n` +
+        `🛡️ *Protection Autos*\n• ${P}antilink on/off\n• ${P}antitoxic on/off\n` +
+        `• ${P}antiflood on [limit]\n• ${P}antiraid on [limit]\n` +
+        `• ${P}antidelete on/off\n• ${P}anticall on/off\n• ${P}waprotect on/off\n• ${P}pmblocker on/off\n\n` +
+        `👥 *Group Autos*\n• ${P}welcome on/off\n• ${P}goodbye on/off\n• ${P}autoreact on/off [random/mood]\n` +
+        `• ${P}autonudge on <days>\n• ${P}autokick join <min>\n• ${P}nightmode on\n• ${P}autoleave on/off\n\n` +
+        `💾 *Maintenance*\n• ${P}autobackup on/off\n• ${P}maintenance on/off\n\n` +
+        `_All autos configurable in config.js → autoFeatures {}_\n_⚡ NovaSpark v${config.botVersion}_`
+      );
+    }
+
+    // ── sub-menu: owner ───────────────────────────────────────────────────────
     if (sub === 'owner') {
       return reply(
-        `👑 *OWNER COMMANDS*\n` +
-        `${'━'.repeat(32)}\n\n` +
-        `🔒 *Bot Control*\n` +
-        `• .shutdown\n` +
-        `• .restart\n` +
-        `• .maintenance on/off [msg]\n` +
-        `• .ownermode on/off\n` +
-        `• .setprefix <char>\n` +
-        `• .resetprefix\n\n` +
-        `🚫 *Ban System*\n` +
-        `• .ban @user [reason]\n` +
-        `• .unban @user\n` +
-        `• .banlist\n\n` +
-        `👤 *Bot Profile*\n` +
-        `• .setname <name>\n` +
-        `• .setstatus <text>\n` +
-        `• .setpp  _(reply to image)_\n\n` +
-        `📋 *Groups*\n` +
-        `• .listgroups\n` +
-        `• .leavegroup [id]\n` +
-        `• .joingroup <link>\n\n` +
-        `📢 *Messaging*\n` +
-        `• .announce <msg>\n` +
-        `• .globalannounce <msg>\n` +
-        `• .broadcast <msg>\n` +
-        `• .dm @user <msg>\n\n` +
-        `🗄️ *Database*\n` +
-        `• .cleardb list\n` +
-        `• .cleardb <table>\n` +
-        `• .botstats\n` +
-        `• .setpremium @user\n` +
-        `• .removepremium @user\n\n` +
-        `🔧 *Other*\n` +
-        `• .anticall on/off\n` +
-        `• .antidelete on/off\n` +
-        `• .autoread on/off\n` +
-        `• .pmblocker on/off\n\n` +
-        `🤖 *Auto Commands (v5.3)*\n` +
-        `• .autotyping on/off  — Show typing indicator always\n` +
-        `• .autoonline on/off  — Stay online continuously\n` +
-        `• .autopm on/off/set  — Away auto-reply to DMs\n` +
-        `• .autoleave on/off  — Auto-leave unauthorized groups\n` +
-        `• .autobackup on/off/now  — DM yourself a DB backup\n\n` +
-        `🛡️ *Account Protection (v5.3)*\n` +
-        `• .waprotect on/off  — Full account protection suite\n` +
-        `• .waprotect scam on/off  — Block scam DMs + auto-ban\n` +
-        `• .waprotect flood on/off  — Block DM spammers\n` +
-        `• .waprotect privacy on/off  — Lock WA privacy settings\n` +
-        `• .waprotect alert on/off  — Alert owner on threats\n` +
-        `• .waprotect status  — View all protection settings\n\n` +
-        `_⚡ NovaSpark Bot — Dev-Ntando_`
+        `👑 *OWNER COMMANDS*\n${BAR}\n\n` +
+        `🔑 *Bot Control*\n• ${P}shutdown\n• ${P}maintenance on/off [msg]\n• ${P}botstats\n` +
+        `• ${P}cleardb\n• ${P}setprefix <char>\n• ${P}setprofile name/bio/pic\n\n` +
+        `📣 *Broadcasting*\n• ${P}broadcast <msg>\n• ${P}announce <msg>\n• ${P}dmowner <msg>\n\n` +
+        `💎 *Premium*\n• ${P}setpremium add/remove/list @user\n\n` +
+        `🚫 *User Control*\n• ${P}ban @user\n• ${P}unban @user\n• ${P}banlist\n\n` +
+        `⚙️ *Auto-Features*\n• ${P}autoonline · ${P}autoread · ${P}autotyping\n` +
+        `• ${P}autobackup · ${P}autoleave · ${P}anticall\n• ${P}antidelete · ${P}waprotect · ${P}pmblocker\n\n` +
+        `📅 *Schedulers*\n• ${P}autogm gm/gn on/off <time>\n• ${P}autoverse on/off\n` +
+        `• ${P}autoprayer on/off\n• ${P}tbj schedule on/off\n\n` +
+        `_⚡ NovaSpark v${config.botVersion} — Owner Only_`
       );
     }
 
-    // ── MAIN MENU ────────────────────────────────────────────────────────────
-    // Shows ALL commands in one message with NovaSpark branded image caption
+    // ── sub-menu: premium ─────────────────────────────────────────────────────
+    if (sub === 'premium' || sub === 'vip') {
+      return reply(
+        `💎 *PREMIUM COMMANDS*\n${BAR}\n\n` +
+        `📚 *Study*\n• ${P}examprep <subject>\n• ${P}autostudy on <subject>\n\n` +
+        `💻 *Code*\n• ${P}code <lang> <task>\n\n` +
+        `⏰ *Reminders*\n• ${P}remind <time> <msg>\n  ↳ .remind 30m Check oven\n  ↳ .remind 2h Team meeting\n\n` +
+        `📊 *Analytics*\n• ${P}mystats\n• ${P}myplan\n\n` +
+        `🤖 *AI*\n• ${P}setpersona <description>\n\n` +
+        `📌 _Type ${P}upgrade to get Premium_\n_⚡ NovaSpark v${config.botVersion}_`
+      );
+    }
 
-    const menuText =
-      `╔════════════════════════════════╗\n` +
-      `║  ⚡ *NOVASPARK BOT v${config.botVersion}* ⚡  ║\n` +
-      `║    *2026 EDITION — Dev-Ntando*   ║\n` +
-      `╚════════════════════════════════╝\n` +
-      `_✨ The Most Advanced WhatsApp MD Bot ✨_\n\n` +
+    // ═══════════════════════════════════════════════════════════════════════
+    //  MAIN MEGA MENU
+    // ═══════════════════════════════════════════════════════════════════════
 
-      `┌─────────────────────────────────\n` +
-      `│  👤 *USER INFO*\n` +
-      `├─────────────────────────────────\n` +
-      `│ 📱 *User   :* +${num}\n` +
-      `│ 💎 *Plan   :* ${plan}\n` +
-      `│ ⌨️  *Prefix :* [ *${config.prefix}* ]\n` +
-      `│ 🕐 *Time   :* ${now}\n` +
-      `│ ⚡ *Uptime :* ${uptimeStr}  💾 ${memMB}MB\n` +
-      `│ 🤖 *Bot    :* ${config.botName}\n` +
-      `│ 🌐 *Ver    :* v${config.botVersion}\n` +
-      `└─────────────────────────────────\n\n` +
-
-      `📌 *Sub-menus:* .menu group | .menu ai | .menu downloads\n` +
-      `        .menu games | .menu social | .menu tools | .menu owner\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `🧠 *AI & GPT*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .gpt <question>\n` +
-      `• .gemini <question>\n` +
-      `• .character <name> <msg>\n` +
-      `• .autochat on/off\n` +
-      `• .imagine <prompt>\n` +
-      `• .genmusic <prompt>  🆕\n` +
-      `• .remini\n` +
-      `• .removebg\n` +
-      `• .homework <question>\n` +
-      `• .essay <topic>\n` +
-      `• .summarize <text>\n` +
-      `• .studytips <subject>\n` +
-      `• .math <problem>\n` +
-      `• .pdf <title> | <subject>\n` +
-      `• .translate <lang> <text>\n` +
-      `💎 .examprep / .code / .setpersona\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `⬇️ *DOWNLOADS*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .song <name/URL>\n` +
-      `• .video <name/URL>\n` +
-      `• .yt <query>\n` +
-      `• .tiktok <URL>\n` +
-      `• .spotify <URL>\n` +
-      `• .ig <URL>\n` +
-      `• .fb <URL>\n` +
-      `• .pin <URL>\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `🎮 *GAMES*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .wordle\n` +
-      `• .trivia\n` +
-      `• .hangman\n` +
-      `• .rps rock/paper/scissors\n` +
-      `• .2truth\n` +
-      `• .wyr\n` +
-      `• .truth / .dare\n` +
-      `• .riddle\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `💬 *SOCIAL & FUN*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .joke / .meme / .quote\n` +
-      `• .lyrics <song>\n` +
-      `• .8ball <question>\n` +
-      `• .flirt / .insult / .roast [@user]\n` +
-      `• .compliment [@user]\n` +
-      `• .complimentme  — Hype yourself  🆕\n` +
-      `• .vibe [@user]  — Vibe check  🆕\n` +
-      `• .waifu  — Anime image  🆕\n` +
-      `• .roulette  — Russian roulette  🆕\n` +
-      `• .ship @user1 @user2\n` +
-      `• .gayrate [@user]\n` +
-      `• .flip / .dice\n` +
-      `• .horoscope <sign>\n` +
-      `• .fact / .urban <word>\n` +
-      `• .poll Q | A | B | C\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `🛡️ *GROUP MANAGEMENT*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .warn / .warns / .clearwarn\n` +
-      `• .setwarnlimit <N>\n` +
-      `• .kick / .promote / .demote\n` +
-      `• .mute / .unmute\n` +
-      `• .tagall / .hidetag\n` +
-      `• .tagadmins [msg]  — Mention all admins  🆕\n` +
-      `• .membercount  — Member breakdown  🆕\n` +
-      `• .antilink / .antiword\n` +
-      `• .antitoxic / .antiflood\n` +
-      `• .antiraid / .antidelete\n` +
-      `• .autoreply / .autokick\n` +
-      `• .autonudge / .autoreact\n` +
-      `• .nightmode / .vip / .ghost\n` +
-      `• .welcome / .goodbye\n` +
-      `• .grouplink / .resetlink\n` +
-      `• .groupstats / .groupinfo\n` +
-      `• .delete\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `🔧 *TOOLS*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .ping / .alive / .owner\n` +
-      `• .vv / .ss <url> / .sticker\n` +
-      `• .simage / .tts <text>\n` +
-      `• .calc / .bmi / .weather\n` +
-      `• .time / .news / .qr <text>\n` +
-      `• .currency / .translate\n` +
-      `• .getpp / .profile / .motivate\n` +
-      `• .myactivity / .topmembers\n` +
-      `• .password / .countdown\n` +
-      `• .color #HEX / .nasa\n` +
-      `• .define / .ip / .myip\n` +
-      `• .crypto / .short / .unshort\n` +
-      `• .advice  — Random life advice  🆕\n` +
-      `• .dadjoke  — Dad joke / pun  🆕\n` +
-      `• .catfact / .dogfact  🆕\n` +
-      `• .numfact [number]  — Number trivia  🆕\n` +
-      `• .emoji <name>  — Emoji lookup  🆕\n` +
-      `• .age <YYYY-MM-DD>  🆕\n` +
-      `• .encode <type> <text>  🆕\n` +
-      `• .decode <type> <text>  🆕\n` +
-      `• .tempnumber [country]  — Free temp SMS number  🆕\n` +
-      `💎 .remind / .mystats\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `👑 *OWNER ONLY*\n` +
-      `${'━'.repeat(32)}\n` +
-      `• .shutdown / .restart\n` +
-      `• .maintenance / .ownermode\n` +
-      `• .setprefix / .setname\n` +
-      `• .setstatus / .setpp\n` +
-      `• .ban / .unban / .banlist\n` +
-      `• .broadcast / .announce\n` +
-      `• .globalannounce / .dm\n` +
-      `• .setpremium / .removepremium\n` +
-      `• .listgroups / .leavegroup\n` +
-      `• .joingroup / .botstats\n` +
-      `• .cleardb / .anticall\n` +
-      `• .autoread / .pmblocker\n` +
-      `🤖 *Auto:* .autotyping / .autoonline\n` +
-      `🤖 *Auto:* .autopm / .autoleave / .autobackup\n` +
-      `🛡️ *Protection:* .waprotect on/off/status\n\n` +
-
-      `${'━'.repeat(32)}\n` +
-      `📋 *.bmenu* — *Interactive tap menu*\n` +
-      `${'━'.repeat(32)}\n\n` +
-      `🆕 *v5.3 New Commands:*\n` +
-      `• .advice • .dadjoke • .catfact • .dogfact\n` +
-      `• .numfact • .emoji • .age • .encode • .decode\n` +
-      `• .complimentme • .vibe • .waifu • .roulette\n` +
-      `• .tagadmins • .membercount\n` +
-      `• .tempnumber — Free temp SMS number with greeting\n` +
-      `• .waprotect — Full WA account protection suite\n\n` +
-      `${'━'.repeat(32)}\n` +
-      `_⚡ Powered by *Dev-Ntando* | *NovaSpark Bot v${config.botVersion}*_\n` +
-      `_${config.channelLink || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'}_`;
-
-    // ── IMAGE SOURCES ─────────────────────────────────────────────────────────
-    // NovaSpark Bot branded menu image — AI-generated circuit/lightning logo
-    // Fallback chain: multiple CDN mirrors → plain text
-    const MENU_IMAGES = [
-      // NovaSpark themed cyberpunk/circuit bot images (no SubZero branding)
-      'https://image.pollinations.ai/prompt/novaspark%20bot%20logo%2C%20electric%20lightning%20bolt%20letter%20N%2C%20gold%20and%20electric%20blue%2C%20cyberpunk%20circuit%20board%2C%20dark%20background%2C%20glowing%20neon%2C%20professional%20logo%2C%204k%20sharp?width=512&height=768&nologo=true&seed=42',
-      'https://image.pollinations.ai/prompt/futuristic%20whatsapp%20bot%20menu%20screen%2C%20NovaSpark%20Bot%2C%20gold%20metallic%20logo%2C%20electric%20blue%20lightning%2C%20circuit%20board%20background%2C%20dark%20tech%20aesthetic%2C%20ultra%20HD?width=512&height=768&nologo=true&seed=77',
-      'https://image.pollinations.ai/prompt/N%20letter%20logo%2C%20electric%20spark%2C%20gold%20and%20blue%20neon%2C%20dark%20background%2C%20WhatsApp%20bot%2C%20cyberpunk%20futuristic%2C%20glowing%20circuit%20lines?width=512&height=768&nologo=true&seed=99',
-    ];
+    const mainMenu =
+      `╔════════════════════════════╗\n` +
+      `║  ⚡ NOVASPARK BOT v${config.botVersion}   \n` +
+      `║  The Most Advanced WA Bot  \n` +
+      `╚════════════════════════════╝\n\n` +
+      `👤 User:   *+${num}*\n` +
+      `📌 Plan:   *${plan}*\n` +
+      `🕐 Time:   *${now}*\n` +
+      `⏱️ Uptime: *${uptimeStr}*\n` +
+      `💾 RAM:    *${memMB}/${memTotal} MB*\n` +
+      `${BAR}\n\n` +
+      `⚡ *QUICK COMMANDS*\n` +
+      `• ${P}sticker — image to sticker\n` +
+      `• ${P}gpt <msg> — AI chat\n` +
+      `• ${P}imagine <prompt> — AI image\n` +
+      `• ${P}tts <text> — voice note\n` +
+      `• ${P}news — headlines\n` +
+      `• ${P}weather <city> — forecast\n` +
+      `• ${P}calc <expr> — calculator\n` +
+      `• ${P}tbj — TB Joshua video 🆕\n` +
+      `• ${P}prayer — daily prayer 🆕\n` +
+      `• ${P}verse — Bible verse 🆕\n` +
+      `${DIVL}\n\n` +
+      `📂 *CATEGORIES  (.menu <name>)*\n` +
+      `• group    — group management\n` +
+      `• ai       — AI & GPT\n` +
+      `• games    — games\n` +
+      `• media    — media & stickers\n` +
+      `• dl       — downloaders\n` +
+      `• tools    — tools & utilities\n` +
+      `• fun      — fun & social\n` +
+      `• inspire  — ✝️ faith & TB Joshua 🆕\n` +
+      `• auto     — all auto-features 🆕\n` +
+      `• premium  — premium commands\n` +
+      `• owner    — owner commands\n` +
+      `${DIVL}\n\n` +
+      `🧠 ${P}gpt · ${P}gemini · ${P}imagine · ${P}character\n` +
+      `🛡️ ${P}warn · ${P}kick · ${P}tagall · ${P}antilink\n` +
+      `🎮 ${P}wordle · ${P}trivia · ${P}hangman · ${P}rps\n` +
+      `🎬 ${P}sticker · ${P}tiktok · ${P}ytmp4 · ${P}ytmp3\n` +
+      `✝️ ${P}tbj · ${P}bible · ${P}prayer · ${P}verse\n` +
+      `🔧 ${P}weather · ${P}news · ${P}qr · ${P}calc\n` +
+      `${DIVL}\n\n` +
+      `_💡 .menu <category> for full details_\n` +
+      `_📌 ${P}myplan — plan | ${P}upgrade — Premium_\n\n` +
+      `⚡ *NovaSpark Bot — Dev-Ntando*`;
 
     try {
-      const imgUrl = MENU_IMAGES[Math.floor(Math.random() * MENU_IMAGES.length)];
-
-      await sock.sendMessage(
-        from,
-        { image: { url: imgUrl }, caption: menuText, mimetype: 'image/jpeg' },
-        { quoted: msg }
-      );
+      await sock.sendMessage(from, {
+        image:   { url: 'https://i.imgur.com/4M7IWwP.jpeg' },
+        caption: mainMenu,
+      }, { quoted: msg });
     } catch {
-      // If image fails, send plain text
-      return reply(menuText);
+      await reply(mainMenu);
     }
   },
 };
