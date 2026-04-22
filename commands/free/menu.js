@@ -232,7 +232,8 @@ module.exports = {
         `• .emoji <name>  — Emoji lookup\n` +
         `• .age <YYYY-MM-DD>  — Age calculator\n` +
         `• .encode <type> <text>  — base64/hex/reverse/morse\n` +
-        `• .decode <type> <text>  — base64/hex/morse\n\n` +
+        `• .decode <type> <text>  — base64/hex/morse\n` +
+        `• .tempnumber [country]  — Free temp SMS number  🆕\n\n` +
         `💎 *Premium*\n` +
         `• .remind <time> <msg>\n` +
         `• .mystats\n\n` +
@@ -285,6 +286,13 @@ module.exports = {
         `• .autopm on/off/set  — Away auto-reply to DMs\n` +
         `• .autoleave on/off  — Auto-leave unauthorized groups\n` +
         `• .autobackup on/off/now  — DM yourself a DB backup\n\n` +
+        `🛡️ *Account Protection (v5.3)*\n` +
+        `• .waprotect on/off  — Full account protection suite\n` +
+        `• .waprotect scam on/off  — Block scam DMs + auto-ban\n` +
+        `• .waprotect flood on/off  — Block DM spammers\n` +
+        `• .waprotect privacy on/off  — Lock WA privacy settings\n` +
+        `• .waprotect alert on/off  — Alert owner on threats\n` +
+        `• .waprotect status  — View all protection settings\n\n` +
         `_⚡ NovaSpark Bot — Dev-Ntando_`
       );
     }
@@ -421,6 +429,7 @@ module.exports = {
       `• .age <YYYY-MM-DD>  🆕\n` +
       `• .encode <type> <text>  🆕\n` +
       `• .decode <type> <text>  🆕\n` +
+      `• .tempnumber [country]  — Free temp SMS number  🆕\n` +
       `💎 .remind / .mystats\n\n` +
 
       `${'━'.repeat(32)}\n` +
@@ -439,7 +448,8 @@ module.exports = {
       `• .cleardb / .anticall\n` +
       `• .autoread / .pmblocker\n` +
       `🤖 *Auto:* .autotyping / .autoonline\n` +
-      `🤖 *Auto:* .autopm / .autoleave / .autobackup\n\n` +
+      `🤖 *Auto:* .autopm / .autoleave / .autobackup\n` +
+      `🛡️ *Protection:* .waprotect on/off/status\n\n` +
 
       `${'━'.repeat(32)}\n` +
       `📋 *.bmenu* — *Interactive tap menu*\n` +
@@ -448,7 +458,9 @@ module.exports = {
       `• .advice • .dadjoke • .catfact • .dogfact\n` +
       `• .numfact • .emoji • .age • .encode • .decode\n` +
       `• .complimentme • .vibe • .waifu • .roulette\n` +
-      `• .tagadmins • .membercount\n\n` +
+      `• .tagadmins • .membercount\n` +
+      `• .tempnumber — Free temp SMS number with greeting\n` +
+      `• .waprotect — Full WA account protection suite\n\n` +
       `${'━'.repeat(32)}\n` +
       `_⚡ Powered by *Dev-Ntando* | *NovaSpark Bot v${config.botVersion}*_\n` +
       `_${config.channelLink || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A'}_`;

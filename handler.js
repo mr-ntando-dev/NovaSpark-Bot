@@ -159,12 +159,32 @@ const { getModeState } = require('./commands/owner/maintenance');
 const broadcastCmd   = require('./commands/owner/broadcast');
 const autoreadCmd    = require('./commands/owner/autoread');
 
-// ── v5.3 OWNER AUTO-COMMANDS ──────────────────────────────────────────────────
+// ── v5.3 owner auto-commands ──────────────────────────────────────────────────
 const autotypingCmd  = require('./commands/owner/autotyping');
 const autoonlineCmd  = require('./commands/owner/autoonline');
 const autoreplyCmd   = require('./commands/owner/autoreply');
 const autoleaveCmd   = require('./commands/owner/autoleave');
 const autobackupCmd  = require('./commands/owner/autobackup');
+
+// ── v5.3 MISSING REGISTRATIONS — added now ────────────────────────────────────
+const adviceCmd      = require('./commands/tools/advice');
+const ageCmd         = require('./commands/tools/age');
+const catfactCmd     = require('./commands/tools/catfact');
+const dogfactCmd     = require('./commands/tools/dogfact');
+const dadjokecmd     = require('./commands/tools/joke2');
+const numfactCmd     = require('./commands/tools/numberfact');
+const emojiCmd       = require('./commands/tools/emoji');
+const encodeCmd      = require('./commands/tools/encode');
+const complimentmeCmd = require('./commands/fun/complimentme');
+const rouletteCmd    = require('./commands/fun/roulette');
+const spiritlevelCmd = require('./commands/fun/spiritlevel');
+const waifuCmd       = require('./commands/fun/waifu');
+const tagadminsCmd   = require('./commands/group/tagadmins');
+const membercountCmd = require('./commands/group/membercount');
+
+// ── v5.3 NEW FEATURES ────────────────────────────────────────────────────────
+const waprotectCmd   = require('./commands/owner/waprotect');
+const tempnumberCmd  = require('./commands/tools/tempnumber');
 
 // ── v5 TOOLS ─────────────────────────────────────────────────────────────────
 const pingCmd        = require('./commands/tools/ping');
@@ -262,6 +282,13 @@ const ALL_COMMANDS = [
   dmCmd,
   // v5.3 owner auto-commands
   autotypingCmd, autoonlineCmd, autoreplyCmd, autoleaveCmd, autobackupCmd,
+  // v5.3 previously unregistered commands (now fixed)
+  adviceCmd, ageCmd, catfactCmd, dogfactCmd, dadjokecmd, numfactCmd,
+  emojiCmd, encodeCmd,
+  complimentmeCmd, rouletteCmd, spiritlevelCmd, waifuCmd,
+  tagadminsCmd, membercountCmd,
+  // v5.3 new features
+  waprotectCmd, tempnumberCmd,
 ];
 
 const cmdMap = new Map();
@@ -493,6 +520,13 @@ module.exports = async (sock, msg) => {
 
   // ── Non-group: PM Blocker (v5) ───────────────────────────────────────────
   if (!isGroup && !isCmd) {
+    // ── v5.3 WA Account Protection — scam/flood DM blocker ────────────────
+    try {
+      const ownerNum = Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber;
+      const ownerJid = `${ownerNum}@s.whatsapp.net`;
+      const blocked  = await waprotectCmd.checkDMProtection(sock, msg, from, body, senderNorm, ownerJid);
+      if (blocked) return;
+    } catch {}
     // PM blocker
     if (pmblockerCmd.pmState?.enabled) {
       try {
