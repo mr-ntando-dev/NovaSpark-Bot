@@ -186,6 +186,14 @@ const membercountCmd = require('./commands/group/membercount');
 const waprotectCmd   = require('./commands/owner/waprotect');
 const tempnumberCmd  = require('./commands/tools/tempnumber');
 
+// ── v7.0 NEW PROTECTION COMMANDS ─────────────────────────────────────────────
+const antifwdCmd      = require('./commands/group/antifwd');
+const antispamCmd     = require('./commands/group/antispam');
+const antibadwordCmd  = require('./commands/group/antibadword');
+const antifakeCmd     = require('./commands/group/antifake');
+const groupbackupCmd  = require('./commands/group/groupbackup');
+const autoprotectCmd  = require('./commands/owner/autoprotect');
+
 // ── v6.0 INSPIRE / FAITH ─────────────────────────────────────────────────────
 const tbjCmd         = require('./commands/inspire/tbj');
 const prayerCmd      = require('./commands/inspire/prayer');
@@ -302,6 +310,9 @@ const ALL_COMMANDS = [
   tbjCmd, prayerCmd,
   // v6.0 owner schedulers
   autogmCmd, autoverseCmd, autoprayerCmd,
+  // v7.0 protection suite
+  antifwdCmd, antispamCmd, antibadwordCmd, antifakeCmd,
+  groupbackupCmd, autoprotectCmd,
 ];
 
 const cmdMap = new Map();
@@ -481,7 +492,7 @@ module.exports = async (sock, msg) => {
       if (database.logGroupMessage) database.logGroupMessage(from, senderNorm);
     } catch {}
 
-    // Anti-link check (v5)
+    // Anti-link check (v7 — enhanced with whitelist + short URL detection)
     try {
       const handled = await antilinkCmd.check(sock, msg, from, groupSettings);
       if (handled) return;
@@ -497,6 +508,30 @@ module.exports = async (sock, msg) => {
     try {
       const handled = await antiwordCmd.check(sock, msg, from, groupSettings);
       if (handled) return;
+    } catch {}
+
+    // ── v7.0 AntiBadWord ────────────────────────────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm)) {
+        const handled = await antibadwordCmd.check(sock, msg, from, groupSettings);
+        if (handled) return;
+      }
+    } catch {}
+
+    // ── v7.0 AntiFWD (block forwarded messages) ─────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm)) {
+        const handled = await antifwdCmd.check(sock, msg, from, groupSettings);
+        if (handled) return;
+      }
+    } catch {}
+
+    // ── v7.0 AntiSpam (rate limiter) ────────────────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm)) {
+        const handled = await antispamCmd.check(sock, msg, from, groupSettings);
+        if (handled) return;
+      }
     } catch {}
 
     // ── v5.2 Anti-Flood ─────────────────────────────────────────────────────

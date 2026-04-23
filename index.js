@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v5 — 2026 EDITION
+ * ⚡ NovaSpark Bot v7.0 — 2026 EDITION
  * Main Entry Point — WhatsApp MD AutoChat Bot
  * Powered by Baileys | By Dev-Ntando
  */
@@ -38,10 +38,11 @@ const fs      = require('fs');
 const path    = require('path');
 const os      = require('os');
 
-// ── v5.3 owner auto-commands — startup hooks ──────────────────────────────────
-const autoonlineCmd = require('./commands/owner/autoonline');
-const autobackupCmd = require('./commands/owner/autobackup');
-const autoleaveCmd  = require('./commands/owner/autoleave');
+// ── v7.0 owner auto-commands — startup hooks ──────────────────────────────────
+const autoonlineCmd  = require('./commands/owner/autoonline');
+const autobackupCmd  = require('./commands/owner/autobackup');
+const autoleaveCmd   = require('./commands/owner/autoleave');
+const autoprotectCmd = require('./commands/owner/autoprotect');
 
 // ── Banner ─────────────────────────────────────────────────────────────────────
 function printBanner() {
@@ -49,7 +50,7 @@ function printBanner() {
   orig.log([
     '',
     '╔══════════════════════════════════════════════╗',
-    '  ⚡   N O V A S P A R K   B O T   v5  ⚡',
+    '  ⚡   N O V A S P A R K   B O T   v7  ⚡',
     '       2 0 2 6  E D I T I O N',
     '╚══════════════════════════════════════════════╝',
     '',
@@ -57,10 +58,12 @@ function printBanner() {
     `   ⚡  Prefix  : ${config.prefix}`,
     `   👑  Owner   : ${owners}`,
     '',
-    '   🌙 Night Mode   ✅ | 👻 Ghost Mode  ✅',
-    '   🧠 Anti-Toxic   ✅ | ⭐ VIP Mode    ✅',
-    '   🎮 Wordle/Trivia ✅ | 🎵 TikTok DL  ✅',
-    '   🖼️  Remove BG   ✅ | 💕 Ship Score  ✅',
+    '   🌙 Night Mode    ✅ | 👻 Ghost Mode   ✅',
+    '   🧠 Anti-Toxic    ✅ | ⭐ VIP Mode     ✅',
+    '   🎮 Wordle/Trivia ✅ | 🎵 TikTok DL   ✅',
+    '   🖼️  Remove BG    ✅ | 💕 Ship Score   ✅',
+    '   🛡️  AutoProtect  ✅ | 🔗 AntiLink v7  ✅',
+    '   🚫 AntiSpam      ✅ | 📨 AntiFWD     ✅',
     '',
     '   ⏳ Starting up...',
     '',
@@ -155,6 +158,10 @@ async function startBot() {
       const ownerJid = `${ownerNum}@s.whatsapp.net`;
       try { autoonlineCmd.startOnlineLoop(sock); } catch {}
       try { autobackupCmd.startBackupLoop(sock, ownerJid); } catch {}
+      // v7: AutoProtect suite — privacy lock, anti-call, anti-scam DM
+      try { autoprotectCmd.onBotOnline(sock); } catch (e) {
+        orig.warn('[AutoProtect] startup warn:', e.message);
+      }
     }
 
     if (connection === 'close') {
@@ -204,13 +211,16 @@ async function startBot() {
   // ── Creds save ────────────────────────────────────────────────────────────
   sock.ev.on('creds.update', saveCreds);
 
-  // ── AntiCall (v5) ─────────────────────────────────────────────────────────
+  // ── AntiCall (v7 — routes through autoprotect AND legacy anticall) ──────────
   const anticallMod  = require('./commands/owner/anticall');
   const autoreadMod  = require('./commands/owner/autoread');
   sock.ev.on('call', async (calls) => {
-    if (!anticallMod.anticallState?.enabled) return;
     for (const c of calls) {
-      if (c.status === 'offer') {
+      if (c.status !== 'offer') continue;
+      // AutoProtect handles it (always enabled by default)
+      try { await autoprotectCmd.checkCall(sock, c); } catch {}
+      // Legacy anticall fallback
+      if (anticallMod.anticallState?.enabled) {
         try { await sock.rejectCall(c.id, c.from); } catch {}
       }
     }
@@ -293,6 +303,14 @@ async function startBot() {
     } catch {}
     try {
       const gs = require('./database').getGroupSettings(id);
+
+      // ── v7.0 AntiFake — remove suspicious accounts on join ──────────────────
+      if (action === 'add') {
+        const antifakeMod = require('./commands/group/antifake');
+        for (const jid of participants) {
+          try { await antifakeMod.checkJoin(sock, id, jid, gs); } catch {}
+        }
+      }
 
       if (action === 'add' && gs.welcome) {
         const meta = await sock.groupMetadata(id).catch(() => null);
