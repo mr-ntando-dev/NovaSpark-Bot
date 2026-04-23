@@ -1,45 +1,26 @@
 ##############################################################
-#  NovaSpark Bot — Render deployment manifest
-#  Deploy as a Background Worker (no HTTP port needed).
-#  Persistent disk keeps WhatsApp session across restarts.
+#  NovaSpark Bot v7 — Deployment manifest
+#  Official hosting: novaspark-nodes.zone.id
+#  Also compatible with any Node.js host or VPS
 ##############################################################
 
 services:
-  - type: worker              # Background Worker — no open port required
+  - type: worker
     name: novaspark-bot
     runtime: node
-    region: oregon            # closest to Africa; change to "frankfurt" if latency matters
-    plan: starter             # cheapest paid plan (free plan spins down)
-
-    # ── Build ────────────────────────────────────────────────
     buildCommand: npm install --omit=dev
     startCommand: node index.js
 
-    # ── Persistent disk (keeps session/ folder alive) ────────
-    disk:
-      name: session-data
-      mountPath: /opt/render/project/src/session
-      sizeGB: 1
-
-    # ── Environment variables ────────────────────────────────
     envVars:
       - key: NODE_ENV
         value: production
 
-      # Required — your WhatsApp session string (NovaSpark!... or KnightBot!...)
+      # Required — your WhatsApp session string (NovaSpark!...)
       - key: SESSION_ID
-        sync: false           # fill this in the Render dashboard after deploy
-
-      # Optional — improves AI response quality
-      - key: OPENAI_API_KEY
         sync: false
 
-      # Optional — used by .pdf command
-      - key: DEEPAI_API_KEY
-        sync: false
+      - key: PREFIX
+        value: "."
 
-      # Skip Puppeteer/Chromium download (not needed)
-      - key: PUPPETEER_SKIP_DOWNLOAD
-        value: "true"
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: "true"
+      - key: BOT_NAME
+        value: "NovaSpark Bot"

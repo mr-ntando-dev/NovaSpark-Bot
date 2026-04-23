@@ -164,7 +164,7 @@ sessionID:   'NovaSpark!...',   // or leave '' to scan QR
 node index.js
 ```
 
-### 5. Deploy on Render / Heroku / VPS / Panel
+### 5. Deploy on NovaSpark Nodes (Official Hosting)
 
 Set env vars:
 - `SESSION_ID` — your session string

@@ -173,7 +173,7 @@ async function startBot() {
       if (code === DisconnectReason.loggedOut) {
         orig.log('\n🔴 Disconnected (code 401). Logged out.');
         orig.log('⚠️  Session revoked by WhatsApp. Generate a new SESSION_ID from the pairing site.');
-        process.exit(0); // Let Render restart the process after user updates SESSION_ID
+        process.exit(0); // Let the host restart the process after user updates SESSION_ID
         return;
       }
 
