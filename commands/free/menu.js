@@ -1,12 +1,15 @@
 /**
  * NovaSpark Bot v8.0 - FULL FLAT MEGA MENU
  * One message: image + full menu as caption. No sub-menus.
+ * Menu image: assets/menu_image.jpg (the gold WA shield on circuit board)
  * Owners: 263777124998 & 263786831091
  * By Dev-Ntando
  */
 'use strict';
 const config   = require('../../config');
 const database = require('../../database');
+const fs       = require('fs');
+const path     = require('path');
 module.exports = {
   name: 'menu',
   aliases: ['help', 'cmds', 'commands', 'start', 'h'],
@@ -164,6 +167,28 @@ module.exports = {
       '  ' + P + 'autoreply / ' + P + 'autostatus / ' + P + 'autobackup',
       '  ' + P + 'autoleave / ' + P + 'anticall / ' + P + 'antidelete',
       '  ' + P + 'waprotect / ' + P + 'pmblocker',
+      '  ' + P + 'autoschedule add HH:MM <msg>   \u2014 Daily timed msgs \ud83c\udd95',
+      '  ' + P + 'autoforward set <src> <dst>    \u2014 Forward between chats \ud83c\udd95',
+      '  ' + P + 'autopin on/off/keyword <word>  \u2014 Auto-pin messages \ud83c\udd95',
+      '  ' + P + 'autotranslate on <lang>        \u2014 Live translate all msgs \ud83c\udd95',
+      '  ' + P + 'autonuke on/off                \u2014 Spam destroyer \ud83c\udd95',
+      '  ' + P + 'birthday add @user DD/MM       \u2014 Birthday wisher \ud83c\udd95',
+      '  ' + P + 'autopollclose on/off           \u2014 Auto-close polls + results \ud83c\udd95',
+      '  ' + P + 'autoquote on/off               \u2014 Human-like quote replies \ud83c\udd95',
+      '  ' + P + 'autosuggest on/off             \u2014 Command suggestions \ud83c\udd95',
+      B,
+      '',
+      '\ud83e\udd77 *S T E A L T H   &   G H O S T*',
+      D,
+      '  ' + P + 'ghost on/off                   \u2014 Ghost mode (no receipts)',
+      '  ' + P + 'stealth on/off                 \u2014 MAXIMUM stealth mode \ud83c\udd95',
+      '  ' + P + 'stealth delay <min> <max>      \u2014 Set response delay \ud83c\udd95',
+      '  ' + P + 'stealth presence <mode>        \u2014 Set presence status \ud83c\udd95',
+      B,
+      '',
+      '\ud83d\udce6 *G U I D E   &   D O W N L O A D*',
+      D,
+      '  ' + P + 'zip / ' + P + 'botzip / ' + P + 'guide        \u2014 Download full guide ZIP \ud83c\udd95',
       B,
       '',
       '\ud83d\udcb8 *P R E M I U M*',
@@ -177,15 +202,19 @@ module.exports = {
       '',
       '\ud83d\udc51 *O W N E R   C O M M A N D S*',
       D,
-      '  ' + P + 'shutdown / ' + P + 'restart \ud83c\udd95 / ' + P + 'botstats',
-      '  ' + P + 'eval <code> \ud83c\udd95     \u2014 Run JavaScript',
+      '  ' + P + 'shutdown / ' + P + 'restart / ' + P + 'botstats',
+      '  ' + P + 'eval <code>          \u2014 Run JavaScript',
       '  ' + P + 'broadcast / ' + P + 'announce / ' + P + 'dmowner',
       '  ' + P + 'setpremium add/rm/list',
       '  ' + P + 'ban / ' + P + 'unban / ' + P + 'banlist / ' + P + 'cleardb',
-      '  ' + P + 'setprefix / ' + P + 'setprofile / ' + P + 'setnick \ud83c\udd95',
-      '  ' + P + 'listgroups \ud83c\udd95 / ' + P + 'joingroup \ud83c\udd95 / ' + P + 'leavegroup \ud83c\udd95',
-      '  ' + P + 'ownerlist \ud83c\udd95 / ' + P + 'addowner \ud83c\udd95 / ' + P + 'removeowner \ud83c\udd95',
+      '  ' + P + 'setprefix / ' + P + 'setprofile / ' + P + 'setnick',
+      '  ' + P + 'listgroups / ' + P + 'joingroup / ' + P + 'leavegroup',
+      '  ' + P + 'ownerlist / ' + P + 'addowner / ' + P + 'removeowner',
       '  ' + P + 'maintenance on/off',
+      '  ' + P + 'autoforward set/list/remove    \u2014 Forward rules \ud83c\udd95',
+      '  ' + P + 'autoschedule add/list/remove   \u2014 Scheduled msgs \ud83c\udd95',
+      '  ' + P + 'birthday add/list/remove       \u2014 Birthday manager \ud83c\udd95',
+      '  ' + P + 'stealth on/off/status          \u2014 Max stealth \ud83c\udd95',
       B,
       '',
       '\ud83d\udce1 *' + config.botName + ' v' + config.botVersion + '*',
@@ -193,12 +222,34 @@ module.exports = {
       '\ud83d\udccc Prefix: ' + P + '  \u00b7  \ud83c\udf0d TZ: ' + (config.timezone || 'Africa/Harare'),
       '',
       '_\ud83c\udd95 = New in v8.0  \u00b7  \ud83d\udcb8 = Premium only_',
+      '_\ud83d\udce6 Type \`.zip\` for full guide download_',
       '_\u26a1 NovaSpark Bot \u2014 Built by Dev-Ntando_',
     ];
     const menuText = rows.join('\n');
+
+    // ── Load menu image ────────────────────────────────────────────────────
+    // Priority: 1) assets/menu_image.jpg  2) config.menuImagePath URL  3) fallback URL
+    let imageSource = null;
+    const localImgPath = path.resolve(__dirname, '../../assets/menu_image.jpg');
+    const localImgJpeg = path.resolve(__dirname, '../../assets/menu_image.jpeg');
+    const localImgPng  = path.resolve(__dirname, '../../assets/menu_image.png');
+
+    if (fs.existsSync(localImgPath)) {
+      imageSource = { image: fs.readFileSync(localImgPath) };
+    } else if (fs.existsSync(localImgJpeg)) {
+      imageSource = { image: fs.readFileSync(localImgJpeg) };
+    } else if (fs.existsSync(localImgPng)) {
+      imageSource = { image: fs.readFileSync(localImgPng) };
+    } else if (config.menuImagePath && config.menuImagePath.startsWith('http')) {
+      imageSource = { image: { url: config.menuImagePath } };
+    } else {
+      // Fallback: use a default branded image URL
+      imageSource = { image: { url: 'https://i.imgur.com/4M7IWwP.jpeg' } };
+    }
+
     try {
       await sock.sendMessage(from, {
-        image:   { url: 'https://i.imgur.com/4M7IWwP.jpeg' },
+        ...imageSource,
         caption: menuText,
       }, { quoted: msg });
     } catch {

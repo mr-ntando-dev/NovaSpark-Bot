@@ -1,0 +1,21 @@
+MENU IMAGE SETUP
+================
+
+The menu image you uploaded (gold WhatsApp shield on blue circuit board) 
+needs to be placed in this folder as:
+
+  assets/menu_image.jpg
+
+HOW TO ADD IT:
+1. Download your menu image to your computer
+2. Rename it to: menu_image.jpg
+3. Place it in the NovaSpark-Bot/assets/ folder
+4. Commit and push: git add assets/menu_image.jpg && git commit -m "Add menu image" && git push
+
+OR use an env variable (easier for hosting):
+1. Host your image on Imgur or any CDN
+2. Set env var: MENU_IMAGE_URL=https://your-image-url.com/menu.jpg
+3. The bot will automatically use it as the menu image
+
+The menu command checks for assets/menu_image.jpg first, 
+then falls back to MENU_IMAGE_URL env var, then uses default image.

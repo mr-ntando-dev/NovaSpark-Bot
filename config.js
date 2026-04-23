@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v7.0 — 2026 EDITION
+ * ⚡ NovaSpark Bot v8.0 — 2026 EDITION
  * Global Configuration — ALL auto-features configurable here
  * By Dev-Ntando
  */
@@ -12,7 +12,7 @@ module.exports = {
 
   // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
-  botVersion:  '7.0.0',
+  botVersion:  '8.0.0',
   prefix:      '.',
   sessionName: process.env.SESSION_DIR || 'session',
   sessionID:   process.env.SESSION_ID  || '',
@@ -20,6 +20,12 @@ module.exports = {
 
   // ── Branding ──────────────────────────────────────────────────────────────
   channelLink: process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/0029Va90zAnIHphOuO8Msp3A',
+
+  // ── Menu Image ────────────────────────────────────────────────────────────
+  // Local path (relative to bot root) OR a direct image URL
+  // Place your custom image as assets/menu_image.jpg to use it
+  // Override with env var: MENU_IMAGE_URL=https://your-image-url.com/img.jpg
+  menuImagePath: process.env.MENU_IMAGE_URL || 'assets/menu_image.jpg',
 
   // ── API Keys (set via env vars or fill directly) ──────────────────────────
   apiKeys: {
