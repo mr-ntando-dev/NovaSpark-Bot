@@ -15,7 +15,7 @@ startCleanup();
 
 // ── Console filter ─────────────────────────────────────────────────────────────
 const orig = { log: console.log, error: console.error, warn: console.warn };
-const SUPPRESS = ['sessionentry','prekey','ratchet','_chains','signal protocol','chainkey','currentratchet','registrationid'];
+const SUPPRESS = ['sessionentry','prekey','ratchet','_chains','signal protocol','chainkey','currentratchet','registrationid','closing session','basekeypair','remoteid','pendingprekey','ephemeralkeypair','rootkey','indexinfo'];
 const shouldHide = (...a) => {
   const m = a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ').toLowerCase();
   return SUPPRESS.some(s => m.includes(s));
@@ -23,6 +23,14 @@ const shouldHide = (...a) => {
 console.log   = (...a) => { if (!shouldHide(...a)) orig.log.apply(console, a); };
 console.error = (...a) => { if (!shouldHide(...a)) orig.error.apply(console, a); };
 console.warn  = (...a) => { if (!shouldHide(...a)) orig.warn.apply(console, a); };
+
+// Also suppress raw stdout writes from Baileys internals
+const _stdoutWrite = process.stdout.write.bind(process.stdout);
+process.stdout.write = (chunk, ...rest) => {
+  const s = (typeof chunk === 'string' ? chunk : chunk.toString()).toLowerCase();
+  if (SUPPRESS.some(kw => s.includes(kw))) return true;
+  return _stdoutWrite(chunk, ...rest);
+};
 
 const pino   = require('pino');
 const {
