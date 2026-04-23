@@ -50,7 +50,7 @@ module.exports = {
     },
 
     autoRead: {
-      enabled: false,
+      enabled: true,
     },
 
     autoTyping: {
@@ -64,27 +64,27 @@ module.exports = {
     },
 
     autoGoodMorning: {
-      enabled: false,
+      enabled: true,
       time: '06:00',
       message: '🌅 *Good Morning!* Wishing everyone a blessed and productive day!\n\n_⚡ NovaSpark Bot_',
       targets: [],
     },
 
     autoGoodNight: {
-      enabled: false,
+      enabled: true,
       time: '22:00',
       message: '🌙 *Good Night!* Rest well and wake up stronger!\n\n_⚡ NovaSpark Bot_',
       targets: [],
     },
 
     autoVerse: {
-      enabled: false,
+      enabled: true,
       time: '07:00',
       targets: [],
     },
 
     autoPrayer: {
-      enabled: false,
+      enabled: true,
       time: '05:30',
       message: '',
       targets: [],
@@ -98,7 +98,7 @@ module.exports = {
     },
 
     autoStatus: {
-      enabled: false,
+      enabled: true,
       intervalHours: 6,
       message: '',
     },
@@ -125,7 +125,7 @@ module.exports = {
     },
 
     autoLeave: {
-      enabled: false,
+      enabled: true,
       minMembers: 3,
     },
 
@@ -137,7 +137,7 @@ module.exports = {
     },
 
     antiLink: {
-      enabled: false,
+      enabled: true,
       action: 'delete',
     },
 
@@ -157,7 +157,7 @@ module.exports = {
     },
 
     antiDelete: {
-      enabled: false,
+      enabled: true,
     },
 
     pmBlocker: {
@@ -190,7 +190,7 @@ module.exports = {
     },
 
     autoNudge: {
-      enabled: false,
+      enabled: true,
       daysInactive: 7,
       message: '👋 Hey! We miss you in the group. Come chat with us!',
     },
