@@ -239,6 +239,13 @@ module.exports = {
   getWarns, addWarn, clearWarns,
   // reminders
   addReminder, getPendingReminders, markReminderDone, getUserReminders,
+  getReminders: getUserReminders,
+  clearReminders: (jid) => {
+    const db = readDB(REMIND_DB);
+    const key = jid.split('@')[0];
+    const filtered = db.filter(r => r.jid !== jid && r.jid !== key && r.userId !== jid && r.userId !== key);
+    writeDB(REMIND_DB, filtered);
+  },
   // memory
   getMemory, setMemory, clearMemory,
   // analytics

@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v5 — 2026 EDITION
+ * ⚡ NovaSpark Bot v9 — 2026 EDITION
  * Message Handler — Full Feature Set
  * Routes commands, triggers auto-features, manages sessions
  * By Dev-Ntando
@@ -238,6 +238,30 @@ const triviaCmd      = require('./commands/games/trivia');
 const hangmanCmd     = require('./commands/games/hangman');
 const rpsCmd         = require('./commands/games/rps');
 
+// ── v9.0 NEW COMMANDS ─────────────────────────────────────────────────────────
+// Games
+const chessCmd         = require('./commands/games/chess');
+const akinatorCmd      = require('./commands/games/akinator');
+const scrambleCmd      = require('./commands/games/scramble');
+// Fun
+const personalityCmd   = require('./commands/fun/personality');
+const wyrV2Cmd         = require('./commands/fun/wouldyourather2');
+// Tools
+const reminderV2Cmd    = require('./commands/tools/reminder');
+const notesCmd         = require('./commands/tools/notes');
+const countdownV2Cmd   = require('./commands/tools/countdowntimer');
+const timetableCmd     = require('./commands/tools/timetable');
+const coinCmds         = require('./commands/tools/coinflip');
+// Tools poll2 array
+const poll2Cmds        = require('./commands/tools/poll2');
+// Group
+const slowmodeCmd      = require('./commands/group/slowmode');
+const pinCmds          = require('./commands/group/pinmsg');
+const leaderboardCmd   = require('./commands/group/leaderboard');
+const antiimageCmds    = require('./commands/group/antiimage');
+// Owner
+const autoreportCmd    = require('./commands/owner/autoreport');
+
 // ── v4 TOOLS ─────────────────────────────────────────────────────────────────
 const calcCmd        = require('./commands/tools/calculator');
 const weatherCmd     = require('./commands/tools/weather');
@@ -344,6 +368,17 @@ const ALL_COMMANDS = [
   restartCmd, evalCmd, setnickCmd, listgroupsCmd,
   ...(Array.isArray(ownerlistCmds)  ? ownerlistCmds  : [ownerlistCmds]),
   ...(Array.isArray(joingroupCmds)  ? joingroupCmds  : [joingroupCmds]),
+  // v9.0 new commands
+  chessCmd, akinatorCmd, scrambleCmd,
+  personalityCmd, wyrV2Cmd,
+  reminderV2Cmd, notesCmd, countdownV2Cmd, timetableCmd,
+  ...(Array.isArray(coinCmds)       ? coinCmds       : [coinCmds]),
+  ...(Array.isArray(poll2Cmds)      ? poll2Cmds      : [poll2Cmds]),
+  slowmodeCmd,
+  ...(Array.isArray(pinCmds)        ? pinCmds        : [pinCmds]),
+  leaderboardCmd,
+  ...(Array.isArray(antiimageCmds)  ? antiimageCmds  : [antiimageCmds]),
+  autoreportCmd,
 ];
 
 const cmdMap = new Map();
@@ -597,6 +632,29 @@ module.exports = async (sock, msg) => {
         return;
       }
     }
+
+    // ── v9.0 Slow Mode enforcement ───────────────────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm) && groupSettings.slowMode) {
+        const blocked = await slowmodeCmd.check(sock, msg, from, senderNorm, groupSettings, isAdmin);
+        if (blocked) return;
+      }
+    } catch {}
+
+    // ── v9.0 Anti-Media checks ───────────────────────────────────────────────
+    try {
+      if (!isAdmin && !isOwner(senderNorm)) {
+        for (const ac of antiimageCmds) {
+          if (typeof ac.check === 'function') {
+            const blocked = await ac.check(sock, msg, from, groupSettings);
+            if (blocked) return;
+          }
+        }
+      }
+    } catch {}
+
+    // ── v9.0 XP tracking ────────────────────────────────────────────────────
+    try { leaderboardCmd.addXP(from, senderNorm); } catch {}
 
     // Auto-react
     try { await autoreactCmd.react(sock, msg, from, groupSettings); } catch {}

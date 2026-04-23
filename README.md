@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚡ NovaSpark Bot v4 — 2026 Edition
+# ⚡ NovaSpark Bot v9 — 2026 Edition
 
-**The most advanced WhatsApp MD bot ever built.**
+**The most advanced WhatsApp MD bot ever built. 130+ commands, 9 major updates.**
 
 *By Dev-Ntando | Powered by [Baileys](https://github.com/WhiskeySockets/Baileys)*
 
@@ -15,15 +15,30 @@
 
 ---
 
-## ✨ What's New in v4 (Never Seen Before)
+## ✨ What's New in v9 (Never Seen Before)
 
 | Feature | What it does |
 |---------|-------------|
+| ♟️ `.chess start @user` | **Text Chess** — Fully playable chess in WhatsApp. Challenge anyone, make moves with algebraic notation (e2e4), resign, view board. |
+| 🧞 `.akinator start` | **Akinator AI Guesser** — Think of any character. Bot asks yes/no questions and guesses it. 60+ character logic tree, no API needed. |
+| 🔤 `.scramble` | **Word Scramble** — Unscramble a random word. Hints cost points. Per-group scoring. 200+ word pool. |
+| 🧠 `.personality` | **Personality Test** — 5 interactive questions, instant result: Social Spark, Loyal Heart, Deep Thinker, or Driven Builder. |
+| 🤔 `.wyr` | **Would You Rather (Interactive)** — Sends a dilemma, members vote A or B. Live vote tallying with bar chart results. |
+| ⭐ `.xp` / `.xp leaderboard` | **XP & Level System** — Every message earns XP. 10 levels from Newcomer to Godlike. Visual progress bar + group leaderboard. |
+| 🪙 `.bet heads 100` | **Coin Economy** — Virtual coin system. Bet on coin flips, transfer coins to friends, check wallets, view the rich list. |
+| 📌 `.pin` / `.pins` | **Message Pin Board** — Reply to any message to pin it. View all pins anytime. Up to 10 pins per group. |
+| 🐢 `.slowmode on 30` | **Slow Mode** — Limit how often members can send messages. Configurable 5s–3600s. Admins exempt. |
+| 📝 `.note add title \| content` | **Group Notepad** — Save and retrieve notes/links/rules by name. Per-group. Admins manage, everyone reads. |
+| 📊 `.poll2 "Q" "A" "B"` | **Advanced Poll System** — Multi-option polls with live vote tracking, bar-chart results, and winner announcement. |
+| ⏳ `.countdown set "Xmas" 2026-12-25` | **Event Countdown** — Multiple countdown timers per group. Shows days/hours/mins remaining. |
+| 📅 `.timetable add Monday 08:00 Math` | **Class Timetable** — Group schedule manager. Add, view by day or full week, delete entries. |
+| 🖼️ `.antiimage on/off` | **Anti-Image/Video/Sticker** — Block media types from non-admins. Three separate controls + `.antimedia` master switch. |
+| 📊 `.autoreport on` | **Daily Auto Report** — Bot sends a group analytics report every morning at 6AM: top chatters, commands run, active features. |
 | 👻 `.ghost on/off` | **Ghost Mode** — Bot acts totally invisible. No typing indicators, no read receipts. Still processes all commands silently. |
 | 🧠 `.antitoxic on/off` | **AI Anti-Toxic Filter** — Heuristic AI scans every message for hate speech & threats. Deletes and auto-warns. No API key needed. |
 | 🌙 `.nightmode on [22:00] [06:00]` | **Night Mode** — Auto-mutes group at your set time and unmutes at wake time. Runs on a background scheduler. |
 | ⭐ `.vip on/off` | **VIP Mode** — Only VIP members (+ admins) can send messages. Comes with `.vip add/remove/list`. |
-| 😄 `.autoreact on [random/mood]` | **Auto React** — Bot reacts to messages with emojis. Mood mode matches sentiment. Completely unique. |
+| 😄 `.autoreact on [random/mood]` | **Auto React** — Bot reacts to messages with emojis. Mood mode matches sentiment. |
 | 🟩 `.wordle` | **Wordle in WhatsApp** — Full 5-letter word guessing game with colour-coded feedback. Per-user sessions. |
 | 🧠 `.trivia` | **Live Trivia** — Fetches real questions from Open Trivia DB. Score tracked in your profile. |
 | 🪢 `.hangman` | **Hangman game** — Classic hangman with ASCII art stages. |
@@ -31,16 +46,10 @@
 | 🖼️ `.removebg` | **AI Background Remover** — Reply to any image. AI removes background instantly. |
 | 🎵 `.tiktok <url>` | **TikTok Downloader** — Downloads TikTok videos without watermark. |
 | ▶️ `.yt <query>` | **YouTube Search** — Top result with thumbnail, views, duration. |
-| ✍️ `.textart <style> <text>` | **Fancy Text Art** — 7 Unicode styles: bold, italic, bubble, square, flip, mirror, tiny. |
-| 💕 `.ship @user1 @user2` | **Compatibility Score** — Love compatibility calculator with emoji bar. Deterministic & shareable. |
-| 🤔 `.truth` / `.dare` | **Truth or Dare** — 10 curated truths and dares. |
-| 🌸 `.compliment [@user]` | **AI Compliment** — Tags someone with a genuine compliment. |
-| 😈 `.insult [@user]` | **Savage Roast** — Funny (not cruel) roasts. |
+| 💕 `.ship @user1 @user2` | **Compatibility Score** — Love compatibility calculator with emoji bar. |
+| 🌸 `.compliment [@user]` / `.insult [@user]` | **Compliment & Roast** — Tag someone with a compliment or a funny roast. |
 | 📊 `.groupstats` | **Group Analytics Dashboard** — Top chatters, message counts, command usage, all active features. |
 | 🔢 `.calc <expr>` | **Scientific Calculator** — sin, cos, sqrt, log, pi, ^ — all supported. |
-| 🕐 `.time [tz]` | **World Clock** — Shows 10 major cities or any custom timezone. |
-| 💪 `.motivate [@user]` | **Live Motivation** — Real quotes from quotable.io. Tag a friend with it. |
-| 🪪 `.profile [@user]` | **Profile Card** — Stats, plan, game scores, join date, all in one. |
 | 👋 `.welcome on/off [msg]` | **Custom Welcome Messages** — Supports `@user`, `@group`, `@count`, `@date` variables. |
 | 🔤 `.antiword on/off/add/remove` | **Per-Group Bad Word Filter** — Custom word list per group. |
 | ⚙️ `.setwarnlimit N` | **Configurable Warn Limit** — Set auto-kick threshold per group. |
@@ -203,6 +212,76 @@ MIT © 2026 Dev-Ntando
 
 <div align="center">
 
-**⚡ Built different. Runs different. NovaSpark v4 — 2026.**
+---
+
+## 🆕 v9.0 New Commands
+
+### 🎮 Games
+| Command | Description |
+|---------|-------------|
+| `.chess start @user` | Challenge someone to chess |
+| `.chess move e2e4` | Make a chess move |
+| `.chess board` | View current board |
+| `.chess resign` | Forfeit the game |
+| `.akinator start` | Start Akinator guessing game |
+| `.akinator yes/no/maybe` | Answer a question |
+| `.scramble` | Get a scrambled word to unscramble |
+| `.scramble hint` | Get a letter hint |
+| `.scramble skip` | Skip current word |
+
+### 🎉 Fun
+| Command | Description |
+|---------|-------------|
+| `.personality` | Take a 5-question personality test |
+| `.wyr` | Would You Rather — interactive voting |
+| `.wyr a / .wyr b` | Cast your vote |
+| `.wyr results` | See vote results |
+
+### 🛠️ Tools
+| Command | Description |
+|---------|-------------|
+| `.reminder set 10m msg` | Set a timed reminder (free!) |
+| `.reminder list` | View your reminders |
+| `.note add title \| content` | Save a group note |
+| `.note list / get / delete` | Manage notes |
+| `.poll2 "Q" "A" "B" "C"` | Create an advanced poll |
+| `.vote 1` | Vote in active poll |
+| `.pollresults` | See live poll results |
+| `.closepoll` | End poll and announce winner |
+| `.countdown set "Event" date` | Add an event countdown |
+| `.timetable add Monday 08:00 Math` | Add to group timetable |
+| `.timetable show / week` | View schedule |
+| `.coinflip / .toss` | Flip a coin |
+| `.bet heads 100` | Bet virtual coins |
+| `.wallet / .balance` | Check your coin balance |
+| `.transfer @user 100` | Send coins to someone |
+| `.richlist` | Group coin leaderboard |
+
+### 🛡️ Group Management
+| Command | Description |
+|---------|-------------|
+| `.slowmode on 30` | Enable slow mode (30s cooldown) |
+| `.slowmode off` | Disable slow mode |
+| `.pin` | Pin a replied-to message |
+| `.pins` | View all pinned messages |
+| `.unpin <n>` | Remove a pin by number |
+| `.unpinall` | Clear all pins |
+| `.xp` | Check your XP and level |
+| `.xp leaderboard` | Top 10 members by XP |
+| `.antiimage on/off` | Block images from non-admins |
+| `.antivideo on/off` | Block videos from non-admins |
+| `.antisticker on/off` | Block stickers from non-admins |
+| `.antimedia on/off` | Block all media types |
+
+### 👑 Owner
+| Command | Description |
+|---------|-------------|
+| `.autoreport on` | Enable daily 6AM stats report |
+| `.autoreport now` | Send report immediately |
+| `.autoreport off` | Disable |
+
+---
+
+**⚡ Built different. Runs different. NovaSpark v9 — 2026.**
 
 </div>

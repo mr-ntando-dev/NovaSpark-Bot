@@ -1,7 +1,7 @@
 {
   "name": "novaspark-bot",
-  "version": "8.0.0",
-  "description": "NovaSpark Bot v8.0 \u2014 WhatsApp MD AutoChat Bot with 100+ commands, Stealth Mode, Auto Schedule, Auto Nuke, Birthday Wisher, and more. Powered by Baileys.",
+  "version": "9.0.0",
+  "description": "NovaSpark Bot v9.0 \u2014 WhatsApp MD AutoChat Bot with 130+ commands, Chess, Akinator, XP System, Coin Economy, Slow Mode, Anti-Media, Pin Board, Timetable, and more. Powered by Baileys.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
