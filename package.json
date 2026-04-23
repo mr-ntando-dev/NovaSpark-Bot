@@ -1,12 +1,14 @@
 {
   "name": "novaspark-bot",
-  "version": "4.0.0",
-  "description": "⚡ NovaSpark Bot v4 — 2026 Edition. The most advanced WhatsApp MD bot ever built. By Dev-Ntando.",
+  "version": "8.0.0",
+  "description": "NovaSpark Bot v8.0 - 2026 Edition. The most advanced WhatsApp MD bot ever built. By Dev-Ntando.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "api": "node api/server.js",
+    "dev": "nodemon index.js",
+    "dev:api": "nodemon api/server.js"
   },
   "keywords": [
     "whatsapp", "bot", "novaspark", "autochat", "baileys", "md",

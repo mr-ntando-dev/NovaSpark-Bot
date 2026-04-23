@@ -194,6 +194,29 @@ const antifakeCmd     = require('./commands/group/antifake');
 const groupbackupCmd  = require('./commands/group/groupbackup');
 const autoprotectCmd  = require('./commands/owner/autoprotect');
 
+// ── v8.0 NEW COMMANDS ────────────────────────────────────────────────────────
+// Fun
+const confessCmd      = require('./commands/fun/confess');
+const rateCmd         = require('./commands/fun/rate');
+const coupleCmd       = require('./commands/fun/couple');
+const zodiacCmd       = require('./commands/fun/zodiac');
+const nhieCmd         = require('./commands/fun/neverhaveiever');
+// Tools
+const unitconvertCmd  = require('./commands/tools/unitconvert');
+const colorInfoCmd    = require('./commands/tools/color');
+const songLyricsCmd   = require('./commands/tools/lyrics');
+const truthfactCmd    = require('./commands/tools/truthfact');
+// Group
+const setrulesCmd     = require('./commands/group/setrules');
+const listwarnCmd     = require('./commands/group/warn2');
+// Owner
+const restartCmd      = require('./commands/owner/restart');
+const evalCmd         = require('./commands/owner/eval');
+const setnickCmd      = require('./commands/owner/setnick');
+const listgroupsCmd   = require('./commands/owner/listgroups');
+const ownerlistCmds   = require('./commands/owner/ownerlist');
+const joingroupCmds   = require('./commands/owner/joingroup');
+
 // ── v6.0 INSPIRE / FAITH ─────────────────────────────────────────────────────
 const tbjCmd         = require('./commands/inspire/tbj');
 const prayerCmd      = require('./commands/inspire/prayer');
@@ -313,6 +336,14 @@ const ALL_COMMANDS = [
   // v7.0 protection suite
   antifwdCmd, antispamCmd, antibadwordCmd, antifakeCmd,
   groupbackupCmd, autoprotectCmd,
+  // v8.0 new commands
+  confessCmd, rateCmd, coupleCmd, zodiacCmd, nhieCmd,
+  unitconvertCmd, colorInfoCmd, songLyricsCmd, truthfactCmd,
+  listwarnCmd,
+  ...(Array.isArray(setrulesCmd)    ? setrulesCmd    : [setrulesCmd]),
+  restartCmd, evalCmd, setnickCmd, listgroupsCmd,
+  ...(Array.isArray(ownerlistCmds)  ? ownerlistCmds  : [ownerlistCmds]),
+  ...(Array.isArray(joingroupCmds)  ? joingroupCmds  : [joingroupCmds]),
 ];
 
 const cmdMap = new Map();
