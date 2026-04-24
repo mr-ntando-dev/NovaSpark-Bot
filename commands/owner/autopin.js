@@ -10,7 +10,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'autopin',
-  aliases: ['pin', 'pinmsg'],
+  aliases: ['autopinmsg', 'apinmsg'],
   description: 'Auto-pin admin messages or pin by keyword',
   category: 'owner',
   ownerOnly: false,

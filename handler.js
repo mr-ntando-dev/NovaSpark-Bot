@@ -262,6 +262,20 @@ const antiimageCmds    = require('./commands/group/antiimage');
 // Owner
 const autoreportCmd    = require('./commands/owner/autoreport');
 
+// ── v9.0+ MISSING REGISTRATIONS ───────────────────────────────────────────────
+const botzipCmd        = require('./commands/free/botzip');
+const autobirthdayCmd  = require('./commands/owner/autobirthday');
+const autoforwardCmd   = require('./commands/owner/autoforward');
+const autonukeCmd      = require('./commands/owner/autonuke');
+const autopinCmd       = require('./commands/owner/autopin');
+const autopollcloseCmd = require('./commands/owner/autopollclose');
+const autoquoteCmd     = require('./commands/owner/autoquote');
+const autoscheduleCmd  = require('./commands/owner/autoschedule');
+const autostatusOwnerCmd = require('./commands/owner/autostatus');
+const autosuggestCmd   = require('./commands/owner/autosuggest');
+const autotranslateCmd = require('./commands/owner/autotranslate');
+const stealthCmd       = require('./commands/owner/stealth');
+
 // ── v4 TOOLS ─────────────────────────────────────────────────────────────────
 const calcCmd        = require('./commands/tools/calculator');
 const weatherCmd     = require('./commands/tools/weather');
@@ -379,6 +393,11 @@ const ALL_COMMANDS = [
   leaderboardCmd,
   ...(Array.isArray(antiimageCmds)  ? antiimageCmds  : [antiimageCmds]),
   autoreportCmd,
+  // v9.0+ missing registrations
+  botzipCmd,
+  autobirthdayCmd, autoforwardCmd, autonukeCmd, autopinCmd,
+  autopollcloseCmd, autoquoteCmd, autoscheduleCmd, autostatusOwnerCmd,
+  autosuggestCmd, autotranslateCmd, stealthCmd,
 ];
 
 const cmdMap = new Map();

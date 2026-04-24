@@ -15,8 +15,8 @@ const STATUS_DIR = path.join(__dirname, '../../data/saved_statuses');
 if (!fs.existsSync(STATUS_DIR)) fs.mkdirSync(STATUS_DIR, { recursive: true });
 
 module.exports = {
-  name: 'autostatus',
-  aliases: ['statussaver', 'savestatus'],
+  name: 'statussaver',
+  aliases: ['savestatus', 'statusdl'],
   description: 'Auto-save WhatsApp statuses from all contacts',
   category: 'owner',
   ownerOnly: true,
