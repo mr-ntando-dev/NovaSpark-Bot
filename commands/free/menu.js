@@ -1,275 +1,308 @@
 /**
- * NovaSpark Bot v8.0 - FULL FLAT MEGA MENU
- * One message: image + full menu as caption. No sub-menus.
- * Menu image: assets/menu_image.jpg (the gold WA shield on circuit board)
- * Owners: 263777124998 & 263786831091
+ * NovaSpark Bot v9.0 — NEON-MD Style Menu
+ * Image + caption, quoted via fake vCard contact.
+ * Time-based greeting, tree-style borders, category sections.
  * By Dev-Ntando
  */
 'use strict';
+
 const config   = require('../../config');
 const database = require('../../database');
 const fs       = require('fs');
 const path     = require('path');
+
+// ── Greeting helper ───────────────────────────────────────────────────────
+function getGreeting() {
+  const tz   = config.timezone || 'Africa/Harare';
+  const hour = new Date(new Date().toLocaleString('en-US', { timeZone: tz })).getHours();
+  if (hour >= 5  && hour < 12) return '🌅 Good Morning';
+  if (hour >= 12 && hour < 17) return '☀️ Good Afternoon';
+  if (hour >= 17 && hour < 21) return '🌆 Good Evening';
+  return '🌙 Good Night';
+}
+
 module.exports = {
-  name: 'menu',
-  aliases: ['help', 'cmds', 'commands', 'start', 'h'],
-  description: 'Full flat mega menu',
-  category: 'free',
+  name:        'menu',
+  aliases:     ['help', 'cmds', 'commands', 'start', 'h'],
+  description: 'Show bot menu — NEON-MD style',
+  category:    'free',
+
   execute: async ({ sock, msg, from, sender, args, reply }) => {
+
     const P      = config.prefix || '.';
     const isPrem = database.isPremium ? database.isPremium(sender) : false;
     const num    = sender.split('@')[0];
-    const plan   = isPrem ? '\uD83D\uDCB8 Premium Member' : '\uD83C\uDD93 Free User';
-    const uptime = process.uptime();
-    const hrs    = Math.floor(uptime / 3600);
-    const mins   = Math.floor((uptime % 3600) / 60);
-    const secs   = Math.floor(uptime % 60);
-    const upStr  = `${hrs}h ${mins}m ${secs}s`;
-    const memMB  = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+    const plan   = isPrem ? '💸 *Premium Member*' : '🆓 *Free User*';
+    const greeting = getGreeting();
+
+    // Uptime
+    const up   = process.uptime();
+    const upStr = `${Math.floor(up / 3600)}h ${Math.floor((up % 3600) / 60)}m ${Math.floor(up % 60)}s`;
+
+    // Memory
+    const memMB  = Math.round(process.memoryUsage().heapUsed  / 1024 / 1024);
     const memTot = Math.round(process.memoryUsage().heapTotal / 1024 / 1024);
-    const now = new Date().toLocaleString('en-ZA', {
+
+    // Date / time
+    const now  = new Date().toLocaleString('en-ZA', {
       timeZone: config.timezone || 'Africa/Harare',
       weekday: 'long', month: 'short', day: 'numeric',
       year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
     });
-    const B = '\u2501'.repeat(35);
-    const D = '\u2504'.repeat(35);
-    const rows = [
-      '\u2554' + '='.repeat(33) + '\u2557',
-      '\u2551  \u26a1 NOVASPARK BOT v' + config.botVersion + ' \u26a1  \u2551',
-      '\u2551  2026 Edition | Most Advanced WA Bot  \u2551',
-      '\u255a' + '='.repeat(33) + '\u255d',
-      '',
-      '\ud83d\udc64 *+' + num + '*',
-      '\ud83d\udccc ' + plan,
-      '\ud83d\udd50 ' + now,
-      '\u23f1\ufe0f Uptime: ' + upStr + '  \u00b7  \ud83d\udcbe ' + memMB + '/' + memTot + ' MB',
-      B,
-      '',
-      '\ud83e\udd16 *A I   &   I N T E L L I G E N C E*',
-      D,
-      '  *' + P + 'gpt <msg>*',
-      '  *' + P + 'gemini <msg>*',
-      '  *' + P + 'character <n> <m>*',
-      '  *' + P + 'autochat on/off*',
-      '  *' + P + 'imagine <prompt>*',
-      '  *' + P + 'imagine2 <prompt>*',
-      '  *' + P + 'remini*',
-      '  *' + P + 'removebg*',
-      '  *' + P + 'genmusic <prompt>*',
-      B,
-      '',
-      '\ud83d\udcda *S T U D Y   &   S C H O O L*',
-      D,
-      '  *' + P + 'homework <q>*',
-      '  *' + P + 'essay <topic>*',
-      '  *' + P + 'summarize <text>*',
-      '  *' + P + 'studytips <subj>*',
-      '  *' + P + 'math <problem>*',
-      '  *' + P + 'translate <l> <t>*',
-      '  *' + P + 'pdf*',
-      B,
-      '',
-      '\ud83c\udfae *G A M E S   &   C H A L L E N G E S*',
-      D,
-      '  *' + P + 'wordle*',
-      '  *' + P + 'trivia*',
-      '  *' + P + 'hangman*',
-      '  *' + P + 'rps rock/paper/scissors*',
-      '  *' + P + '8ball <question>*',
-      '  *' + P + 'dice [N]  /  ' + P + 'flip  /  ' + P + 'roulette*',
-      '  *' + P + 'truth  /  ' + P + 'dare  /  ' + P + 'wouldyourather*',
-      '  *' + P + 'twotruth*',
-      '  *' + P + 'nhie*',
-      '  *' + P + 'chess start @user* \ud83c\udd95',
-      '  *' + P + 'akinator start* \ud83c\udd95',
-      '  *' + P + 'scramble* \ud83c\udd95',
-      '  *' + P + 'wyr  /  ' + P + 'wyr a/b* \ud83c\udd95',
-      B,
-      '',
-      '\ud83d\ude02 *F U N   &   S O C I A L*',
-      D,
-      '  *' + P + 'joke  /  ' + P + 'meme  /  ' + P + 'riddle*',
-      '  *' + P + 'roast @user  /  ' + P + 'insult @user*',
-      '  *' + P + 'flirt [@user]  /  ' + P + 'compliment [@user]*',
-      '  *' + P + 'ship @u1 @u2*',
-      '  *' + P + 'couple @u1 @u2*',
-      '  *' + P + 'vibe*',
-      '  *' + P + 'rate <anything>*',
-      '  *' + P + 'zodiac <sign>*',
-      '  *' + P + 'horoscope <sign>*',
-      '  *' + P + 'confess <msg>*',
-      '  *' + P + 'waifu  /  ' + P + 'gayrate [@user]*',
-      '  *' + P + 'personality* \ud83c\udd95',
-      B,
-      '',
-      '\ud83d\udd27 *T O O L S   &   U T I L I T I E S*',
-      D,
-      '  *' + P + 'weather <city>*',
-      '  *' + P + 'news [topic]*',
-      '  *' + P + 'qr <text>*',
-      '  *' + P + 'calc <expr>*',
-      '  *' + P + 'bmi <kg> <cm>  /  ' + P + 'age <date>*',
-      '  *' + P + 'time [zone]  /  ' + P + 'countdown <date>*',
-      '  *' + P + 'currency 100 USD ZAR*',
-      '  *' + P + 'convert <v> <f> <t>*',
-      '  *' + P + 'color <hex/name>*',
-      '  *' + P + 'lyrics <song>*',
-      '  *' + P + 'truthfact*',
-      '  *' + P + 'tts [lang] <text>*',
-      '  *' + P + 'textart <s> <text>*',
-      '  *' + P + 'encode <t> <text>*',
-      '  *' + P + 'password [len]  /  ' + P + 'ip <addr>*',
-      '  *' + P + 'crypto <coin>  /  ' + P + 'shorturl <url>*',
-      '  *' + P + 'ssweb <url>  /  ' + P + 'define  /  ' + P + 'urban*',
-      '  *' + P + 'fact / ' + P + 'catfact / ' + P + 'dogfact / ' + P + 'numberfact <N>*',
-      '  *' + P + 'motivate / ' + P + 'advice / ' + P + 'quote*',
-      '  *' + P + 'getpp @user  /  ' + P + 'tempnumber  /  ' + P + 'myactivity*',
-      '  *' + P + 'reminder set 10m <msg>* \ud83c\udd95',
-      '  *' + P + 'note add/list/get/delete* \ud83c\udd95',
-      '  *' + P + 'poll2 "Q" "A" "B"  /  ' + P + 'vote 1* \ud83c\udd95',
-      '  *' + P + 'countdown set "Event" date* \ud83c\udd95',
-      '  *' + P + 'timetable add/show/week* \ud83c\udd95',
-      '  *' + P + 'coinflip  /  ' + P + 'bet heads 100* \ud83c\udd95',
-      '  *' + P + 'wallet  /  ' + P + 'richlist  /  ' + P + 'transfer @u 100* \ud83c\udd95',
-      B,
-      '',
-      '\u2b07\ufe0f *D O W N L O A D S*',
-      D,
-      '  *' + P + 'ytmp3 <q/url>*',
-      '  *' + P + 'ytmp4 <q/url>*',
-      '  *' + P + 'tiktok / ' + P + 'instagram / ' + P + 'facebook / ' + P + 'pinterest*',
-      '  *' + P + 'spotify <query>*',
-      B,
-      '',
-      '\ud83c\udfac *M E D I A   &   V I S U A L S*',
-      D,
-      '  *' + P + 'sticker*',
-      '  *' + P + 'simage <url>  /  ' + P + 'viewonce*',
-      '  *' + P + 'remini / ' + P + 'removebg*',
-      B,
-      '',
-      '\ud83d\udee1\ufe0f *G R O U P   M A N A G E M E N T*',
-      D,
-      '  *' + P + 'kick / ' + P + 'promote / ' + P + 'demote / ' + P + 'ban / ' + P + 'unban*',
-      '  *' + P + 'warn / ' + P + 'warns / ' + P + 'clearwarn / ' + P + 'listwarn \ud83c\udd95*',
-      '  *' + P + 'tagall / ' + P + 'hidetag / ' + P + 'tagadmins / ' + P + 'delete*',
-      '  *' + P + 'mute / ' + P + 'unmute / ' + P + 'grouplink / ' + P + 'resetlink*',
-      '  *' + P + 'welcome / ' + P + 'goodbye on/off*',
-      '  *' + P + 'setrules <rules> \ud83c\udd95  /  ' + P + 'rules \ud83c\udd95*',
-      '  *' + P + 'nightmode / ' + P + 'vip / ' + P + 'ghost on/off*',
-      '  *' + P + 'antilink / ' + P + 'antitoxic / ' + P + 'antiflood / ' + P + 'antiraid*',
-      '  *' + P + 'antiword / ' + P + 'antifwd / ' + P + 'antispam on/off*',
-      '  *' + P + 'autokick / ' + P + 'autoreact / ' + P + 'autoreply / ' + P + 'autonudge*',
-      '  *' + P + 'groupinfo / ' + P + 'groupstats / ' + P + 'membercount / ' + P + 'topmembers*',
-      '  *' + P + 'slowmode on 30 \ud83c\udd95  /  ' + P + 'slowmode off* ',
-      '  *' + P + 'pin \ud83c\udd95  /  ' + P + 'pins  /  ' + P + 'unpin <n>*',
-      '  *' + P + 'xp  /  ' + P + 'xp leaderboard \ud83c\udd95*',
-      '  *' + P + 'antiimage / ' + P + 'antivideo / ' + P + 'antisticker on/off \ud83c\udd95*',
-      B,
-      '',
-      '\u271d\ufe0f *F A I T H   &   I N S P I R A T I O N*',
-      D,
-      '  *' + P + 'tbj / ' + P + 'tbj <N> / ' + P + 'tbj search <topic>*',
-      '  *' + P + 'tbj quote / ' + P + 'tbj list*',
-      '  *' + P + 'bible <ref>*',
-      '  *' + P + 'verse / ' + P + 'prayer / ' + P + 'pray <request>*',
-      '  *' + P + 'autoverse / ' + P + 'autoprayer / ' + P + 'autogm on HH:MM*',
-      B,
-      '',
-      '\u2699\ufe0f *A U T O   F E A T U R E S*',
-      D,
-      '  *' + P + 'autoonline / ' + P + 'autotyping / ' + P + 'autoread*',
-      '  *' + P + 'autoreply / ' + P + 'autostatus / ' + P + 'autobackup*',
-      '  *' + P + 'autoleave / ' + P + 'anticall / ' + P + 'antidelete*',
-      '  *' + P + 'waprotect / ' + P + 'pmblocker*',
-      '  *' + P + 'autoschedule add HH:MM <msg>*',
-      '  *' + P + 'autoforward set <src> <dst>*',
-      '  *' + P + 'autopin on/off/keyword <word>*',
-      '  *' + P + 'autotranslate on <lang>*',
-      '  *' + P + 'autonuke on/off*',
-      '  *' + P + 'birthday add @user DD/MM*',
-      '  *' + P + 'autopollclose on/off*',
-      '  *' + P + 'autoquote on/off*',
-      '  *' + P + 'autosuggest on/off*',
-      B,
-      '',
-      '\ud83e\udd77 *S T E A L T H   &   G H O S T*',
-      D,
-      '  *' + P + 'ghost on/off*',
-      '  *' + P + 'stealth on/off*',
-      '  *' + P + 'stealth delay <min> <max>*',
-      '  *' + P + 'stealth presence <mode>*',
-      B,
-      '',
-      '\ud83d\udce6 *G U I D E   &   D O W N L O A D*',
-      D,
-      '  *' + P + 'zip / ' + P + 'botzip / ' + P + 'guide*',
-      B,
-      '',
-      '\ud83d\udcb8 *P R E M I U M*',
-      D,
-      '  *' + P + 'examprep <subject>*',
-      '  *' + P + 'code <lang> <task>*',
-      '  *' + P + 'remind <time> <m>*',
-      '  *' + P + 'mystats / ' + P + 'setpersona / ' + P + 'autostudy*',
-      '  *' + P + 'upgrade*',
-      B,
-      '',
-      '\ud83d\udc51 *O W N E R   C O M M A N D S*',
-      D,
-      '  *' + P + 'shutdown / ' + P + 'restart / ' + P + 'botstats*',
-      '  *' + P + 'eval <code>*',
-      '  *' + P + 'broadcast / ' + P + 'announce / ' + P + 'dmowner*',
-      '  *' + P + 'setpremium add/rm/list*',
-      '  *' + P + 'ban / ' + P + 'unban / ' + P + 'banlist / ' + P + 'cleardb*',
-      '  *' + P + 'setprefix / ' + P + 'setprofile / ' + P + 'setnick*',
-      '  *' + P + 'listgroups / ' + P + 'joingroup / ' + P + 'leavegroup*',
-      '  *' + P + 'ownerlist / ' + P + 'addowner / ' + P + 'removeowner*',
-      '  *' + P + 'maintenance on/off*',
-      '  *' + P + 'autoforward set/list/remove*',
-      '  *' + P + 'autoschedule add/list/remove*',
-      '  *' + P + 'birthday add/list/remove*',
-      '  *' + P + 'stealth on/off/status*',
-      B,
-      '',
-      '\ud83d\udce1 *' + config.botName + ' v' + config.botVersion + '*',
-      '\ud83d\udc51 Owners: ' + (Array.isArray(config.ownerName) ? config.ownerName.join(' & ') : config.ownerName),
-      '\ud83d\udccc Prefix: ' + P + '  \u00b7  \ud83c\udf0d TZ: ' + (config.timezone || 'Africa/Harare'),
-      '',
-      '_\ud83c\udd95 = New in v8.0  \u00b7  \ud83d\udcb8 = Premium only_',
-      '_\ud83d\udce6 Type \`.zip\` for full guide download_',
-      '_\u26a1 NovaSpark Bot \u2014 Built by Dev-Ntando_',
-    ];
-    const menuText = rows.join('\n');
 
-    // ── Load menu image ────────────────────────────────────────────────────
-    // Priority: 1) assets/menu_image.jpg  2) config.menuImagePath URL  3) fallback URL
+    // ── Borders ──────────────────────────────────────────────────────────
+    const TOP  = '╔' + '═'.repeat(33) + '╗';
+    const MID  = '╠' + '═'.repeat(33) + '╣';
+    const BOT  = '╚' + '═'.repeat(33) + '╝';
+    const PIPE = '║';
+    const DIV  = '┄'.repeat(33);
+    const SEP  = '━'.repeat(33);
+
+    // ── Section builder ──────────────────────────────────────────────────
+    const sec = (emoji, title) => `\n${emoji} *${title}*\n${DIV}`;
+
+    // cmd shorthand
+    const c = cmd => `  *╰┈➤ ${P}${cmd}*`;
+
+    // ── Menu body ────────────────────────────────────────────────────────
+    const menu = [
+      TOP,
+      `${PIPE}  ⚡ *N O V A S P A R K  B O T*  ⚡  ${PIPE}`,
+      `${PIPE}   v${config.botVersion} · 2026 Edition  ${PIPE}`,
+      MID,
+      `${PIPE}  ${greeting}, *${(config.ownerName[0] || 'User')}*  ${PIPE}`,
+      BOT,
+      '',
+      `> 👤 *+${num}*`,
+      `> 📌 ${plan}`,
+      `> 🕐 ${now}`,
+      `> ⏱️ Uptime: ${upStr}  ·  💾 ${memMB}/${memTot} MB`,
+      SEP,
+
+      // ── AI ──────────────────────────────────────────────────────────
+      sec('🤖', 'A I   &   I N T E L L I G E N C E'),
+      c('gpt <msg>'),
+      c('gemini <msg>'),
+      c('character <name> <msg>'),
+      c('autochat on/off'),
+      c('imagine <prompt>'),
+      c('imagine2 <prompt>'),
+      c('remini'),
+      c('removebg'),
+      c('genmusic <prompt>'),
+      SEP,
+
+      // ── Study ────────────────────────────────────────────────────────
+      sec('📚', 'S T U D Y   &   S C H O O L'),
+      c('homework <question>'),
+      c('essay <topic>'),
+      c('summarize <text>'),
+      c('studytips <subject>'),
+      c('math <problem>'),
+      c('translate <lang> <text>'),
+      c('pdf'),
+      SEP,
+
+      // ── Games ────────────────────────────────────────────────────────
+      sec('🎮', 'G A M E S   &   C H A L L E N G E S'),
+      c('wordle  🆕'),
+      c('trivia'),
+      c('hangman'),
+      c('rps rock/paper/scissors'),
+      c('8ball <question>'),
+      c('dice [N]  /  flip  /  roulette'),
+      c('truth  /  dare  /  wouldyourather'),
+      c('twotruth  /  nhie'),
+      c('chess start @user  🆕'),
+      c('akinator start  🆕'),
+      c('scramble  🆕'),
+      c('wyr  /  wyr a/b  🆕'),
+      SEP,
+
+      // ── Fun ──────────────────────────────────────────────────────────
+      sec('😂', 'F U N   &   S O C I A L'),
+      c('joke  /  meme  /  riddle'),
+      c('roast @user  /  insult @user'),
+      c('flirt [@user]  /  compliment [@user]'),
+      c('ship @u1 @u2  /  couple @u1 @u2'),
+      c('rate <anything>  /  vibe'),
+      c('zodiac <sign>  /  horoscope <sign>'),
+      c('confess <msg>  /  waifu  /  gayrate [@user]'),
+      c('personality  🆕'),
+      SEP,
+
+      // ── Tools ────────────────────────────────────────────────────────
+      sec('🔧', 'T O O L S   &   U T I L I T I E S'),
+      c('weather <city>  /  news [topic]'),
+      c('qr <text>  /  calc <expr>'),
+      c('bmi <kg> <cm>  /  age <date>'),
+      c('time [zone]  /  countdown <date>'),
+      c('currency 100 USD ZAR'),
+      c('convert <val> <from> <to>'),
+      c('color <hex/name>  /  lyrics <song>'),
+      c('tts [lang] <text>  /  textart <style> <text>'),
+      c('encode <type> <text>'),
+      c('password [len]  /  ip <addr>'),
+      c('crypto <coin>  /  shorturl <url>'),
+      c('ssweb <url>  /  define  /  urban'),
+      c('fact  /  catfact  /  dogfact  /  numberfact <N>'),
+      c('motivate  /  advice  /  quote'),
+      c('getpp @user  /  tempnumber  /  myactivity'),
+      c('reminder set 10m <msg>  🆕'),
+      c('note add/list/get/delete  🆕'),
+      c('poll2 "Q" "A" "B"  /  vote 1  🆕'),
+      c('countdown set "Event" date  🆕'),
+      c('timetable add/show/week  🆕'),
+      c('coinflip  /  bet heads 100  🆕'),
+      c('wallet  /  richlist  /  transfer @u 100  🆕'),
+      SEP,
+
+      // ── Downloads ────────────────────────────────────────────────────
+      sec('⬇️', 'D O W N L O A D S'),
+      c('ytmp3 <query/url>'),
+      c('ytmp4 <query/url>'),
+      c('tiktok  /  instagram  /  facebook  /  pinterest'),
+      c('spotify <query>'),
+      SEP,
+
+      // ── Media ────────────────────────────────────────────────────────
+      sec('🎬', 'M E D I A   &   V I S U A L S'),
+      c('sticker'),
+      c('simage <url>  /  viewonce'),
+      c('remini  /  removebg'),
+      SEP,
+
+      // ── Group ────────────────────────────────────────────────────────
+      sec('🛡️', 'G R O U P   M A N A G E M E N T'),
+      c('kick  /  promote  /  demote  /  ban  /  unban'),
+      c('warn  /  warns  /  clearwarn  /  listwarn  🆕'),
+      c('tagall  /  hidetag  /  tagadmins  /  delete'),
+      c('mute  /  unmute  /  grouplink  /  resetlink'),
+      c('welcome  /  goodbye on/off'),
+      c('setrules <rules>  🆕  /  rules  🆕'),
+      c('nightmode  /  vip  /  ghost on/off'),
+      c('antilink  /  antitoxic  /  antiflood  /  antiraid'),
+      c('antiword  /  antifwd  /  antispam on/off'),
+      c('autokick  /  autoreact  /  autoreply  /  autonudge'),
+      c('groupinfo  /  groupstats  /  membercount  /  topmembers'),
+      c('slowmode on 30  🆕  /  slowmode off'),
+      c('pin  🆕  /  pins  /  unpin <n>'),
+      c('xp  /  xp leaderboard  🆕'),
+      c('antiimage  /  antivideo  /  antisticker on/off  🆕'),
+      SEP,
+
+      // ── Faith ────────────────────────────────────────────────────────
+      sec('✝️', 'F A I T H   &   I N S P I R A T I O N'),
+      c('tbj  /  tbj <N>  /  tbj search <topic>'),
+      c('tbj quote  /  tbj list'),
+      c('bible <ref>'),
+      c('verse  /  prayer  /  pray <request>'),
+      c('autoverse  /  autoprayer  /  autogm on HH:MM'),
+      SEP,
+
+      // ── Auto ─────────────────────────────────────────────────────────
+      sec('⚙️', 'A U T O   F E A T U R E S'),
+      c('autoonline  /  autotyping  /  autoread'),
+      c('autoreply  /  autostatus  /  autobackup'),
+      c('autoleave  /  anticall  /  antidelete'),
+      c('waprotect  /  pmblocker'),
+      c('autoschedule add HH:MM <msg>'),
+      c('autoforward set <src> <dst>'),
+      c('autopin on/off/keyword <word>'),
+      c('autotranslate on <lang>'),
+      c('autonuke on/off'),
+      c('birthday add @user DD/MM'),
+      c('autopollclose on/off  /  autoquote on/off  /  autosuggest on/off'),
+      SEP,
+
+      // ── Stealth ──────────────────────────────────────────────────────
+      sec('👻', 'S T E A L T H   &   G H O S T'),
+      c('ghost on/off'),
+      c('stealth on/off'),
+      c('stealth delay <min> <max>'),
+      c('stealth presence <mode>'),
+      SEP,
+
+      // ── Guide ────────────────────────────────────────────────────────
+      sec('📦', 'G U I D E   &   D O W N L O A D'),
+      c('zip  /  botzip  /  guide'),
+      SEP,
+
+      // ── Premium ──────────────────────────────────────────────────────
+      sec('💸', 'P R E M I U M'),
+      c('examprep <subject>'),
+      c('code <lang> <task>'),
+      c('remind <time> <msg>'),
+      c('mystats  /  setpersona  /  autostudy'),
+      c('upgrade'),
+      SEP,
+
+      // ── Owner ────────────────────────────────────────────────────────
+      sec('👑', 'O W N E R   C O M M A N D S'),
+      c('shutdown  /  restart  /  botstats'),
+      c('eval <code>'),
+      c('broadcast  /  announce  /  dmowner'),
+      c('setpremium add/rm/list'),
+      c('ban  /  unban  /  banlist  /  cleardb'),
+      c('setprefix  /  setprofile  /  setnick'),
+      c('listgroups  /  joingroup  /  leavegroup'),
+      c('ownerlist  /  addowner  /  removeowner'),
+      c('maintenance on/off'),
+      c('autoforward set/list/remove'),
+      c('autoschedule add/list/remove'),
+      c('birthday add/list/remove'),
+      c('stealth on/off/status'),
+      SEP,
+
+      '',
+      `📡 *${config.botName} v${config.botVersion}*`,
+      `👑 Owner: ${Array.isArray(config.ownerName) ? config.ownerName.join(' & ') : config.ownerName}`,
+      `📌 Prefix: *${P}*  ·  🌍 TZ: ${config.timezone || 'Africa/Harare'}`,
+      '',
+      `_🆕 = New in v9.0  ·  💸 = Premium only_`,
+      `_📦 Type \`${P}zip\` for full source download_`,
+      `_⚡ NovaSpark Bot — Built by Dev-Ntando_`,
+    ].join('\n');
+
+    // ── Fake vCard for NEON-MD style quoted message ───────────────────────
+    const fakevCard = {
+      key: {
+        fromMe:    false,
+        participant: '0@s.whatsapp.net',
+        remoteJid:   'status@broadcast',
+      },
+      message: {
+        contactMessage: {
+          displayName: config.botName || 'NovaSpark Bot',
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${config.botName || 'NovaSpark Bot'}\nORG:${config.botName || 'NovaSpark Bot'};\nTEL;type=CELL;type=VOICE;waid=${(config.ownerNumber[0] || '263786831091')}:+${(config.ownerNumber[0] || '263786831091')}\nEND:VCARD`,
+        },
+      },
+    };
+
+    // ── Load menu image ───────────────────────────────────────────────────
     let imageSource = null;
-    const localImgPath = path.resolve(__dirname, '../../assets/menu_image.jpg');
-    const localImgJpeg = path.resolve(__dirname, '../../assets/menu_image.jpeg');
-    const localImgPng  = path.resolve(__dirname, '../../assets/menu_image.png');
-
-    if (fs.existsSync(localImgPath)) {
-      imageSource = { image: fs.readFileSync(localImgPath) };
-    } else if (fs.existsSync(localImgJpeg)) {
-      imageSource = { image: fs.readFileSync(localImgJpeg) };
-    } else if (fs.existsSync(localImgPng)) {
-      imageSource = { image: fs.readFileSync(localImgPng) };
-    } else if (config.menuImagePath && config.menuImagePath.startsWith('http')) {
-      imageSource = { image: { url: config.menuImagePath } };
-    } else {
-      // Fallback: use a default branded image URL
-      imageSource = { image: { url: 'https://i.imgur.com/4M7IWwP.jpeg' } };
+    const base = path.resolve(__dirname, '../../assets');
+    for (const fname of ['menu_image.jpg', 'menu_image.jpeg', 'menu_image.png']) {
+      const fp = path.join(base, fname);
+      if (fs.existsSync(fp)) { imageSource = { image: fs.readFileSync(fp) }; break; }
+    }
+    if (!imageSource) {
+      if (config.menuImagePath && config.menuImagePath.startsWith('http')) {
+        imageSource = { image: { url: config.menuImagePath } };
+      } else {
+        imageSource = { image: { url: 'https://i.imgur.com/4M7IWwP.jpeg' } };
+      }
     }
 
+    // ── Send ──────────────────────────────────────────────────────────────
     try {
       await sock.sendMessage(from, {
         ...imageSource,
-        caption: menuText,
-      }, { quoted: msg });
+        caption: menu,
+      }, { quoted: fakevCard });
     } catch {
-      await sock.sendMessage(from, { text: menuText }, { quoted: msg });
+      // fallback: plain text, quoted on the user's original message
+      await sock.sendMessage(from, { text: menu }, { quoted: msg });
     }
   },
 };
