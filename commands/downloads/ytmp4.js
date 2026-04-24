@@ -1,7 +1,7 @@
 /**
- * ⚡ NovaSpark Bot v5 — YouTube Video Downloader
+ * ⚡ NovaSpark Bot v9 — YouTube Video Downloader
  * .video / .ytvideo — search by name OR paste any YouTube URL (shorts, live, music)
- * Multi-API fallback + rich animated download status
+ * Multi-API fallback | Clean professional output
  * By Dev-Ntando
  */
 'use strict';
@@ -25,12 +25,6 @@ function normalizeYtUrl(raw) {
     }
     return raw.trim();
   } catch { return raw.trim(); }
-}
-
-function progressBar(pct, len) {
-  len = len || 14;
-  const filled = Math.round(pct / 100 * len);
-  return '█'.repeat(filled) + '░'.repeat(len - filled);
 }
 
 async function tryApis(youtubeUrl) {
@@ -83,11 +77,11 @@ module.exports = {
   async execute({ sock, msg, from, args, reply }) {
     const query = args.join(' ').trim();
     if (!query) return reply(
-      '🎬 *NovaSpark Downloader*\n\n' +
+      '🎬 *NovaSpark Video*\n\n' +
       'Usage:\n' +
-      '• .video Bohemian Rhapsody\n' +
-      '• .video https://youtu.be/xxxxx\n' +
-      '• .video https://www.youtube.com/shorts/xxxxx'
+      '• `.video Bohemian Rhapsody`\n' +
+      '• `.video https://youtu.be/xxxxx`\n' +
+      '• `.video https://www.youtube.com/shorts/xxxxx`'
     );
 
     await sock.sendMessage(from, { react: { text: '🎬', key: msg.key } });
@@ -100,17 +94,11 @@ module.exports = {
         videoTitle = 'Resolving...';
       } else {
         await sock.sendMessage(from, {
-          text:
-            '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-            '  🎬 *NovaSpark Downloader*\n' +
-            '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-            '🔍 Searching: _' + query + '_\n' +
-            progressBar(15) + ' 15%\n\n' +
-            '_⚡ Please wait..._',
+          text: '🔍 _Searching "' + query + '"..._',
         }, { quoted: msg });
 
         const { videos } = await yts(query);
-        if (!videos || !videos.length) return reply('❌ No results found. Try different words.');
+        if (!videos || !videos.length) return reply('❌ No results found for that query.');
         const v       = videos[0];
         videoUrl      = v.url;
         videoTitle    = v.title;
@@ -118,85 +106,50 @@ module.exports = {
         videoDuration = v.timestamp;
       }
 
-      if (videoThumb) {
-        await sock.sendMessage(from, {
-          image: { url: videoThumb },
-          caption:
-            '🎬 *' + videoTitle + '*\n' +
-            '⏱ ' + (videoDuration || '') + '\n\n' +
-            '╔══════════════════════╗\n' +
-            '  ⬇️  *DOWNLOADING VIDEO*  \n' +
-            '  ' + progressBar(40) + ' 40%\n' +
-            '╚══════════════════════╝\n\n' +
-            '_🔄 Fetching from servers..._',
-        }, { quoted: msg });
-      }
-
       const data = await tryApis(videoUrl);
-      const resolvedTitle = (data.title || videoTitle || 'Video').replace(/[^\w\s\-–]/g, '').trim();
-
-      if (!videoThumb && data.thumb) {
-        await sock.sendMessage(from, {
-          image: { url: data.thumb },
-          caption:
-            '🎬 *' + resolvedTitle + '*\n\n' +
-            '╔══════════════════════╗\n' +
-            '  ⬇️  *DOWNLOADING VIDEO*  \n' +
-            '  ' + progressBar(60) + ' 60%\n' +
-            '╚══════════════════════╝\n\n' +
-            '_🔄 Almost there..._',
-        }, { quoted: msg });
-      }
+      const resolvedTitle = (data.title || videoTitle || 'Video').replace(/[^\w\s\-]/g, '').trim();
+      const dur   = videoDuration || data.duration || '—';
 
       const tmpFile = path.join(os.tmpdir(), 'ns_video_' + Date.now() + '.mp4');
       const dlRes   = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 120000, headers: { 'User-Agent': UA } });
       fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
+      const sizeMB  = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
 
-      const sizeMB = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
       if (parseFloat(sizeMB) > 64) {
         fs.unlink(tmpFile, () => {});
-        return reply('❌ Video too large (' + sizeMB + 'MB). WhatsApp limit is 64MB.\n\n_Try .song to get audio only._');
+        return reply('❌ Video too large (' + sizeMB + 'MB). WhatsApp limit is 64MB.\n\n_Try `.play` to get audio only._');
       }
 
-      const videoBuffer = fs.readFileSync(tmpFile);
-      const dur = videoDuration || data.duration || '—';
+      const videoBuf = fs.readFileSync(tmpFile);
 
-      const caption =
-        '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-        '  🎬 *NovaSpark Video*\n' +
-        '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-        '🎞  *' + resolvedTitle + '*\n' +
-        '⏱  Duration : ' + dur + '\n' +
-        '💾  Size     : ' + sizeMB + ' MB\n' +
-        progressBar(100) + ' ✅\n\n' +
-        '_⚡ Powered by NovaSpark Bot_';
-
-      // 1️⃣ Send as playable video with rich caption
+      // ── 1. Playable video with clean caption ──────────────────────────────
       await sock.sendMessage(from, {
-        video:    videoBuffer,
+        video:    videoBuf,
         mimetype: 'video/mp4',
         fileName: resolvedTitle + '.mp4',
-        caption:  caption,
+        caption:
+          '🎬 *' + resolvedTitle + '*\n' +
+          '⏱  ' + dur + '   ·   💾 ' + sizeMB + ' MB\n\n' +
+          '_⚡ NovaSpark Bot_',
       }, { quoted: msg });
 
-      // 2️⃣ Send as document so users can save the full mp4 file directly
+      // ── 2. Document (saveable .mp4) ────────────────────────────────────────
       await sock.sendMessage(from, {
-        document: videoBuffer,
+        document: videoBuf,
         mimetype: 'video/mp4',
         fileName: resolvedTitle + '.mp4',
-        caption:  '📎 *' + resolvedTitle + '.mp4* — tap to save',
+        caption:  '📎 ' + resolvedTitle + '.mp4',
       }, { quoted: msg });
 
       fs.unlink(tmpFile, () => {});
+
     } catch (e) {
       await sock.sendMessage(from, {
         text:
-          '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-          '  ❌ *Download Failed*\n' +
-          '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
+          '❌ *Download failed*\n\n' +
           '• Query: _' + query + '_\n' +
           '• Reason: ' + e.message.split('\n')[0] + '\n\n' +
-          '_💡 Tip: Try searching by video name instead of URL_',
+          '_💡 Try searching by video name instead of URL_',
       }, { quoted: msg });
     }
   },

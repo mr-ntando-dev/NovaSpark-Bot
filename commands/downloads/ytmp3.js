@@ -1,7 +1,7 @@
 /**
- * ⚡ NovaSpark Bot v5 — YouTube Audio Downloader
+ * ⚡ NovaSpark Bot v9 — YouTube Audio Downloader
  * .song / .play — search by name OR paste any YouTube URL (shorts, live, music)
- * Multi-API fallback + rich animated download status
+ * Multi-API fallback | Clean professional output
  * By Dev-Ntando
  */
 'use strict';
@@ -25,12 +25,6 @@ function normalizeYtUrl(raw) {
     }
     return raw.trim();
   } catch { return raw.trim(); }
-}
-
-function progressBar(pct, len) {
-  len = len || 14;
-  const filled = Math.round(pct / 100 * len);
-  return '█'.repeat(filled) + '░'.repeat(len - filled);
 }
 
 async function tryApis(youtubeUrl) {
@@ -78,17 +72,16 @@ module.exports = {
   aliases: ['song', 'play', 'mp3', 'audio', 'ytaudio'],
   category: 'downloads',
   description: 'Download YouTube audio — search by name or paste any YouTube URL',
-  usage: '.song <name or YouTube URL>',
+  usage: '.play <song name or YouTube URL>',
 
   async execute({ sock, msg, from, args, reply }) {
     const query = args.join(' ').trim();
     if (!query) return reply(
-      '🎵 *NovaSpark Downloader*\n\n' +
+      '🎵 *NovaSpark Music*\n\n' +
       'Usage:\n' +
-      '• .song Blinding Lights\n' +
-      '• .play Minister GUC captured\n' +
-      '• .song https://youtu.be/xxxxx\n' +
-      '• .song https://www.youtube.com/shorts/xxxxx'
+      '• `.play Blinding Lights`\n' +
+      '• `.play Minister GUC captured`\n' +
+      '• `.play https://youtu.be/xxxxx`'
     );
 
     await sock.sendMessage(from, { react: { text: '🎵', key: msg.key } });
@@ -101,17 +94,11 @@ module.exports = {
         videoTitle = 'Resolving...';
       } else {
         await sock.sendMessage(from, {
-          text:
-            '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-            '  🎵 *NovaSpark Downloader*\n' +
-            '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-            '🔍 Searching: _' + query + '_\n' +
-            progressBar(15) + ' 15%\n\n' +
-            '_⚡ Please wait..._',
+          text: '🔍 _Searching "' + query + '"..._',
         }, { quoted: msg });
 
         const { videos } = await yts(query);
-        if (!videos || !videos.length) return reply('❌ No results found. Try different words.');
+        if (!videos || !videos.length) return reply('❌ No results found for that query.');
         const v       = videos[0];
         videoUrl      = v.url;
         videoTitle    = v.title;
@@ -119,90 +106,58 @@ module.exports = {
         videoDuration = v.timestamp;
       }
 
-      if (videoThumb) {
-        await sock.sendMessage(from, {
-          image: { url: videoThumb },
-          caption:
-            '🎵 *' + videoTitle + '*\n' +
-            '⏱ ' + (videoDuration || '') + '\n\n' +
-            '╔══════════════════════╗\n' +
-            '  ⬇️  *DOWNLOADING AUDIO*  \n' +
-            '  ' + progressBar(40) + ' 40%\n' +
-            '╚══════════════════════╝\n\n' +
-            '_🔄 Fetching from servers..._',
-        }, { quoted: msg });
-      }
-
+      // Fetch download link + actual file in parallel after we have the URL
       const data = await tryApis(videoUrl);
-      const resolvedTitle = (data.title || videoTitle || 'Song').replace(/[^\w\s\-–]/g, '').trim();
-
-      if (!videoThumb && data.thumb) {
-        await sock.sendMessage(from, {
-          image: { url: data.thumb },
-          caption:
-            '🎵 *' + resolvedTitle + '*\n\n' +
-            '╔══════════════════════╗\n' +
-            '  ⬇️  *DOWNLOADING AUDIO*  \n' +
-            '  ' + progressBar(60) + ' 60%\n' +
-            '╚══════════════════════╝\n\n' +
-            '_🔄 Almost there..._',
-        }, { quoted: msg });
-      }
+      const resolvedTitle = (data.title || videoTitle || 'Song').replace(/[^\w\s\-]/g, '').trim();
+      const thumb = videoThumb || data.thumb || null;
+      const dur   = videoDuration || data.duration || '—';
 
       const tmpFile = path.join(os.tmpdir(), 'ns_audio_' + Date.now() + '.mp3');
       const dlRes   = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA } });
       fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
-      const sizeMB  = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
-      const audioBuffer = fs.readFileSync(tmpFile);
-      const thumb   = videoThumb || data.thumb || null;
-      const dur     = videoDuration || data.duration || '—';
+      const sizeMB    = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
+      const audioBuf  = fs.readFileSync(tmpFile);
 
-      const caption =
-        '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-        '  🎵 *NovaSpark Music*\n' +
-        '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-        '📀 *' + resolvedTitle + '*\n' +
-        '⏱  Duration : ' + dur + '\n' +
-        '💾  Size     : ' + sizeMB + ' MB\n' +
-        progressBar(100) + ' ✅\n\n' +
-        '_⚡ Powered by NovaSpark Bot_';
-
-      // 1️⃣ Send as playable audio (WhatsApp audio player)
+      // ── 1. Playable audio ──────────────────────────────────────────────────
       await sock.sendMessage(from, {
-        audio:    audioBuffer,
+        audio:    audioBuf,
         mimetype: 'audio/mp4',
         fileName: resolvedTitle + '.mp3',
         ptt:      false,
       }, { quoted: msg });
 
-      // 2️⃣ Send completion card — with thumbnail if available
+      // ── 2. Info card (thumbnail + metadata) ───────────────────────────────
+      const card =
+        '🎵 *' + resolvedTitle + '*\n' +
+        '⏱  ' + dur + '   ·   💾 ' + sizeMB + ' MB\n\n' +
+        '_⚡ NovaSpark Bot — tap audio above to play_';
+
       if (thumb) {
         await sock.sendMessage(from, {
           image:   { url: thumb },
-          caption: caption,
+          caption: card,
         }, { quoted: msg });
       } else {
-        await sock.sendMessage(from, { text: caption }, { quoted: msg });
+        await sock.sendMessage(from, { text: card }, { quoted: msg });
       }
 
-      // 3️⃣ Send as document so users can save the mp3 file directly
+      // ── 3. Document (saveable .mp3) ────────────────────────────────────────
       await sock.sendMessage(from, {
-        document: audioBuffer,
+        document: audioBuf,
         mimetype: 'audio/mpeg',
         fileName: resolvedTitle + '.mp3',
-        caption:  '📎 *' + resolvedTitle + '.mp3* — tap to save',
+        caption:  '📎 ' + resolvedTitle + '.mp3',
       }, { quoted: msg });
 
       fs.unlink(tmpFile, () => {});
+
     } catch (e) {
       await sock.sendMessage(from, {
         text:
-          '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-          '  ❌ *Download Failed*\n' +
-          '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
+          '❌ *Download failed*\n\n' +
           '• Query: _' + query + '_\n' +
           '• Reason: ' + e.message.split('\n')[0] + '\n\n' +
-          '_💡 Tip: Try searching by song name instead of URL_',
+          '_💡 Try searching by song name instead of URL_',
       }, { quoted: msg });
     }
   },
