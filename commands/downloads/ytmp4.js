@@ -158,23 +158,33 @@ module.exports = {
         return reply('❌ Video too large (' + sizeMB + 'MB). WhatsApp limit is 64MB.\n\n_Try .song to get audio only._');
       }
 
+      const videoBuffer = fs.readFileSync(tmpFile);
+      const dur = videoDuration || data.duration || '—';
+
+      const caption =
+        '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
+        '  🎬 *NovaSpark Video*\n' +
+        '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
+        '🎞  *' + resolvedTitle + '*\n' +
+        '⏱  Duration : ' + dur + '\n' +
+        '💾  Size     : ' + sizeMB + ' MB\n' +
+        progressBar(100) + ' ✅\n\n' +
+        '_⚡ Powered by NovaSpark Bot_';
+
+      // 1️⃣ Send as playable video with rich caption
       await sock.sendMessage(from, {
-        video:    fs.readFileSync(tmpFile),
+        video:    videoBuffer,
         mimetype: 'video/mp4',
         fileName: resolvedTitle + '.mp4',
-        caption:  '🎬 *' + resolvedTitle + '*\n_⚡ NovaSpark Bot_',
+        caption:  caption,
       }, { quoted: msg });
 
+      // 2️⃣ Send as document so users can save the full mp4 file directly
       await sock.sendMessage(from, {
-        text:
-          '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-          '  ✅ *Download Complete!*\n' +
-          '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-          '🎬 *' + resolvedTitle + '*\n' +
-          '⏱ ' + (videoDuration || data.duration || '—') + '\n' +
-          '💾 ' + sizeMB + ' MB\n' +
-          progressBar(100) + ' 100%\n\n' +
-          '_⚡ Powered by NovaSpark Bot_',
+        document: videoBuffer,
+        mimetype: 'video/mp4',
+        fileName: resolvedTitle + '.mp4',
+        caption:  '📎 *' + resolvedTitle + '.mp4* — tap to save',
       }, { quoted: msg });
 
       fs.unlink(tmpFile, () => {});

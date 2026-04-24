@@ -152,25 +152,45 @@ module.exports = {
       const tmpFile = path.join(os.tmpdir(), 'ns_audio_' + Date.now() + '.mp3');
       const dlRes   = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA } });
       fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
-      const sizeMB = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
+      const sizeMB  = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
+      const audioBuffer = fs.readFileSync(tmpFile);
+      const thumb   = videoThumb || data.thumb || null;
+      const dur     = videoDuration || data.duration || '—';
 
+      const caption =
+        '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
+        '  🎵 *NovaSpark Music*\n' +
+        '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
+        '📀 *' + resolvedTitle + '*\n' +
+        '⏱  Duration : ' + dur + '\n' +
+        '💾  Size     : ' + sizeMB + ' MB\n' +
+        progressBar(100) + ' ✅\n\n' +
+        '_⚡ Powered by NovaSpark Bot_';
+
+      // 1️⃣ Send as playable audio (WhatsApp audio player)
       await sock.sendMessage(from, {
-        audio:    fs.readFileSync(tmpFile),
+        audio:    audioBuffer,
         mimetype: 'audio/mp4',
         fileName: resolvedTitle + '.mp3',
         ptt:      false,
       }, { quoted: msg });
 
+      // 2️⃣ Send completion card — with thumbnail if available
+      if (thumb) {
+        await sock.sendMessage(from, {
+          image:   { url: thumb },
+          caption: caption,
+        }, { quoted: msg });
+      } else {
+        await sock.sendMessage(from, { text: caption }, { quoted: msg });
+      }
+
+      // 3️⃣ Send as document so users can save the mp3 file directly
       await sock.sendMessage(from, {
-        text:
-          '╭━━━━━━━━━━━━━━━━━━━━━╮\n' +
-          '  ✅ *Download Complete!*\n' +
-          '╰━━━━━━━━━━━━━━━━━━━━━╯\n\n' +
-          '🎵 *' + resolvedTitle + '*\n' +
-          '⏱ ' + (videoDuration || data.duration || '—') + '\n' +
-          '💾 ' + sizeMB + ' MB\n' +
-          progressBar(100) + ' 100%\n\n' +
-          '_⚡ Powered by NovaSpark Bot_',
+        document: audioBuffer,
+        mimetype: 'audio/mpeg',
+        fileName: resolvedTitle + '.mp3',
+        caption:  '📎 *' + resolvedTitle + '.mp3* — tap to save',
       }, { quoted: msg });
 
       fs.unlink(tmpFile, () => {});
