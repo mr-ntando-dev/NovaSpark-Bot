@@ -276,6 +276,19 @@ const autosuggestCmd   = require('./commands/owner/autosuggest');
 const autotranslateCmd = require('./commands/owner/autotranslate');
 const stealthCmd       = require('./commands/owner/stealth');
 
+// ── v10.0 NEW COMMANDS ────────────────────────────────────────────────────────
+// Fun
+const dadjokeCmdV10    = require('./commands/fun/dadjoke');
+const emojimixCmd      = require('./commands/fun/emojimix');
+const fortuneCmd       = require('./commands/fun/fortunecookie');
+// Tools
+const wodCmd           = require('./commands/tools/wordofday');
+const timezoneCmd      = require('./commands/tools/timezone');
+const randomnameCmd    = require('./commands/tools/randomname');
+// Group
+const mutelistCmd      = require('./commands/group/mutelist');
+const grouprulesV2Cmd  = require('./commands/group/grouprules');
+
 // ── v4 TOOLS ─────────────────────────────────────────────────────────────────
 const calcCmd        = require('./commands/tools/calculator');
 const weatherCmd     = require('./commands/tools/weather');
@@ -398,6 +411,11 @@ const ALL_COMMANDS = [
   autobirthdayCmd, autoforwardCmd, autonukeCmd, autopinCmd,
   autopollcloseCmd, autoquoteCmd, autoscheduleCmd, autostatusOwnerCmd,
   autosuggestCmd, autotranslateCmd, stealthCmd,
+  // v10.0 new commands
+  dadjokeCmdV10, emojimixCmd, fortuneCmd,
+  wodCmd, timezoneCmd, randomnameCmd,
+  mutelistCmd,
+  ...(Array.isArray(grouprulesV2Cmd) ? grouprulesV2Cmd : [grouprulesV2Cmd]),
 ];
 
 const cmdMap = new Map();
