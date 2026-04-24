@@ -117,8 +117,14 @@ async function startBot() {
   // CRITICAL: creds.json must exist on disk before useMultiFileAuthState()
   // is called — otherwise the socket starts with empty credentials and
   // WhatsApp issues a 401 (logged out) immediately.
+  //
+  // FIX: Always decode SESSION_ID on every startup (removed !fs.existsSync guard).
+  // On ephemeral filesystems (Render free tier, Railway, etc.) creds.json is wiped
+  // on every restart. The old guard meant the file was only written once — on the
+  // very first boot — so any restart after that would start with no creds → 401.
+  // SESSION_ID (the env var) is the only persistent source of truth here.
   const sessionPath = path.join(sessionDir, 'creds.json');
-  if (config.sessionID && config.sessionID !== '' && !fs.existsSync(sessionPath)) {
+  if (config.sessionID && config.sessionID !== '') {
     try {
       const zlib = require('zlib');
       const b64  = config.sessionID
