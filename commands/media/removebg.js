@@ -51,7 +51,7 @@ module.exports = {
           form,
           { headers: { ...form.getHeaders(), 'x-api-key': 'sandbox_' }, responseType: 'arraybuffer', timeout: 20000 }
         );
-        return sock.sendMessage(from, {
+        return await sock.sendMessage(from, {
           image: Buffer.from(result),
           caption: '🖼️ Background removed!\n_⚡ NovaSpark Bot v4_',
           mimetype: 'image/png',

@@ -29,13 +29,13 @@ module.exports = [
       if (count >= maxWarn) {
         try { await sock.groupParticipantsUpdate(from, [target], 'remove'); } catch {}
         database.clearWarns(from, target);
-        return sock.sendMessage(from, {
+        return await sock.sendMessage(from, {
           text: `🚫 @${num} reached *${maxWarn} warns* and was removed.\n_Reason: ${reason}_`,
           mentions: [target],
         });
       }
 
-      return sock.sendMessage(from, {
+      return await sock.sendMessage(from, {
         text:
           `⚠️ *Warning ${count}/${maxWarn}*\n\n` +
           `@${num} — *${reason}*\n\n` +
@@ -60,7 +60,7 @@ module.exports = [
       const max  = gs.maxWarn || 3;
       if (!list.length) return reply(`✅ @${target.split('@')[0]} has no warnings.`);
       const detail = list.map((w, i) => `  ${i+1}. ${w.reason || 'No reason'}`).join('\n');
-      return sock.sendMessage(from, {
+      return await sock.sendMessage(from, {
         text: `⚠️ *Warns for @${target.split('@')[0]}*: *${list.length}/${max}*\n\n${detail}`,
         mentions: [target],
       });
@@ -78,7 +78,7 @@ module.exports = [
       const target = mentions?.[0];
       if (!target) return reply('Tag the user: `.clearwarn @user`');
       database.clearWarns(from, target);
-      return sock.sendMessage(from, {
+      return await sock.sendMessage(from, {
         text: `✅ Warnings cleared for @${target.split('@')[0]}.`,
         mentions: [target],
       });

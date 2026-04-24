@@ -22,7 +22,7 @@ module.exports = {
       const prefix = target ? `@${target.split('@')[0]} — here's something for you:\n\n` : '';
       const msgTxt = `💪 *Daily Motivation*\n\n${prefix}"${quote}"\n\n— _${author}_\n\n_⚡ NovaSpark Bot v4_`;
       if (target) {
-        return sock.sendMessage(from, { text: msgTxt, mentions: [target] });
+        return await sock.sendMessage(from, { text: msgTxt, mentions: [target] }, { quoted: msg });
       }
       return reply(msgTxt);
     } catch {

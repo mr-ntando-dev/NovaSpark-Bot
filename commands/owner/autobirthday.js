@@ -84,7 +84,7 @@ module.exports = {
       if (!list.length) return reply('📭 No birthdays registered for this group.');
       const lines = list.map(b => `• @${b.jid.split('@')[0]} — *${b.date}*`).join('\n');
       const mentions = list.map(b => b.jid);
-      return sock.sendMessage(from, { text: `🎂 *Registered Birthdays*\n\n${lines}`, mentions }, { quoted: msg });
+      return await sock.sendMessage(from, { text: `🎂 *Registered Birthdays*\n\n${lines}`, mentions }, { quoted: msg });
     }
 
     if (sub === 'remove') {
@@ -107,7 +107,7 @@ module.exports = {
       const metadata = await sock.groupMetadata(from).catch(() => null);
       const gs = database.getGroupSettings ? database.getGroupSettings(from) : {};
       const msg2 = buildBdayMsg(gs.birthdayTemplate, userJid, metadata?.subject);
-      return sock.sendMessage(from, { text: `🎂 *Birthday Message Preview:*\n\n${msg2}`, mentions: [userJid] }, { quoted: msg });
+      return await sock.sendMessage(from, { text: `🎂 *Birthday Message Preview:*\n\n${msg2}`, mentions: [userJid] }, { quoted: msg });
     }
 
     return reply(

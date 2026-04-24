@@ -58,7 +58,7 @@ module.exports = {
       if (thumb) {
         try {
           const imgBuf = await axios.get(thumb, { responseType: 'arraybuffer', timeout: 8000 });
-          return sock.sendMessage(from, {
+          return await sock.sendMessage(from, {
             image:   Buffer.from(imgBuf.data),
             caption: cap,
           }, { quoted: msg });
