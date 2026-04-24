@@ -114,15 +114,14 @@ async function startBot() {
   if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
 
   // ── Decode SESSION_ID BEFORE loading auth state ──────────────────────────
-  // CRITICAL: creds.json must exist on disk before useMultiFileAuthState()
-  // is called — otherwise the socket starts with empty credentials and
-  // WhatsApp issues a 401 (logged out) immediately.
+  // ALWAYS write creds.json from SESSION_ID on every startup.
+  // On ephemeral filesystems (Render free tier, Railway, Heroku, etc.) the
+  // entire disk is wiped on every container restart. The SESSION_ID env var
+  // is the only persistent source of truth — so we must decode it every time.
   //
-  // FIX: Always decode SESSION_ID on every startup (removed !fs.existsSync guard).
-  // On ephemeral filesystems (Render free tier, Railway, etc.) creds.json is wiped
-  // on every restart. The old guard meant the file was only written once — on the
-  // very first boot — so any restart after that would start with no creds → 401.
-  // SESSION_ID (the env var) is the only persistent source of truth here.
+  // We also re-decode it on 401 (logged-out) restarts: if the user has updated
+  // their SESSION_ID env var to a fresh session, this picks it up automatically
+  // instead of dying permanently.
   const sessionPath = path.join(sessionDir, 'creds.json');
   if (config.sessionID && config.sessionID !== '') {
     try {
@@ -149,10 +148,14 @@ async function startBot() {
     auth:   state,
     logger: pino({ level: 'silent' }),
     printQRInTerminal: false,
-    keepAliveIntervalMs:   10000,
-    connectTimeoutMs:      60000,
-    defaultQueryTimeoutMs: 30000,
-    emitOwnEvents: false,
+    keepAliveIntervalMs:   15_000,   // ping every 15 s — tighter keepalive
+    connectTimeoutMs:      60_000,
+    defaultQueryTimeoutMs: 30_000,
+    retryRequestDelayMs:   2_000,    // retry failed requests after 2 s
+    maxMsgRetryCount:       5,       // retry up to 5 times before dropping
+    emitOwnEvents:          false,
+    markOnlineonConnect:    true,    // tell WA the bot is online immediately
+    syncFullHistory:        false,   // don't pull full chat history (saves memory)
   });
 
   // ── QR fallback (only when no SESSION_ID set) ────────────────────────────
@@ -183,13 +186,32 @@ async function startBot() {
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
 
-      // ── 401: Hard logout ────────────────────────────────────────────────
-      // WhatsApp revoked the session. Do NOT reconnect — the session is dead.
-      // User must generate a new SESSION_ID from the pairing site.
+      // ── 401: Session expired / logged out ──────────────────────────────
+      // This can happen for two reasons:
+      //   1. WhatsApp genuinely revoked the session (rare — usually from the WA app)
+      //   2. The creds.json on disk has gone stale / was corrupted by an in-flight
+      //      write during a crash. SESSION_ID env var still holds the good session.
+      //
+      // Strategy: delete the stale creds.json, re-decode from SESSION_ID, and
+      // restart. If there is no SESSION_ID (QR-paired session) — exit cleanly so
+      // the host process-manager can restart and show a fresh QR.
       if (code === DisconnectReason.loggedOut) {
-        orig.log('\n🔴 Disconnected (code 401). Logged out.');
-        orig.log('⚠️  Session revoked by WhatsApp. Generate a new SESSION_ID from the pairing site.');
-        process.exit(0); // Let the host restart the process after user updates SESSION_ID
+        orig.log('\n🔴 Session closed (401). Attempting session recovery...');
+
+        if (config.sessionID && config.sessionID !== '') {
+          // Wipe stale creds so the next startBot() call re-decodes from SESSION_ID
+          try {
+            const sp = path.join(path.resolve(config.sessionName), 'creds.json');
+            if (fs.existsSync(sp)) fs.unlinkSync(sp);
+          } catch {}
+
+          orig.log('🔄 Re-decoding SESSION_ID and reconnecting in 8 s...');
+          startBot._attempt = 0; // reset backoff
+          setTimeout(startBot, 8000);
+        } else {
+          orig.log('⚠️  No SESSION_ID set — cannot auto-recover. Generate a new SESSION_ID from the pairing site, set it as an env var, and restart.');
+          process.exit(0); // host will restart → shows fresh QR
+        }
         return;
       }
 
@@ -206,14 +228,13 @@ async function startBot() {
       // ── 408 / stream error / all other codes: temporary disconnect ──────
       // Use increasing backoff to avoid rapid reconnect loops that trigger
       // WhatsApp Business account bans.
-      const delay = [5000, 10000, 15000, 30000];
-      const attempt = (startBot._attempt || 0);
+      const delay    = [3000, 5000, 10000, 15000, 30000];
+      const attempt  = (startBot._attempt || 0);
       startBot._attempt = Math.min(attempt + 1, delay.length - 1);
-      const wait = delay[startBot._attempt - 1] || 5000;
+      const wait    = delay[startBot._attempt - 1] || 3000;
 
-      orig.log(`\n🔴 Disconnected (code ${code}). Reconnecting in ${wait / 1000}s...`);
+      orig.log(`\n🔴 Disconnected (code ${code ?? 'unknown'}). Reconnecting in ${wait / 1000}s...`);
       setTimeout(() => {
-        startBot._attempt = Math.max((startBot._attempt || 1) - 1, 0); // reduce on success
         startBot();
       }, wait);
     }
