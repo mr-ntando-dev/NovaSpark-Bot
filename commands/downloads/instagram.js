@@ -1,90 +1,128 @@
 /**
- * ⚡ NovaSpark Bot v5 — Instagram Downloader
- * Photos, Reels, Videos — handles multi-media posts
- * API: Siputzx → ruhend-scraper fallback
- * Ported & adapted from KnightBot-Mini | By Dev-Ntando
+ * ⚡ NovaSpark Bot v9 — Instagram Downloader
+ * Photos, Reels, Videos, Carousels — handles multi-media posts
+ * API cascade: Siputzx → EliteProTech → ruhend-scraper (igdl)
+ * By Dev-Ntando
  */
 'use strict';
 const axios = require('axios');
+const fs    = require('fs');
+const path  = require('path');
+const os    = require('os');
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const IG_PATTERNS = [
   /https?:\/\/(?:www\.)?instagram\.com\/p\//,
   /https?:\/\/(?:www\.)?instagram\.com\/reel\//,
   /https?:\/\/(?:www\.)?instagram\.com\/tv\//,
   /https?:\/\/(?:www\.)?instagram\.com\/stories\//,
+  /https?:\/\/(?:www\.)?instagram\.com\/s\//,
 ];
 
-async function downloadIG(url) {
-  // API 1 — Siputzx
-  try {
-    const r = await axios.get(`https://api.siputzx.my.id/api/d/ig?url=${encodeURIComponent(url)}`, { timeout: 20000, headers: { 'User-Agent': UA } });
-    if (r.data?.status && r.data.data?.length) {
-      return r.data.data.map(m => ({ url: m.url, type: m.type || 'video' }));
-    }
-  } catch {}
-
-  // API 2 — SnapSave
-  try {
-    const r = await axios.get(`https://snapsave.app/api/ajaxSearch?q=${encodeURIComponent(url)}&lang=en&version=v2`, { timeout: 20000, headers: { 'User-Agent': UA } });
-    const items = r.data?.data;
-    if (Array.isArray(items) && items.length) {
-      return items.map(i => ({ url: i.url, type: i.type || 'image' }));
-    }
-  } catch {}
-
-  // API 3 — ruhend-scraper (optional, if installed)
-  try {
-    const { igdl } = require('ruhend-scraper');
-    const res = await igdl(url);
-    if (res?.data?.length) return res.data.map(m => ({ url: m.url, type: m.type || 'image' }));
-  } catch {}
-
-  throw new Error('All Instagram APIs failed — post may be private.');
+// Deduplicate media items by URL
+function dedupeMedia(arr) {
+  const seen = new Set();
+  return arr.filter(m => {
+    if (!m.url || seen.has(m.url)) return false;
+    seen.add(m.url); return true;
+  });
 }
 
+// ── API cascade ────────────────────────────────────────────────────────────
+async function downloadIG(url) {
+  const enc = encodeURIComponent(url);
+
+  // API 1: Siputzx
+  try {
+    const r = await axios.get('https://api.siputzx.my.id/api/d/ig?url=' + enc, { timeout: 25000, headers: { 'User-Agent': UA } });
+    if (r.data?.status && r.data.data?.length)
+      return r.data.data.map(m => ({ url: m.url, type: m.type || 'video' }));
+  } catch {}
+
+  // API 2: EliteProTech
+  try {
+    const r = await axios.get('https://eliteprotech-apis.zone.id/igdown?url=' + enc, { timeout: 25000, headers: { 'User-Agent': UA } });
+    const d = r.data;
+    if (d?.success && d.data?.length)
+      return d.data.map(m => ({ url: m.url || m.downloadURL, type: m.type || 'video' }));
+    if (d?.success && d.downloadURL)
+      return [{ url: d.downloadURL, type: 'video' }];
+  } catch {}
+
+  // API 3: ruhend-scraper igdl (npm package fallback)
+  try {
+    const { igdl } = require('ruhend-scraper');
+    const result = await igdl(url);
+    if (result?.data?.length)
+      return dedupeMedia(result.data.map(m => ({ url: m.url, type: m.type || 'video' })));
+  } catch {}
+
+  throw new Error('All Instagram APIs failed — post may be private or deleted.');
+}
+
+// ── Command ────────────────────────────────────────────────────────────────
 module.exports = {
   name: 'instagram',
-  aliases: ['ig', 'igdl', 'insta', 'reels', 'reel'],
+  aliases: ['ig', 'insta', 'igdl', 'reels'],
   category: 'downloads',
-  description: 'Download Instagram photos/reels/videos',
+  description: 'Download Instagram photos, reels, videos and carousels',
   usage: '.ig <Instagram URL>',
 
-  async execute({ sock, msg, from, args, reply, sender, isAdmin, isBotAdmin, groupMeta, groupSettings, mentions, body }) {
+  async execute({ sock, msg, from, args, reply }) {
     const url = (args[0] || args.join(' ')).trim();
-    if (!url) return reply('📸 Provide an Instagram URL!\n\n_Example: .ig https://www.instagram.com/reel/xxx_');
-    if (!IG_PATTERNS.some(p => p.test(url))) return reply('❌ That does not look like an Instagram post/reel link.');
+    if (!url) return reply(
+      '📸 *Instagram Downloader*\n\n' +
+      'Usage: `.ig <Instagram URL>`\n\n' +
+      '_Supports: posts, reels, videos, stories, carousels_'
+    );
+    if (!IG_PATTERNS.some(p => p.test(url)))
+      return reply('❌ That does not look like a valid Instagram link.');
 
     try {
       await sock.sendMessage(from, { react: { text: '📥', key: msg.key } });
-      await reply('📥 Fetching Instagram media...');
 
-      const media = await downloadIG(url);
+      const mediaList = await downloadIG(url);
+      const unique    = dedupeMedia(mediaList);
+
+      if (!unique.length) return reply('❌ No media found — the post might be private.');
+
       let sent = 0;
+      for (const media of unique.slice(0, 10)) {
+        const isVideo = media.type === 'video' ||
+          /\.(mp4|mov|webm)$/i.test(media.url) ||
+          media.url.includes('video');
 
-      for (const item of media.slice(0, 10)) {
         try {
-          if (item.type === 'video' || item.url?.includes('.mp4')) {
+          if (isVideo) {
+            const tmpFile = path.join(os.tmpdir(), 'ns_ig_' + Date.now() + '_' + sent + '.mp4');
+            const dl = await axios.get(media.url, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
+            fs.writeFileSync(tmpFile, Buffer.from(dl.data));
             await sock.sendMessage(from, {
-              video:   { url: item.url },
+              video:    fs.readFileSync(tmpFile),
               mimetype: 'video/mp4',
-              caption: sent === 0 ? `📸 Instagram Download\n_⚡ NovaSpark Bot_` : '',
-            }, { quoted: sent === 0 ? msg : undefined });
+              fileName: 'instagram.mp4',
+              caption:  sent === 0 ? '_⚡ NovaSpark Bot — Instagram_' : undefined,
+            }, { quoted: msg });
+            fs.unlink(tmpFile, () => {});
           } else {
             await sock.sendMessage(from, {
-              image:   { url: item.url },
-              caption: sent === 0 ? `📸 Instagram Download\n_⚡ NovaSpark Bot_` : '',
-            }, { quoted: sent === 0 ? msg : undefined });
+              image:   { url: media.url },
+              caption: sent === 0 ? '_⚡ NovaSpark Bot — Instagram_' : undefined,
+            }, { quoted: msg });
           }
           sent++;
-          await new Promise(r => setTimeout(r, 800));
-        } catch {}
+        } catch (_) {}
       }
 
-      if (!sent) await reply('❌ No media could be downloaded from that link.');
+      if (!sent) return reply('❌ Could not download any media from that post.');
+
     } catch (e) {
-      await reply(`❌ Failed: ${e.message}`);
+      await reply(
+        '❌ *Instagram Download Failed*\n\n' +
+        '• Reason: ' + e.message.split('\n')[0] + '\n\n' +
+        '_💡 Make sure the post is public and the URL is correct._'
+      );
     }
   },
 };
