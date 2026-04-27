@@ -30,34 +30,40 @@ function normalizeYtUrl(raw) {
 async function tryApis(youtubeUrl) {
   const encoded = encodeURIComponent(youtubeUrl);
   const apis = [
-    async () => {
-      const r = await axios.get('https://ytdl.vreden.web.id/api/v1/dl?url=' + encoded + '&format=mp4', { timeout: 40000, headers: { 'User-Agent': UA } });
-      if (r.data && r.data.result && r.data.result.download && r.data.result.download.url)
-        return { download: r.data.result.download.url, title: r.data.result.title, thumb: r.data.result.thumbnail, duration: r.data.result.duration };
-      throw new Error('vreden no data');
-    },
+    // API 1: EliteProTech — primary, confirmed working April 2026
     async () => {
       const r = await axios.get('https://eliteprotech-apis.zone.id/ytdown?url=' + encoded + '&format=mp4', { timeout: 40000, headers: { 'User-Agent': UA } });
       if (r.data && r.data.success && r.data.downloadURL)
-        return { download: r.data.downloadURL, title: r.data.title, thumb: r.data.thumbnail };
-      throw new Error('EliteProTech no data');
+        return { download: r.data.downloadURL, title: r.data.title, thumb: null, duration: '--' };
+      throw new Error('EliteProTech: ' + JSON.stringify(r.data).slice(0, 80));
     },
+    // API 2: ymcdn direct (same backend as EliteProTech)
+    async () => {
+      const r = await axios.get('https://ydl.ymcdn.org/api/v1/dl?url=' + encoded + '&format=mp4', { timeout: 40000, headers: { 'User-Agent': UA, Referer: 'https://eliteprotech-apis.zone.id/' } });
+      if (r.data && r.data.result && r.data.result.download && r.data.result.download.url)
+        return { download: r.data.result.download.url, title: r.data.result.title, thumb: r.data.result.thumbnail || null, duration: r.data.result.duration || '--' };
+      throw new Error('ymcdn: no data');
+    },
+    // API 3: Yupra (kept — may come back online)
     async () => {
       const r = await axios.get('https://api.yupra.my.id/api/downloader/ytmp4?url=' + encoded, { timeout: 40000, headers: { 'User-Agent': UA } });
       if (r.data && r.data.success && r.data.data && r.data.data.download_url)
-        return { download: r.data.data.download_url, title: r.data.data.title, thumb: r.data.data.thumbnail, duration: r.data.data.duration };
-      throw new Error('Yupra no data');
+        return { download: r.data.data.download_url, title: r.data.data.title, thumb: r.data.data.thumbnail || null, duration: r.data.data.duration || '--' };
+      throw new Error('Yupra: ' + (r.data && r.data.error ? r.data.error : 'no data'));
     },
+    // API 4: vreden
+    async () => {
+      const r = await axios.get('https://ytdl.vreden.web.id/api/v1/dl?url=' + encoded + '&format=mp4', { timeout: 40000, headers: { 'User-Agent': UA } });
+      if (r.data && r.data.result && r.data.result.download && r.data.result.download.url)
+        return { download: r.data.result.download.url, title: r.data.result.title, thumb: r.data.result.thumbnail || null, duration: r.data.result.duration || '--' };
+      throw new Error('vreden: no data');
+    },
+    // API 5: Nusantara
     async () => {
       const r = await axios.get('https://api.nusantara-bot.biz.id/ytdl/mp4?url=' + encoded, { timeout: 40000, headers: { 'User-Agent': UA } });
       if (r.data && r.data.result && r.data.result.dl_url)
-        return { download: r.data.result.dl_url, title: r.data.result.title, thumb: r.data.result.thumbnail };
-      throw new Error('Nusantara no data');
-    },
-    async () => {
-      const r = await axios.get('https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=' + encoded, { timeout: 40000, headers: { 'User-Agent': UA } });
-      if (r.data && r.data.dl) return { download: r.data.dl, title: r.data.title, thumb: r.data.thumb };
-      throw new Error('Okatsu no data');
+        return { download: r.data.result.dl_url, title: r.data.result.title, thumb: r.data.result.thumbnail || null, duration: '--' };
+      throw new Error('Nusantara: no data');
     },
   ];
   const errors = [];
