@@ -123,7 +123,7 @@ module.exports = {
       // ── 1. Playable audio ──────────────────────────────────────────────
       await sock.sendMessage(from, {
         audio:    audioBuf,
-        mimetype: 'audio/mp4',
+        mimetype: 'audio/mpeg',
         fileName: fileName,
         ptt:      false,
       }, { quoted: msg });

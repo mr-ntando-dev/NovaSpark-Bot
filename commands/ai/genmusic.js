@@ -250,7 +250,7 @@ module.exports = {
         fs.writeFileSync(tmpFile, audioBuffer);
         await sock.sendMessage(from, {
           audio:    fs.readFileSync(tmpFile),
-          mimetype: 'audio/mp4',
+          mimetype: 'audio/mpeg',
           fileName: songTitle + '.mp3',
           ptt:      false,
         }, { quoted: msg });

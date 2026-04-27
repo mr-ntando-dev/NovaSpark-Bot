@@ -115,7 +115,7 @@ module.exports = {
           fs.writeFileSync(tmpAudio, Buffer.from(aRes.data));
           await sock.sendMessage(from, {
             audio:    fs.readFileSync(tmpAudio),
-            mimetype: 'audio/mp4',
+            mimetype: 'audio/mpeg',
             fileName: 'tiktok_audio.mp3',
             ptt:      false,
           }, { quoted: msg });
