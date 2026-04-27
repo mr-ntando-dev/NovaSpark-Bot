@@ -39,7 +39,7 @@ async function chatAI(query, systemPrompt = null) {
   const fullQuery = systemPrompt ? `${sys}\n\nUser: ${query}\nNovaSpark:` : query;
 
   const endpoints = [
-    // Endpoint 1 — Shizo GPT (fast, reliable)
+    // Endpoint 1 — Shizo GPT (confirmed working)
     async () => {
       const r = await axios.get(
         `https://api.shizo.top/ai/gpt?apikey=shizo&query=${encodeURIComponent(fullQuery)}&system=${encodeURIComponent(sys)}`,
@@ -49,43 +49,47 @@ async function chatAI(query, systemPrompt = null) {
       if (ans && ans.trim().length > 2) return ans.trim();
       throw new Error('No response');
     },
-    // Endpoint 2 — siputzx ChatGPT
+    // Endpoint 2 — Pollinations text GET (free, no key, confirmed working)
     async () => {
       const r = await axios.get(
-        `https://api.siputzx.my.id/api/ai/chatgpt?query=${encodeURIComponent(fullQuery)}`,
+        `https://text.pollinations.ai/${encodeURIComponent(fullQuery)}?seed=${Date.now() % 9999}`,
+        { timeout: 25000 }
+      );
+      const ans = typeof r.data === 'string' ? r.data.trim() : null;
+      if (ans && ans.length > 2 && !ans.startsWith('{')) return ans;
+      throw new Error('pollinations: no text');
+    },
+    // Endpoint 3 — Pollinations POST (OpenAI-compatible, free)
+    async () => {
+      const r = await axios.post('https://text.pollinations.ai/', {
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: query },
+        ],
+        model: 'openai-fast',
+        seed: Math.floor(Math.random() * 9999),
+      }, { timeout: 25000, headers: { 'Content-Type': 'application/json' } });
+      const ans = typeof r.data === 'string' ? r.data.trim() : r.data?.choices?.[0]?.message?.content;
+      if (ans && ans.trim().length > 2) return ans.trim();
+      throw new Error('pollinations POST: no data');
+    },
+    // Endpoint 4 — GiftedTech web.id
+    async () => {
+      const r = await axios.get(
+        `https://api.giftedtech.web.id/api/ai/gpt4o?apikey=gifted&q=${encodeURIComponent(fullQuery)}`,
         { timeout: 18000 }
       );
-      const ans = r.data?.data?.text || r.data?.result || r.data?.response || r.data?.msg;
+      const ans = r.data?.result || r.data?.message || r.data?.answer;
       if (ans && ans.trim().length > 2) return ans.trim();
       throw new Error('No response');
     },
-    // Endpoint 3 — widipe OpenAI
+    // Endpoint 5 — PopCat chatbot (no key needed)
     async () => {
       const r = await axios.get(
-        `https://widipe.com/openai?text=${encodeURIComponent(fullQuery)}`,
+        `https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&uid=novaspark`,
         { timeout: 15000 }
       );
-      const ans = r.data?.result || r.data?.response || r.data?.msg;
-      if (ans && ans.trim().length > 2) return ans.trim();
-      throw new Error('No response');
-    },
-    // Endpoint 4 — BK9 API
-    async () => {
-      const r = await axios.get(
-        `https://bk9.fun/ai/gpt4?q=${encodeURIComponent(fullQuery)}`,
-        { timeout: 18000 }
-      );
-      const ans = r.data?.BK9 || r.data?.response || r.data?.result;
-      if (ans && ans.trim().length > 2) return ans.trim();
-      throw new Error('No response');
-    },
-    // Endpoint 5 — Nime AI
-    async () => {
-      const r = await axios.get(
-        `https://nime-api.vercel.app/api/gpt?text=${encodeURIComponent(fullQuery)}`,
-        { timeout: 15000 }
-      );
-      const ans = r.data?.result || r.data?.response || r.data?.msg;
+      const ans = r.data?.response;
       if (ans && ans.trim().length > 2) return ans.trim();
       throw new Error('No response');
     },

@@ -19,18 +19,42 @@ const PRESETS = {
 
 async function chatAsCharacter(characterPrompt, userMessage) {
   const prompt = `${characterPrompt}\n\nUser says: "${userMessage}"\n\nRespond in character (2-4 sentences max):`;
+  const enc = encodeURIComponent(prompt);
   const apis = [
+    // API 1: Pollinations text GET
     async () => {
-      const r = await axios.get(`https://api.siputzx.my.id/api/ai/gpt3?prompt=${encodeURIComponent(prompt)}`, { timeout: 20000, headers: { 'User-Agent': UA } });
-      const a = r.data?.data || r.data?.result;
-      if (a) return a;
-      throw new Error('no data');
+      const r = await axios.get(`https://text.pollinations.ai/${enc}?seed=${Date.now() % 9999}`, { timeout: 25000, headers: { 'User-Agent': UA } });
+      const a = typeof r.data === 'string' ? r.data.trim() : null;
+      if (a && a.length > 3 && !a.startsWith('{')) return a;
+      throw new Error('pollinations: no text');
     },
+    // API 2: Pollinations POST
     async () => {
-      const r = await axios.get(`https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(prompt)}`, { timeout: 20000, headers: { 'User-Agent': UA } });
+      const r = await axios.post('https://text.pollinations.ai/', {
+        messages: [
+          { role: 'system', content: characterPrompt },
+          { role: 'user', content: userMessage + '\n\nRespond in character (2-4 sentences max).' },
+        ],
+        model: 'openai-fast',
+        seed: Math.floor(Math.random() * 9999),
+      }, { timeout: 25000, headers: { 'User-Agent': UA, 'Content-Type': 'application/json' } });
+      const a = typeof r.data === 'string' ? r.data.trim() : r.data?.choices?.[0]?.message?.content;
+      if (a && a.length > 3) return a;
+      throw new Error('pollinations POST: no data');
+    },
+    // API 3: GiftedTech web.id
+    async () => {
+      const r = await axios.get(`https://api.giftedtech.web.id/api/ai/gpt4o?apikey=gifted&q=${enc}`, { timeout: 20000, headers: { 'User-Agent': UA } });
       const a = r.data?.result || r.data?.message;
       if (a) return a;
-      throw new Error('no data');
+      throw new Error('giftedtech: no data');
+    },
+    // API 4: PopCat
+    async () => {
+      const r = await axios.get(`https://api.popcat.xyz/chatbot?msg=${enc}&uid=novaspark`, { timeout: 20000, headers: { 'User-Agent': UA } });
+      const a = r.data?.response;
+      if (a) return a;
+      throw new Error('popcat: no data');
     },
   ];
   for (const fn of apis) { try { return await fn(); } catch {} }
@@ -63,8 +87,8 @@ module.exports = {
 
     try {
       await sock.sendMessage(from, { react: { text: '🎭', key: msg.key } });
-      const reply = await chatAsCharacter(preset, message);
-      await reply(`🎭 *${charName.charAt(0).toUpperCase() + charName.slice(1)}:*\n\n${reply}`);
+      const answer = await chatAsCharacter(preset, message);
+      await reply(`🎭 *${charName.charAt(0).toUpperCase() + charName.slice(1)}:*\n\n${answer}`);
     } catch (e) {
       await reply(`❌ Error: ${e.message}`);
     }
