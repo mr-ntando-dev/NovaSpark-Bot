@@ -23,6 +23,21 @@ const SP_PATTERNS = [
   /https?:\/\/spotify\.link\//,
 ];
 
+// ── Ensure buffer is real MP3 (convert if MP4/M4A container) ─────────────
+async function ensureMp3Buffer(buf) {
+  const isRealMp3 = (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) ||
+                    (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
+  if (isRealMp3) return buf;
+  const tmpIn  = path.join(os.tmpdir(), 'ns_sp_in_'  + Date.now() + '.mp4');
+  const tmpOut = path.join(os.tmpdir(), 'ns_sp_out_' + Date.now() + '.mp3');
+  fs.writeFileSync(tmpIn, buf);
+  await execAsync(`ffmpeg -y -i "${tmpIn}" -acodec libmp3lame -q:a 3 "${tmpOut}"`, { timeout: 90000 });
+  const result = fs.readFileSync(tmpOut);
+  fs.unlink(tmpIn,  () => {});
+  fs.unlink(tmpOut, () => {});
+  return result;
+}
+
 // ── Get Spotify track metadata + optional direct download link ─────────────
 async function getSpotifyMeta(url) {
   const enc = encodeURIComponent(url);
@@ -104,16 +119,16 @@ module.exports = {
 
       if (meta?.downloadUrl) {
         const dlRes = await axios.get(meta.downloadUrl, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
-        audioBuf = Buffer.from(dlRes.data);
+        audioBuf = await ensureMp3Buffer(Buffer.from(dlRes.data));
       } else {
         await sock.sendMessage(from, { text: '🔍 _Matching track on YouTube, please wait..._' }, { quoted: msg });
         const result = await downloadViaYouTube(displayTitle, displayArtist);
         if (result.localFile) {
-          audioBuf = fs.readFileSync(result.localFile);
+          audioBuf = await ensureMp3Buffer(fs.readFileSync(result.localFile));
           fs.unlink(result.localFile, () => {});
         } else {
           const dlRes = await axios.get(result.remoteUrl, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
-          audioBuf = Buffer.from(dlRes.data);
+          audioBuf = await ensureMp3Buffer(Buffer.from(dlRes.data));
         }
       }
 

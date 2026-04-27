@@ -63,7 +63,23 @@ async function tryYtDlp(youtubeUrl) {
   return { localFile: outputFile, title, thumb, duration };
 }
 
-// ── Remote API cascade ─────────────────────────────────────────────────────
+// ── Ensure file is real MP3 (convert if API returned MP4/M4A container) ──
+async function ensureMp3(inputFile) {
+  // Check magic bytes — real MP3 starts with ID3 (0x49 0x44 0x33) or sync word 0xFF 0xFB/0xF3/0xF2
+  const buf = Buffer.allocUnsafe(4);
+  const fd  = fs.openSync(inputFile, 'r');
+  fs.readSync(fd, buf, 0, 4, 0);
+  fs.closeSync(fd);
+  const isRealMp3 = (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) ||
+                    (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
+  if (isRealMp3) return inputFile; // already valid mp3, no conversion needed
+
+  // It's an MP4/M4A/DASH container — convert to real mp3 with ffmpeg
+  const outFile = inputFile.replace(/\.mp3$/, '_conv.mp3');
+  await execAsync(`ffmpeg -y -i "${inputFile}" -acodec libmp3lame -q:a 3 "${outFile}"`, { timeout: 90000 });
+  fs.unlinkSync(inputFile); // remove original
+  return outFile;
+}
 async function tryApis(youtubeUrl) {
   const encoded = encodeURIComponent(youtubeUrl);
   const apis = [
@@ -161,6 +177,7 @@ module.exports = {
         tmpFile = path.join(os.tmpdir(), 'ns_audio_' + Date.now() + '.mp3');
         const dlRes = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
         fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
+        tmpFile  = await ensureMp3(tmpFile); // convert MP4/M4A → real MP3 if needed
         audioBuf = fs.readFileSync(tmpFile);
 
       } catch (_apiErr) {

@@ -9,8 +9,26 @@ const axios = require('axios');
 const fs    = require('fs');
 const path  = require('path');
 const os    = require('os');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+// ── Ensure buffer is real MP3 (convert if MP4/M4A container) ─────────────
+async function ensureMp3Buffer(buf) {
+  const isRealMp3 = (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) ||
+                    (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
+  if (isRealMp3) return buf;
+  const tmpIn  = path.join(os.tmpdir(), 'ns_tt_in_'  + Date.now() + '.mp4');
+  const tmpOut = path.join(os.tmpdir(), 'ns_tt_out_' + Date.now() + '.mp3');
+  fs.writeFileSync(tmpIn, buf);
+  await execAsync(`ffmpeg -y -i "${tmpIn}" -acodec libmp3lame -q:a 3 "${tmpOut}"`, { timeout: 90000 });
+  const result = fs.readFileSync(tmpOut);
+  fs.unlink(tmpIn,  () => {});
+  fs.unlink(tmpOut, () => {});
+  return result;
+}
 
 const TT_PATTERNS = [
   /https?:\/\/(?:www\.|vm\.|vt\.)?tiktok\.com\//,
@@ -112,9 +130,9 @@ module.exports = {
             responseType: 'arraybuffer', timeout: 60000,
             headers: { 'User-Agent': UA }, maxRedirects: 10,
           });
-          fs.writeFileSync(tmpAudio, Buffer.from(aRes.data));
+          const audioBuf = await ensureMp3Buffer(Buffer.from(aRes.data));
           await sock.sendMessage(from, {
-            audio:    fs.readFileSync(tmpAudio),
+            audio:    audioBuf,
             mimetype: 'audio/mpeg',
             fileName: 'tiktok_audio.mp3',
             ptt:      false,
