@@ -32,9 +32,10 @@ function normalizeYtUrl(raw) {
 
 // ── yt-dlp local fallback (iron-clad — no third party APIs needed) ────────
 async function tryYtDlp(youtubeUrl) {
+  // Try yt-dlp directly first, then uvx yt-dlp
   let ytdlpCmd = null;
   for (const cmd of ['yt-dlp', 'uvx yt-dlp']) {
-    try { await execAsync(cmd + ' --version', { timeout: 10000 }); ytdlpCmd = cmd; break; }
+    try { await execAsync(cmd + ' --version', { timeout: 15000 }); ytdlpCmd = cmd; break; }
     catch (_) {}
   }
   if (!ytdlpCmd) throw new Error('yt-dlp not available on this server');
@@ -56,7 +57,7 @@ async function tryYtDlp(youtubeUrl) {
 
   await execAsync(
     ytdlpCmd + ' --no-playlist -x --audio-format mp3 --audio-quality 128K -o "' + tmpBase + '.%(ext)s" "' + youtubeUrl + '"',
-    { timeout: 120000 }
+    { timeout: 180000 }
   );
 
   if (!fs.existsSync(outputFile)) throw new Error('yt-dlp produced no output file');
@@ -150,7 +151,10 @@ module.exports = {
     try {
       if (/youtu\.?be|youtube\.com/i.test(query)) {
         videoUrl   = normalizeYtUrl(query);
-        videoTitle = 'Resolving...';
+        videoTitle = 'Song';
+        await sock.sendMessage(from, {
+          text: '🔗 _URL detected — fetching audio..._',
+        }, { quoted: msg });
       } else {
         await sock.sendMessage(from, {
           text: '🔍 _Searching "' + query + '"..._',
@@ -167,7 +171,12 @@ module.exports = {
 
       let audioBuf, resolvedTitle, thumb, dur, tmpFile;
 
-      // Try remote APIs first, fall back to yt-dlp local
+      // ── Progress message ────────────────────────────────────────────────
+      await sock.sendMessage(from, {
+        text: '⬇️ _Downloading audio, please wait..._',
+      }, { quoted: msg });
+
+      // Try remote APIs first (faster), fall back to yt-dlp local
       try {
         const data    = await tryApis(videoUrl);
         resolvedTitle = (data.title || videoTitle || 'Song').replace(/[^\w\s\-]/g, '').trim();
@@ -183,7 +192,7 @@ module.exports = {
       } catch (_apiErr) {
         // yt-dlp fallback — works even when all remote APIs are down
         await sock.sendMessage(from, {
-          text: '⏳ _Remote APIs busy — using local downloader, please wait..._',
+          text: '⏳ _Remote APIs busy — using local downloader, this may take ~30s..._',
         }, { quoted: msg });
 
         const result  = await tryYtDlp(videoUrl);
