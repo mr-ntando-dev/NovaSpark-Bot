@@ -144,7 +144,7 @@ module.exports = {
   usage: '.bmenu',
 
   async execute({ sock, from, msg, sender, reply }) {
-    const isPrem = database.isPremium ? database.isPremium(sender) : false;
+    const isPrem = true; // All users enjoy Premium for free
     const plan   = isPrem ? '💎 Premium' : '🆓 Free';
     const num    = sender.split('@')[0];
     const uptime = process.uptime();

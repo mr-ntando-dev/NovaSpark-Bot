@@ -12,7 +12,7 @@ module.exports = {
   studyIntervals,
   execute: async ({ sock, msg, from, sender, args, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 *.autostudy* is a *Premium* feature.\nType *.myplan* for upgrade info.');
+    // All users enjoy Premium for free
     const sub     = (args[0] || '').toLowerCase();
     database.logCommand(sender, 'autostudy');
 

@@ -152,14 +152,7 @@ module.exports = {
     const fullText = args.join(' ');
     const type     = (args[0] || 'project').toLowerCase();
 
-    const PREMIUM_TYPES = ['cv', 'resume', 'research', 'business', 'report'];
-    if (PREMIUM_TYPES.includes(type) && !premium) {
-      return reply(
-        `💎 *${type.toUpperCase()} PDFs are a Premium feature.*\n\n` +
-        `Free plan supports: school project, assignment\n\n` +
-        `Type *.myplan* to see Premium features.`
-      );
-    }
+    // All PDF types are free — no premium gate
 
     // Parse title | subject | content (pipe-separated)
     const parts   = fullText.replace(type, '').trim().split('|').map(s => s.trim());

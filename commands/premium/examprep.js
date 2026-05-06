@@ -9,7 +9,7 @@ module.exports = {
   category: 'premium',
   execute: async ({ sock, msg, from, sender, args, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 .examprep is a *Premium* feature.\nType *.myplan* to see upgrade info.');
+    // All users enjoy Premium for free
     const subject = args.join(' ').trim();
     if (!subject) return reply('🎓 Usage: *.examprep <subject>*\nExample: .examprep Mathematics Grade 10');
     database.logCommand(sender, 'examprep');

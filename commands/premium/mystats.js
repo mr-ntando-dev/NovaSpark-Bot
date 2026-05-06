@@ -8,7 +8,7 @@ module.exports = {
   category: 'premium',
   execute: async ({ sender, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 *.mystats* is a *Premium* feature.\nType *.myplan* for upgrade info.');
+    // All users enjoy Premium for free
     const stats   = database.getAnalytics(userId);
     const profile = database.getProfile(userId);
     const firstSeen = stats.firstSeen ? new Date(stats.firstSeen).toLocaleDateString('en-US', { dateStyle: 'medium' }) : 'N/A';

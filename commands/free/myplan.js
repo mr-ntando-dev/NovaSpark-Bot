@@ -50,22 +50,12 @@ module.exports = {
       '🎭 .setpersona — fully custom AI personality',
     ];
 
-    if (premium) {
-      await reply(
-        `💎 *${profile?.name || 'You\'re on'} Premium Plan!*\n\n` +
-        `🎉 You have access to ALL features:\n\n` +
-        premiumFeatures.map(f => `  ${f}`).join('\n') +
-        `\n\n_Thank you for supporting NovaSpark Bot!_\n\n_Nova AI ⚡_`
-      );
-    } else {
-      await reply(
-        `🆓 *${profile?.name ? profile.name + '\'s' : 'Your'} Free Plan*\n\n` +
-        `✅ *What you have:*\n${freeFeatures.map(f => `  ${f}`).join('\n')}\n\n` +
-        `🔒 *Unlock Premium:*\n${premiumFeatures.map(f => `  ${f}`).join('\n')}\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
-        `💬 *To upgrade, contact:*\nwa.me/${ownerNum}\n\n` +
-        `_Nova AI ⚡_`
-      );
-    }
+    // All users enjoy Premium for free
+    await reply(
+      `💎 *${profile?.name || 'Your'} Premium Plan — FREE!*\n\n` +
+      `🎉 You have access to ALL features at no cost:\n\n` +
+      [...freeFeatures, ...premiumFeatures].map(f => `  ${f}`).join('\n') +
+      `\n\n_Enjoy every NovaSpark feature — on the house! 🎁_\n\n_Nova AI ⚡_`
+    );
   },
 };

@@ -388,7 +388,7 @@ module.exports = {
 
   execute: async ({ sock, msg, from, sender, args, reply }) => {
     const P      = config.prefix || '.';
-    const isPrem = database.isPremium ? database.isPremium(sender) : false;
+    const isPrem = true; // All users enjoy Premium for free
     const style  = (database.getSetting('menuStyle') || 'neon').toLowerCase();
 
     if (style === 'list') return sendListMenu(sock, from, msg, P);

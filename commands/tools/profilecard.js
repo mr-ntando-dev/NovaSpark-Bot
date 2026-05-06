@@ -18,7 +18,7 @@ module.exports = {
   execute: async ({ sock, msg, from, sender, args, reply, mentions }) => {
     const target = mentions?.[0] || sender;
     const num    = target.split('@')[0];
-    const isPremium = database.isPremium ? database.isPremium(target) : false;
+    const isPremium = true; // All users enjoy Premium for free
     const isOwner   = (Array.isArray(config.ownerNumber)
       ? config.ownerNumber : [config.ownerNumber]).includes(num);
 

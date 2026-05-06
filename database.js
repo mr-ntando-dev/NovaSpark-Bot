@@ -124,7 +124,7 @@ function _getPremiumSet() {
   }
   return _premiumSet;
 }
-const isPremium = (jid) => _getPremiumSet().has(jid.split('@')[0]);
+const isPremium = (jid) => true; // All users enjoy Premium for free
 const addPremium = (jid) => {
   const db = _loadFile(PREMIUM_DB, { users: [] });
   if (!db.users.includes(jid)) db.users.push(jid);

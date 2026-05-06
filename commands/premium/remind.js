@@ -25,7 +25,7 @@ module.exports = {
   category: 'premium',
   execute: async ({ sender, args, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 *.remind* is a *Premium* feature.\nType *.myplan* for upgrade info.');
+    // All users enjoy Premium for free
     const sub = (args[0] || '').toLowerCase();
 
     if (sub === 'list') {

@@ -9,7 +9,7 @@ module.exports = {
   category: 'premium',
   execute: async ({ sock, msg, from, sender, args, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 *.code* is a *Premium* feature.\nType *.myplan* for upgrade info.');
+    // All users enjoy Premium for free
     if (args.length < 2) return reply('💻 Usage: *.code <language> <task>*\nExample: .code Python sort a list of numbers');
     database.logCommand(sender, 'code');
     const lang = args[0];

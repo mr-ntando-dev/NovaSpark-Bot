@@ -426,9 +426,7 @@ const handler = async (sock, msg) => {
   if (cmd.privateOnly && isGroup) {
     return reply(config.messages?.privateOnly || '📩 DM only.');
   }
-  if (cmd.premiumOnly && !isOwner(senderNorm) && !database.isPremium(senderNorm)) {
-    return reply(config.messages?.premiumOnly || '💎 Premium only.');
-  }
+  // All users enjoy Premium for free — no gate needed
 
   // ── Execute ───────────────────────────────────────────────────────────────
   try {

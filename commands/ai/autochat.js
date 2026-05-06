@@ -511,7 +511,7 @@ module.exports = {
 
     if (sub === 'status') {
       const profile = database.getProfile(userId);
-      const plan    = database.isPremium(userId) ? '💎 Premium' : '🆓 Free';
+      const plan    = '💎 Premium'; // All users enjoy Premium for free
       const uptime  = session.startedAt ? Math.round((Date.now() - session.startedAt) / 60000) + 'm' : 'N/A';
       await reply(
         `⚡ *NovaSpark AutoChat v6 Status*\n\n` +
@@ -534,7 +534,7 @@ module.exports = {
     if (sub === 'persona') {
       const name = (args[1] || '').toLowerCase();
       if (!name) { await reply(`🎭 *Personas:* ${Object.keys(PERSONAS).join(', ')}\n\nUsage: *.autochat persona friendly*\n\n${NOVA_TAG}`); return; }
-      if (name === 'custom' && !database.isPremium(userId)) { await reply(`💎 Custom personas are Premium.\nType *.myplan*\n\n${NOVA_TAG}`); return; }
+      // All users enjoy Premium for free — custom personas available to all
       if (!PERSONAS[name]) { await reply(`❌ Unknown persona. Options: ${Object.keys(PERSONAS).join(', ')}\n\n${NOVA_TAG}`); return; }
       session.persona = name;
       await reply(`🎭 Persona → *${PERSONAS[name].name}*\n\n${NOVA_TAG}`);

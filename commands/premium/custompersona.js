@@ -9,7 +9,7 @@ module.exports = {
   category: 'premium',
   execute: async ({ from, sender, args, reply }) => {
     const userId = sender.split('@')[0];
-    if (!database.isPremium(userId)) return reply('💎 *Custom personas* are a *Premium* feature.\nType *.myplan* for upgrade info.');
+    // All users enjoy Premium for free
     const description = args.join(' ').trim();
     if (!description || description.length < 10) {
       return reply(
