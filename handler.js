@@ -17,6 +17,7 @@ const fs       = require('fs');
 
 const _cmdCache = new Map();    // name/alias -> module
 const _cmdPaths = new Map();    // name/alias -> file path (for lazy resolve)
+const _arrayFiles = new Set();  // files that export arrays (need special handling)
 
 function _buildCommandIndex() {
   const commandsDir = path.join(__dirname, 'commands');
@@ -30,20 +31,44 @@ function _buildCommandIndex() {
     const files = fs.readdirSync(catDir).filter(f => f.endsWith('.js'));
     for (const file of files) {
       const filePath = path.join(catDir, file);
-      // Quick parse: read first 2KB to extract name & aliases without full require()
       try {
-        const head = fs.readFileSync(filePath, 'utf-8').slice(0, 3000);
-        const nameMatch = head.match(/name\s*:\s*['"`]([^'"`]+)['"`]/);
-        if (!nameMatch) continue;
-        const cmdName = nameMatch[1].toLowerCase();
-        _cmdPaths.set(cmdName, filePath);
-        // Extract aliases
-        const aliasMatch = head.match(/aliases\s*:\s*\[([^\]]*)\]/);
-        if (aliasMatch) {
-          const aliases = aliasMatch[1].match(/['"`]([^'"`]+)['"`]/g);
-          if (aliases) {
-            for (const a of aliases) {
-              _cmdPaths.set(a.replace(/['"`]/g, '').toLowerCase(), filePath);
+        // Read full file content for reliable parsing
+        const content = fs.readFileSync(filePath, 'utf-8');
+
+        // Detect array exports (module.exports = [...])
+        const isArrayExport = content.includes('module.exports = [') || content.includes('module.exports=[');
+
+        if (isArrayExport) {
+          _arrayFiles.add(filePath);
+          // Extract ALL name fields from array-exported files
+          const nameMatches = content.matchAll(/name\s*:\s*['"`]([^'"`]+)['"`]/g);
+          for (const m of nameMatches) {
+            _cmdPaths.set(m[1].toLowerCase(), filePath);
+          }
+          // Extract ALL aliases from array-exported files
+          const aliasBlocks = content.matchAll(/aliases\s*:\s*\[([^\]]*)\]/g);
+          for (const block of aliasBlocks) {
+            const aliases = block[1].match(/['"`]([^'"`]+)['"`]/g);
+            if (aliases) {
+              for (const a of aliases) {
+                _cmdPaths.set(a.replace(/['"`]/g, '').toLowerCase(), filePath);
+              }
+            }
+          }
+        } else {
+          // Single export — find name anywhere in file
+          const nameMatch = content.match(/name\s*:\s*['"`]([^'"`]+)['"`]/);
+          if (!nameMatch) continue;
+          const cmdName = nameMatch[1].toLowerCase();
+          _cmdPaths.set(cmdName, filePath);
+          // Extract aliases
+          const aliasMatch = content.match(/aliases\s*:\s*\[([^\]]*)\]/);
+          if (aliasMatch) {
+            const aliases = aliasMatch[1].match(/['"`]([^'"`]+)['"`]/g);
+            if (aliases) {
+              for (const a of aliases) {
+                _cmdPaths.set(a.replace(/['"`]/g, '').toLowerCase(), filePath);
+              }
             }
           }
         }
@@ -58,20 +83,33 @@ function _getCommand(name) {
   if (!filePath) return null;
   try {
     const mod = require(filePath);
-    // Cache by name and all aliases
-    _cmdCache.set(name, mod);
-    if (mod.name) _cmdCache.set(mod.name, mod);
-    if (Array.isArray(mod.aliases)) {
-      for (const a of mod.aliases) _cmdCache.set(a, mod);
+
+    if (Array.isArray(mod)) {
+      // Array export — register ALL commands from the array
+      for (const cmd of mod) {
+        if (!cmd || !cmd.name) continue;
+        _cmdCache.set(cmd.name.toLowerCase(), cmd);
+        if (Array.isArray(cmd.aliases)) {
+          for (const a of cmd.aliases) _cmdCache.set(a.toLowerCase(), cmd);
+        }
+      }
+      return _cmdCache.get(name) || null;
+    } else {
+      // Single export
+      _cmdCache.set(name, mod);
+      if (mod.name) _cmdCache.set(mod.name.toLowerCase(), mod);
+      if (Array.isArray(mod.aliases)) {
+        for (const a of mod.aliases) _cmdCache.set(a.toLowerCase(), mod);
+      }
+      return mod;
     }
-    return mod;
   } catch (e) {
     console.error(`[CMD LOAD] ${name}:`, e.message);
     return null;
   }
 }
 
-// Build index at require-time (fast — only reads filenames + first 3KB headers)
+// Build index at require-time (reads full files for reliable name extraction)
 _buildCommandIndex();
 
 // ── Auto-feature modules (lazy-loaded on first group message) ─────────────────
