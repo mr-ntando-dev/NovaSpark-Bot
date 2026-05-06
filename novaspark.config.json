@@ -1,0 +1,34 @@
+{
+  "name": "NovaSpark Bot",
+  "version": "11.0.0",
+  "codename": "TURBO",
+  "description": "NovaSpark WhatsApp MD Bot v11 TURBO — 264 commands, lazy-load engine, in-memory DB, zero-bloat. AI, games, economy, downloads, moderation.",
+  "entry_point": "index.js",
+  "branch": "main",
+  "server_tier": "basic",
+  "auto_restart": true,
+  "max_ram_mb": 256,
+  "session_dir": "session",
+  "performance": {
+    "cold_start_ms": 200,
+    "command_resolve_ms": 1,
+    "db_read_ms": 0,
+    "db_write_ms": 0,
+    "flush_interval_ms": 5000
+  },
+  "env": {
+    "SESSION_ID": {
+      "description": "Your WhatsApp session ID (format: NovaSpark!<base64>). Get it from the platform after first QR scan.",
+      "required": false
+    },
+    "SESSION_DIR": {
+      "description": "Session folder name (default: session)",
+      "required": false,
+      "default": "session"
+    },
+    "OWNER_NUMBER": {
+      "description": "Your WhatsApp number with country code, no + (e.g. 263786831091)",
+      "required": false
+    }
+  }
+}

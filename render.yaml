@@ -1,0 +1,12 @@
+services:
+  - type: worker
+    name: novaspark-turbo
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: node --max-old-space-size=256 --optimize-for-size index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_DIR
+        value: session
