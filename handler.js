@@ -197,11 +197,18 @@ const handler = async (sock, msg) => {
   const from    = msg.key.remoteJid;
   if (!from) return;
   const isGroup = from.endsWith('@g.us');
+  // In a DM, msg.key.fromMe=true means the bot itself sent the message.
+  // We normalise that to the first ownerNumber so owner commands still work.
+  // But if the actual sender JID is already an owner (e.g. 263786831091 DMing
+  // the bot), we use `from` directly so ALL owners are recognised, not just [0].
+  const _dmSender = msg._ownerOverride
+    ? msg._ownerOverride
+    : msg.key.fromMe
+      ? `${(Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber)}@s.whatsapp.net`
+      : from;
   const sender  = isGroup
     ? (msg.key.participant || msg.key.remoteJid)
-    : (msg._ownerOverride || (msg.key.fromMe
-        ? `${(Array.isArray(config.ownerNumber) ? config.ownerNumber[0] : config.ownerNumber)}@s.whatsapp.net`
-        : from));
+    : _dmSender;
   const senderNorm = normalizeJid(sender);
 
   // ── Cache message for anti-delete ────────────────────────────────────────

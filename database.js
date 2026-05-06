@@ -256,4 +256,8 @@ module.exports = {
   flush,
   // backward compat
   readDB, writeDB,
+  // alias — many commands call database.getProfile() / database.setProfile()
+  getProfile:    getUserProfile,
+  setProfile:    (jid, data) => updateUserProfile(jid, data),
+  updateProfile: updateUserProfile,
 };
