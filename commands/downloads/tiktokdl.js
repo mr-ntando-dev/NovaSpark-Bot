@@ -3,6 +3,10 @@
  * No watermark | Video + optional audio-only bonus
  * API cascade: Siputzx → Tiklydown → EliteProTech → ruhend-scraper (ttdl)
  * By Dev-Ntando
+ *
+ * FIX (memory): replaced fs.readFileSync(tmpVideo) → { url: tmpVideo } and
+ * rewrote ensureMp3Buffer → ensureMp3File so no large Buffer is ever held in
+ * RAM. Files are written to /tmp, sent by path, then deleted.
  */
 'use strict';
 const axios = require('axios');
@@ -15,19 +19,22 @@ const execAsync = promisify(exec);
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
-// ── Ensure buffer is real MP3 (convert if MP4/M4A container) ─────────────
-async function ensureMp3Buffer(buf) {
+// ── Ensure file is real MP3 (convert if MP4/M4A container) ───────────────
+// ✅ FIX: works entirely with file paths — never loads full file into RAM
+async function ensureMp3File(inputFile) {
+  const buf = Buffer.allocUnsafe(4);
+  const fd  = fs.openSync(inputFile, 'r');
+  fs.readSync(fd, buf, 0, 4, 0);
+  fs.closeSync(fd);
   const isRealMp3 = (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) ||
                     (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
-  if (isRealMp3) return buf;
-  const tmpIn  = path.join(os.tmpdir(), 'ns_tt_in_'  + Date.now() + '.mp4');
-  const tmpOut = path.join(os.tmpdir(), 'ns_tt_out_' + Date.now() + '.mp3');
-  fs.writeFileSync(tmpIn, buf);
-  await execAsync(`ffmpeg -y -i "${tmpIn}" -acodec libmp3lame -q:a 3 "${tmpOut}"`, { timeout: 90000 });
-  const result = fs.readFileSync(tmpOut);
-  fs.unlink(tmpIn,  () => {});
-  fs.unlink(tmpOut, () => {});
-  return result;
+  if (isRealMp3) return inputFile; // already valid mp3
+
+  // It's an MP4/M4A container — convert with ffmpeg
+  const outFile = inputFile.replace(/\.(mp3|mp4|m4a)$/, '_conv.mp3');
+  await execAsync(`ffmpeg -y -i "${inputFile}" -acodec libmp3lame -q:a 3 "${outFile}"`, { timeout: 90000 });
+  fs.unlink(inputFile, () => {}); // remove original
+  return outFile;
 }
 
 const TT_PATTERNS = [
@@ -109,9 +116,9 @@ module.exports = {
       fs.writeFileSync(tmpVideo, Buffer.from(dlRes.data));
       const sizeMB = (fs.statSync(tmpVideo).size / 1024 / 1024).toFixed(1);
 
-      // Send video
+      // ✅ FIX: { url: tmpVideo } streams from disk — no readFileSync, ~0 RAM
       await sock.sendMessage(from, {
-        video:    fs.readFileSync(tmpVideo),
+        video:    { url: tmpVideo },
         mimetype: 'video/mp4',
         fileName: 'tiktok.mp4',
         caption:
@@ -130,14 +137,16 @@ module.exports = {
             responseType: 'arraybuffer', timeout: 60000,
             headers: { 'User-Agent': UA }, maxRedirects: 10,
           });
-          const audioBuf = await ensureMp3Buffer(Buffer.from(aRes.data));
+          // ✅ FIX: write to file, convert via file path, send by path — no Buffer in RAM
+          fs.writeFileSync(tmpAudio, Buffer.from(aRes.data));
+          const finalAudio = await ensureMp3File(tmpAudio);
           await sock.sendMessage(from, {
-            audio:    audioBuf,
+            audio:    { url: finalAudio },
             mimetype: 'audio/mpeg',
             fileName: 'tiktok_audio.mp3',
             ptt:      false,
           }, { quoted: msg });
-          fs.unlink(tmpAudio, () => {});
+          fs.unlink(finalAudio, () => {});
         } catch (_) {}
       }
 

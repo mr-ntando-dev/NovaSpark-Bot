@@ -3,6 +3,10 @@
  * .song / .play — search by name OR paste any YouTube URL (shorts, live, music)
  * Multi-API fallback + yt-dlp local fallback | Clean professional output
  * By Dev-Ntando
+ *
+ * FIX (memory): replaced fs.readFileSync(tmpFile) → { url: tmpFile } so Baileys
+ * streams the file from disk instead of loading the whole MP3 into RAM.
+ * sizeMB now uses fs.statSync (no read needed). audioBuf variable removed.
  */
 'use strict';
 const axios = require('axios');
@@ -65,6 +69,7 @@ async function tryYtDlp(youtubeUrl) {
 }
 
 // ── Ensure file is real MP3 (convert if API returned MP4/M4A container) ──
+// Takes a file path, returns a (possibly converted) file path — never buffers
 async function ensureMp3(inputFile) {
   // Check magic bytes — real MP3 starts with ID3 (0x49 0x44 0x33) or sync word 0xFF 0xFB/0xF3/0xF2
   const buf = Buffer.allocUnsafe(4);
@@ -81,6 +86,7 @@ async function ensureMp3(inputFile) {
   fs.unlinkSync(inputFile); // remove original
   return outFile;
 }
+
 async function tryApis(youtubeUrl) {
   const encoded = encodeURIComponent(youtubeUrl);
   const apis = [
@@ -98,6 +104,7 @@ async function tryApis(youtubeUrl) {
         return { download: r.data.result.download.url, title: r.data.result.title, thumb: r.data.result.thumbnail || null, duration: r.data.result.duration || '--' };
       throw new Error('ymcdn: no data');
     },
+
     // API 3: Yupra (kept — may come back online)
     async () => {
       const r = await axios.get('https://api.yupra.my.id/api/downloader/ytmp3?url=' + encoded, { timeout: 30000, headers: { 'User-Agent': UA } });
@@ -169,7 +176,7 @@ module.exports = {
         videoDuration = v.timestamp;
       }
 
-      let audioBuf, resolvedTitle, thumb, dur, tmpFile;
+      let resolvedTitle, thumb, dur, tmpFile;
 
       // ── Progress message ────────────────────────────────────────────────
       await sock.sendMessage(from, {
@@ -186,8 +193,8 @@ module.exports = {
         tmpFile = path.join(os.tmpdir(), 'ns_audio_' + Date.now() + '.mp3');
         const dlRes = await axios.get(data.download, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
         fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
-        tmpFile  = await ensureMp3(tmpFile); // convert MP4/M4A → real MP3 if needed
-        audioBuf = fs.readFileSync(tmpFile);
+        // ✅ FIX: ensureMp3 returns a file path — no readFileSync needed
+        tmpFile = await ensureMp3(tmpFile);
 
       } catch (_apiErr) {
         // yt-dlp fallback — works even when all remote APIs are down
@@ -197,17 +204,17 @@ module.exports = {
 
         const result  = await tryYtDlp(videoUrl);
         tmpFile       = result.localFile;
-        audioBuf      = fs.readFileSync(tmpFile);
         resolvedTitle = (result.title || videoTitle || 'Song').replace(/[^\w\s\-]/g, '').trim();
         thumb         = videoThumb || result.thumb || null;
         dur           = videoDuration || result.duration || '--';
       }
 
-      const sizeMB = (audioBuf.length / 1024 / 1024).toFixed(1);
+      // ✅ FIX: use fs.statSync for size — no need to read file into RAM
+      const sizeMB = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
 
-      // ── 1. Playable audio ─────────────────────────────────────────────────
+      // ── 1. Playable audio — { url: tmpFile } streams from disk, ~0 RAM ──
       await sock.sendMessage(from, {
-        audio:    audioBuf,
+        audio:    { url: tmpFile },
         mimetype: 'audio/mpeg',
         fileName: resolvedTitle + '.mp3',
         ptt:      false,
@@ -228,9 +235,9 @@ module.exports = {
         await sock.sendMessage(from, { text: card }, { quoted: msg });
       }
 
-      // ── 3. Document (saveable .mp3) ───────────────────────────────────────
+      // ── 3. Document (saveable .mp3) — streams from disk, ~0 RAM ─────────
       await sock.sendMessage(from, {
-        document: audioBuf,
+        document: { url: tmpFile },
         mimetype: 'audio/mpeg',
         fileName: resolvedTitle + '.mp3',
         caption:  '📎 ' + resolvedTitle + '.mp3',
