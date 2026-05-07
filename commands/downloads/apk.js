@@ -59,18 +59,22 @@ module.exports = {
       const size = result.size || 'Unknown';
 
       if (dlUrl) {
+        const _tmpAPK = require('path').join(require('os').tmpdir(), 'ns_apk_' + Date.now() + '.apk');
         const file = await axios.get(dlUrl, { responseType: 'arraybuffer', timeout: 120000, headers: { 'User-Agent': UA } });
+        require('fs').writeFileSync(_tmpAPK, Buffer.from(file.data));
 
-        if (file.data.length > 50 * 1024 * 1024) {
+        if (require('fs').statSync(_tmpAPK).size > 50 * 1024 * 1024) {
+          require('fs').unlink(_tmpAPK, () => {});
           return reply(`📱 *${name}*\n📊 Size: ${size}\n\n🔗 Download: ${dlUrl}\n\n_Too large for WhatsApp_`);
         }
 
         await sock.sendMessage(from, {
-          document: Buffer.from(file.data),
+          document: { url: _tmpAPK },
           fileName: `${name.replace(/[^a-zA-Z0-9]/g, '_')}.apk`,
           mimetype: 'application/vnd.android.package-archive',
           caption: `📱 *${name}*\n📊 ${size}\n\n_NovaSpark Bot ⚡_`,
         }, { quoted: msg });
+        require('fs').unlink(_tmpAPK, () => {});
       } else {
         return reply(`📱 *${name}*\n📊 ${size}\n\n❌ Direct download unavailable.`);
       }

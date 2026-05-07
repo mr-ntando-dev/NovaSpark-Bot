@@ -46,8 +46,11 @@ module.exports = {
       const title = result.title || 'CapCut Video';
       if (!videoUrl) return reply('❌ No video found.');
 
+      const _tmpCC = require('path').join(require('os').tmpdir(), 'ns_cc_' + Date.now() + '.mp4');
       const video = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
-      await sock.sendMessage(from, { video: Buffer.from(video.data), caption: `🎬 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').writeFileSync(_tmpCC, Buffer.from(video.data));
+      await sock.sendMessage(from, { video: { url: _tmpCC }, caption: `🎬 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').unlink(_tmpCC, () => {});
     } catch (e) {
       await reply(`❌ CapCut Error: ${e.message}`);
     }

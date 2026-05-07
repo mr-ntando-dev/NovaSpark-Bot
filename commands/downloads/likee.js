@@ -45,8 +45,11 @@ module.exports = {
       const videoUrl = result.url || result.video || result.download;
       if (!videoUrl) return reply('❌ No video found.');
 
+      const _tmpLK = require('path').join(require('os').tmpdir(), 'ns_lk_' + Date.now() + '.mp4');
       const video = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
-      await sock.sendMessage(from, { video: Buffer.from(video.data), caption: `🎥 ${result.title || 'Likee Video'}\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').writeFileSync(_tmpLK, Buffer.from(video.data));
+      await sock.sendMessage(from, { video: { url: _tmpLK }, caption: `🎥 ${result.title || 'Likee Video'}\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').unlink(_tmpLK, () => {});
     } catch (e) {
       await reply(`❌ Likee Error: ${e.message}`);
     }

@@ -99,7 +99,7 @@ module.exports = {
             const dl = await axios.get(media.url, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
             fs.writeFileSync(tmpFile, Buffer.from(dl.data));
             await sock.sendMessage(from, {
-              video:    fs.readFileSync(tmpFile),
+              video:    { url: tmpFile },
               mimetype: 'video/mp4',
               fileName: 'instagram.mp4',
               caption:  sent === 0 ? '_⚡ NovaSpark Bot — Instagram_' : undefined,

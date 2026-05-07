@@ -56,9 +56,12 @@ module.exports = {
       const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('v.redd.it') || mediaUrl.includes('video');
 
       if (isVideo) {
-        await sock.sendMessage(from, { video: Buffer.from(media.data), caption: `🤖 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+        const _tmpRD = require('path').join(require('os').tmpdir(), 'ns_rd_' + Date.now() + '.mp4');
+        require('fs').writeFileSync(_tmpRD, Buffer.from(media.data));
+        await sock.sendMessage(from, { video: { url: _tmpRD }, caption: `🤖 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+        require('fs').unlink(_tmpRD, () => {});
       } else {
-        await sock.sendMessage(from, { image: Buffer.from(media.data), caption: `🤖 *${title}*\n\n_NovaSpark Bot ⚡_` }, { quoted: msg });
+        await sock.sendMessage(from, { image: { url: mediaUrl }, caption: `🤖 *${title}*\n\n_NovaSpark Bot ⚡_` }, { quoted: msg });
       }
     } catch (e) {
       await reply(`❌ Reddit Error: ${e.message}`);

@@ -50,9 +50,12 @@ module.exports = {
       const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('video');
 
       if (isVideo) {
-        await sock.sendMessage(from, { video: Buffer.from(media.data), caption: '🧵 _NovaSpark Bot ⚡_', mimetype: 'video/mp4' }, { quoted: msg });
+        const _tmpTH = require('path').join(require('os').tmpdir(), 'ns_th_' + Date.now() + '.mp4');
+        require('fs').writeFileSync(_tmpTH, Buffer.from(media.data));
+        await sock.sendMessage(from, { video: { url: _tmpTH }, caption: '🧵 _NovaSpark Bot ⚡_', mimetype: 'video/mp4' }, { quoted: msg });
+        require('fs').unlink(_tmpTH, () => {});
       } else {
-        await sock.sendMessage(from, { image: Buffer.from(media.data), caption: '🧵 _NovaSpark Bot ⚡_' }, { quoted: msg });
+        await sock.sendMessage(from, { image: { url: mediaUrl }, caption: '🧵 _NovaSpark Bot ⚡_' }, { quoted: msg });
       }
     } catch (e) {
       await reply(`❌ Threads Error: ${e.message}`);

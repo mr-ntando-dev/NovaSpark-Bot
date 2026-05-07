@@ -45,8 +45,11 @@ module.exports = {
       const videoUrl = result.url || result.video || result.download;
       if (!videoUrl) return reply('❌ No video found.');
 
+      const _tmpSN = require('path').join(require('os').tmpdir(), 'ns_sn_' + Date.now() + '.mp4');
       const video = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
-      await sock.sendMessage(from, { video: Buffer.from(video.data), caption: `🎬 ${result.title || 'Snack Video'}\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').writeFileSync(_tmpSN, Buffer.from(video.data));
+      await sock.sendMessage(from, { video: { url: _tmpSN }, caption: `🎬 ${result.title || 'Snack Video'}\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').unlink(_tmpSN, () => {});
     } catch (e) {
       await reply(`❌ Snack Error: ${e.message}`);
     }

@@ -54,13 +54,16 @@ module.exports = {
 
       if (!audioUrl) return reply('❌ Could not extract audio URL.');
 
+      const _tmpSC = require('path').join(require('os').tmpdir(), 'ns_sc_' + Date.now() + '.mp3');
       const audio = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
+      require('fs').writeFileSync(_tmpSC, Buffer.from(audio.data));
 
       await sock.sendMessage(from, {
-        audio: Buffer.from(audio.data),
+        audio: { url: _tmpSC },
         mimetype: 'audio/mpeg',
         fileName: `${title}.mp3`,
       }, { quoted: msg });
+      require('fs').unlink(_tmpSC, () => {});
 
       await reply(`🎵 *${title}*${artist ? `\n🎤 ${artist}` : ''}\n\n_NovaSpark Bot ⚡_`);
     } catch (e) {

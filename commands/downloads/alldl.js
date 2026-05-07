@@ -92,19 +92,23 @@ module.exports = {
 
       if (!mediaUrl) return reply(`❌ No downloadable media found.${platform ? `\n\n_Detected: ${platform.name}_` : ''}`);
 
-      const media = await axios.get(mediaUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
       const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('video');
       const isAudio = mediaUrl.includes('.mp3') || mediaUrl.includes('audio');
-
       const caption = `⬇️ *${platform?.name || 'Download'}*\n${result.title ? `📝 ${result.title}` : ''}\n\n_NovaSpark Bot ⚡_`;
 
+      const ext = isAudio ? '.mp3' : isVideo ? '.mp4' : '.jpg';
+      const _tmpAL = require('path').join(require('os').tmpdir(), 'ns_al_' + Date.now() + ext);
+      const media = await axios.get(mediaUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
+      require('fs').writeFileSync(_tmpAL, Buffer.from(media.data));
+
       if (isAudio) {
-        await sock.sendMessage(from, { audio: Buffer.from(media.data), mimetype: 'audio/mpeg' }, { quoted: msg });
+        await sock.sendMessage(from, { audio: { url: _tmpAL }, mimetype: 'audio/mpeg' }, { quoted: msg });
       } else if (isVideo) {
-        await sock.sendMessage(from, { video: Buffer.from(media.data), caption, mimetype: 'video/mp4' }, { quoted: msg });
+        await sock.sendMessage(from, { video: { url: _tmpAL }, caption, mimetype: 'video/mp4' }, { quoted: msg });
       } else {
-        await sock.sendMessage(from, { image: Buffer.from(media.data), caption }, { quoted: msg });
+        await sock.sendMessage(from, { image: { url: _tmpAL }, caption }, { quoted: msg });
       }
+      require('fs').unlink(_tmpAL, () => {});
     } catch (e) {
       await reply(`❌ Download Error: ${e.message}${platform ? `\n\n_Try: .${platform.cmd} ${url}_` : ''}`);
     }

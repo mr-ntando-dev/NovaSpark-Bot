@@ -68,14 +68,17 @@ module.exports = {
         return reply(`📁 *MediaFire*\n\n📄 ${filename}\n📊 Size: ${size}\n\n🔗 Direct link:\n${dlUrl}\n\n_File too large to send via WhatsApp (>50MB)_`);
       }
 
+      const _tmpMF = require('path').join(require('os').tmpdir(), 'ns_mf_' + Date.now() + '_' + filename);
       const file = await axios.get(dlUrl, { responseType: 'arraybuffer', timeout: 120000, headers: { 'User-Agent': UA } });
+      require('fs').writeFileSync(_tmpMF, Buffer.from(file.data));
 
       await sock.sendMessage(from, {
-        document: Buffer.from(file.data),
+        document: { url: _tmpMF },
         fileName: filename,
         mimetype: 'application/octet-stream',
         caption: `📁 *MediaFire Download*\n\n📄 ${filename}\n📊 ${size}\n\n_NovaSpark Bot ⚡_`,
       }, { quoted: msg });
+      require('fs').unlink(_tmpMF, () => {});
     } catch (e) {
       await reply(`❌ MediaFire Error: ${e.message}`);
     }

@@ -126,11 +126,10 @@ module.exports = {
         return reply('❌ Video too large (' + sizeMB + 'MB). WhatsApp limit is 64MB.\n\n_Try `.play` to get audio only._');
       }
 
-      const videoBuf = fs.readFileSync(tmpFile);
 
       // ── 1. Playable video with clean caption ──────────────────────────────
       await sock.sendMessage(from, {
-        video:    videoBuf,
+        video:    { url: tmpFile },
         mimetype: 'video/mp4',
         fileName: resolvedTitle + '.mp4',
         caption:
@@ -141,7 +140,7 @@ module.exports = {
 
       // ── 2. Document (saveable .mp4) ────────────────────────────────────────
       await sock.sendMessage(from, {
-        document: videoBuf,
+        document: { url: tmpFile },
         mimetype: 'video/mp4',
         fileName: resolvedTitle + '.mp4',
         caption:  '📎 ' + resolvedTitle + '.mp4',

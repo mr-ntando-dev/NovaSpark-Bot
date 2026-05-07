@@ -80,14 +80,17 @@ module.exports = {
         return reply(`📂 *Google Drive*\n\n📄 ${filename}\n📊 Size: ${size}\n\n🔗 Direct: ${dlUrl}\n\n_File too large for WhatsApp_`);
       }
 
+      const _tmpGD = require('path').join(require('os').tmpdir(), 'ns_gd_' + Date.now() + '_' + filename);
       const file = await axios.get(dlUrl, { responseType: 'arraybuffer', timeout: 120000, headers: { 'User-Agent': UA } });
+      require('fs').writeFileSync(_tmpGD, Buffer.from(file.data));
 
       await sock.sendMessage(from, {
-        document: Buffer.from(file.data),
+        document: { url: _tmpGD },
         fileName: filename,
         mimetype: 'application/octet-stream',
         caption: `📂 *Google Drive*\n📄 ${filename}\n\n_NovaSpark Bot ⚡_`,
       }, { quoted: msg });
+      require('fs').unlink(_tmpGD, () => {});
     } catch (e) {
       await reply(`❌ GDrive Error: ${e.message}`);
     }

@@ -78,13 +78,16 @@ module.exports = {
       await sock.sendMessage(from, { react: { text: '🐦', key: msg.key } });
       const result = await downloadTwitter(url);
 
+      const _tmpTW = require('path').join(require('os').tmpdir(), 'ns_tw_' + Date.now() + '.mp4');
       const mediaBuffer = await axios.get(result.url, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
+      require('fs').writeFileSync(_tmpTW, Buffer.from(mediaBuffer.data));
 
       await sock.sendMessage(from, {
-        video: Buffer.from(mediaBuffer.data),
+        video: { url: _tmpTW },
         caption: `🐦 *Twitter/X Download*\n\n${result.title || ''}\n\n_NovaSpark Bot ⚡_`,
         mimetype: 'video/mp4',
       }, { quoted: msg });
+      require('fs').unlink(_tmpTW, () => {});
     } catch (e) {
       await reply(`❌ Twitter Error: ${e.message}`);
     }

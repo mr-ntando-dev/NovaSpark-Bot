@@ -23,19 +23,20 @@ const SP_PATTERNS = [
   /https?:\/\/spotify\.link\//,
 ];
 
-// ── Ensure buffer is real MP3 (convert if MP4/M4A container) ─────────────
-async function ensureMp3Buffer(buf) {
+// ── Ensure file is real MP3 (convert if MP4/M4A container) ───────────────
+// FIX: works with file paths only — never loads full file into RAM
+async function ensureMp3File(inputFile) {
+  const buf = Buffer.allocUnsafe(4);
+  const fd  = fs.openSync(inputFile, 'r');
+  fs.readSync(fd, buf, 0, 4, 0);
+  fs.closeSync(fd);
   const isRealMp3 = (buf[0] === 0x49 && buf[1] === 0x44 && buf[2] === 0x33) ||
                     (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
-  if (isRealMp3) return buf;
-  const tmpIn  = path.join(os.tmpdir(), 'ns_sp_in_'  + Date.now() + '.mp4');
-  const tmpOut = path.join(os.tmpdir(), 'ns_sp_out_' + Date.now() + '.mp3');
-  fs.writeFileSync(tmpIn, buf);
-  await execAsync(`ffmpeg -y -i "${tmpIn}" -acodec libmp3lame -q:a 3 "${tmpOut}"`, { timeout: 90000 });
-  const result = fs.readFileSync(tmpOut);
-  fs.unlink(tmpIn,  () => {});
-  fs.unlink(tmpOut, () => {});
-  return result;
+  if (isRealMp3) return inputFile;
+  const outFile = inputFile.replace(/\.(mp3|mp4|m4a)$/, '_conv.mp3');
+  await execAsync(`ffmpeg -y -i "${inputFile}" -acodec libmp3lame -q:a 3 "${outFile}"`, { timeout: 90000 });
+  fs.unlink(inputFile, () => {});
+  return outFile;
 }
 
 // ── Get Spotify track metadata + optional direct download link ─────────────
@@ -115,29 +116,33 @@ module.exports = {
       const displayTitle  = meta?.title  || 'Spotify Track';
       const displayArtist = meta?.artist || '';
 
-      let audioBuf;
+      let tmpFile;
 
       if (meta?.downloadUrl) {
+        tmpFile = path.join(os.tmpdir(), 'ns_sp_' + Date.now() + '.mp3');
         const dlRes = await axios.get(meta.downloadUrl, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
-        audioBuf = await ensureMp3Buffer(Buffer.from(dlRes.data));
+        fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
+        tmpFile = await ensureMp3File(tmpFile);
       } else {
         await sock.sendMessage(from, { text: '🔍 _Matching track on YouTube, please wait..._' }, { quoted: msg });
         const result = await downloadViaYouTube(displayTitle, displayArtist);
         if (result.localFile) {
-          audioBuf = await ensureMp3Buffer(fs.readFileSync(result.localFile));
-          fs.unlink(result.localFile, () => {});
+          tmpFile = await ensureMp3File(result.localFile);
         } else {
+          tmpFile = path.join(os.tmpdir(), 'ns_sp_' + Date.now() + '.mp3');
           const dlRes = await axios.get(result.remoteUrl, { responseType: 'arraybuffer', timeout: 90000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
-          audioBuf = await ensureMp3Buffer(Buffer.from(dlRes.data));
+          fs.writeFileSync(tmpFile, Buffer.from(dlRes.data));
+          tmpFile = await ensureMp3File(tmpFile);
         }
       }
 
-      const sizeMB   = (audioBuf.length / 1024 / 1024).toFixed(1);
+      // FIX: use statSync for size — no readFileSync needed
+      const sizeMB   = (fs.statSync(tmpFile).size / 1024 / 1024).toFixed(1);
       const fileName = (displayTitle + (displayArtist ? ' - ' + displayArtist : '')).replace(/[^\w\s\-]/g, '').trim() + '.mp3';
 
-      // ── 1. Playable audio ──────────────────────────────────────────────
+      // ── 1. Playable audio — streams from disk, ~0 RAM ─────────────────
       await sock.sendMessage(from, {
-        audio:    audioBuf,
+        audio:    { url: tmpFile },
         mimetype: 'audio/mpeg',
         fileName: fileName,
         ptt:      false,
@@ -156,13 +161,15 @@ module.exports = {
         await sock.sendMessage(from, { text: card }, { quoted: msg });
       }
 
-      // ── 3. Saveable document ───────────────────────────────────────────
+      // ── 3. Saveable document — streams from disk, ~0 RAM ──────────────
       await sock.sendMessage(from, {
-        document: audioBuf,
+        document: { url: tmpFile },
         mimetype: 'audio/mpeg',
         fileName: fileName,
         caption:  '📎 ' + fileName,
       }, { quoted: msg });
+
+      fs.unlink(tmpFile, () => {});
 
     } catch (e) {
       await reply(

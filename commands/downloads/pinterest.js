@@ -83,7 +83,7 @@ module.exports = {
         const dl = await axios.get(data.url, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA }, maxRedirects: 10 });
         fs.writeFileSync(tmpFile, Buffer.from(dl.data));
         await sock.sendMessage(from, {
-          video:    fs.readFileSync(tmpFile),
+          video:    { url: tmpFile },
           mimetype: 'video/mp4',
           caption:  '📌 *' + (data.title || 'Pinterest Video') + '*\n\n_⚡ NovaSpark Bot_',
         }, { quoted: msg });

@@ -52,8 +52,11 @@ module.exports = {
       const title = result.title || 'YouTube Short';
       if (!videoUrl) return reply('❌ Could not get video URL.');
 
+      const _tmpYS = require('path').join(require('os').tmpdir(), 'ns_ys_' + Date.now() + '.mp4');
       const video = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 60000, headers: { 'User-Agent': UA } });
-      await sock.sendMessage(from, { video: Buffer.from(video.data), caption: `🎬 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').writeFileSync(_tmpYS, Buffer.from(video.data));
+      await sock.sendMessage(from, { video: { url: _tmpYS }, caption: `🎬 *${title}*\n\n_NovaSpark Bot ⚡_`, mimetype: 'video/mp4' }, { quoted: msg });
+      require('fs').unlink(_tmpYS, () => {});
     } catch (e) {
       await reply(`❌ Shorts Error: ${e.message}`);
     }
