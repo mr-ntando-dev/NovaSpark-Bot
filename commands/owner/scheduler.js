@@ -70,7 +70,7 @@ function parseTime(timeStr) {
 
 module.exports = {
   name: 'schedule',
-  aliases: ['sched', 'cron', 'timer', 'schedulemsg'],
+  aliases: ['sched', 'cron', 'schedcron', 'schedulemsg'],
   category: 'owner',
   description: 'Schedule messages — one-time or recurring',
   usage: '.schedule <time> <message>',

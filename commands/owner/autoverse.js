@@ -116,7 +116,7 @@ module.exports = {
   ...module.exports,
 
   name: 'autoverse',
-  aliases: ['dailyverse', 'bibleverse', 'verse'],
+  aliases: ['dailyverse', 'autoversepost', 'autoverse2'],
   description: 'Daily Bible verse auto-sender + on-demand verse',
   category: 'owner',
   ownerOnly: true,

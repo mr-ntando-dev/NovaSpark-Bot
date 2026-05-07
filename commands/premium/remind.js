@@ -19,8 +19,8 @@ const timeLabel = (timeStr) => {
 };
 
 module.exports = {
-  name: 'remind',
-  aliases: ['reminder', 'remindme'],
+  name: 'premiumremind',
+  aliases: ['premiumreminder', 'premiumremindme'],
   description: '[PREMIUM] Set a reminder — .remind 30m Study for math',
   category: 'premium',
   execute: async ({ sender, args, reply }) => {
@@ -50,7 +50,7 @@ module.exports = {
       );
     }
 
-    database.logCommand(sender, 'remind');
+    database.logCommand(sender, 'premiumremind');
     const time    = args[0];
     const message = args.slice(1).join(' ');
     const trigger = parseTime(time);

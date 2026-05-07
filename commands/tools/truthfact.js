@@ -21,7 +21,7 @@ const FALLBACK = [
 
 module.exports = {
   name: 'truthfact',
-  aliases: ['mindblown', 'didyouknow', 'dyk'],
+  aliases: ['mindblown', 'truthdyk', 'dyk'],
   description: '🤯 Random mind-blowing true fact',
   category: 'tools',
 

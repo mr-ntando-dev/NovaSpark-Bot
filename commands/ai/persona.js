@@ -102,7 +102,7 @@ async function chatWithPersona(personaPrompt, query) {
 
 module.exports = {
   name: 'persona',
-  aliases: ['personality', 'setpersona', 'mypersona'],
+  aliases: ['botpersonality', 'setbotpersona', 'mybotpersona'],
   category: 'ai',
   description: 'Create, switch, and chat with custom AI personalities',
   usage: '.persona <subcommand>',

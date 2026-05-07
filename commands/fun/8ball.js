@@ -32,7 +32,7 @@ const RESPONSES = [
 
 module.exports = {
   name: '8ball',
-  aliases: ['eightball', 'oracle', 'ask'],
+  aliases: ['eightball', 'oracle', 'askball'],
   category: 'fun',
   description: 'Ask the Magic 8-Ball a yes/no question',
   usage: '.8ball <question>',

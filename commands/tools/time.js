@@ -30,7 +30,7 @@ function cityTime(tz, city) {
 
 module.exports = {
   name: 'time',
-  aliases: ['worldclock', 'clock'],
+  aliases: ['localclock', 'timeclock'],
   description: '🕐 World clock — time in major cities or any timezone',
   category: 'tools',
 

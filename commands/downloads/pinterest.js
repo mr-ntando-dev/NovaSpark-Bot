@@ -56,7 +56,7 @@ async function downloadPin(url) {
 // ── Command ────────────────────────────────────────────────────────────────
 module.exports = {
   name: 'pinterest',
-  aliases: ['pin', 'pindl', 'pindownload'],
+  aliases: ['pintdl', 'pindl', 'pindownload'],
   category: 'downloads',
   description: 'Download Pinterest images and videos',
   usage: '.pin <Pinterest URL>',

@@ -26,7 +26,7 @@ const LINES = [
 
 module.exports = {
   name: 'flirt',
-  aliases: ['pickup', 'pickupline', 'pl'],
+  aliases: ['pickup', 'pickupline', 'flirtpl'],
   category: 'fun',
   description: 'Send a flirty pickup line to someone',
   usage: '.flirt @user',

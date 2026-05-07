@@ -15,7 +15,7 @@ const MESSAGES = [
 
 module.exports = {
   name: 'gayrate',
-  aliases: ['vibecheck', 'sparkle', 'gr'],
+  aliases: ['gayvibecheck', 'sparkle', 'gr'],
   category: 'fun',
   description: 'Silly vibe percentage check',
   usage: '.gayrate [@user]',

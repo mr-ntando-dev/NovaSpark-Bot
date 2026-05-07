@@ -24,7 +24,7 @@ const TRUTHS = [
 ];
 
 module.exports = {
-  name: 'truth',
+  name: 'truthgen',
   aliases: ['tod', 'askme'],
   category: 'fun',
   description: 'Get a Truth question for Truth or Dare',

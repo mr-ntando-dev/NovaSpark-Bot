@@ -4,7 +4,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'summarize',
-  aliases: ['summary', 'sum', 'tldr'],
+  aliases: ['summary', 'sum', 'summarytldr'],
   description: 'Summarize any text — reply to a message or paste text directly',
   category: 'free',
   execute: async ({ sock, msg, from, sender, args, reply }) => {

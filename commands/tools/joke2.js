@@ -7,8 +7,8 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'dadjoke',
-  aliases: ['dad', 'pun'],
+  name: 'joke2dad',
+  aliases: ['dad', 'joke2pun'],
   description: 'Get a random dad joke / pun',
   category: 'tools',
 

@@ -60,7 +60,7 @@ async function generateImage(prompt, style = 'realistic', size = 'square') {
 
 module.exports = {
   name: 'imggen',
-  aliases: ['generate', 'draw', 'art', 'create', 'imagine3'],
+  aliases: ['generate', 'imgdraw', 'art', 'create', 'imagine3'],
   category: 'ai',
   description: 'Advanced AI image generation with styles and sizes',
   usage: '.imggen [--style <style>] [--size <size>] <prompt>',

@@ -24,7 +24,7 @@ const QUESTIONS = [
 ];
 
 module.exports = {
-  name: 'wyr',
+  name: 'wyr1',
   aliases: ['wouldyourather', 'would'],
   category: 'fun',
   description: 'Would You Rather — a random dilemma',

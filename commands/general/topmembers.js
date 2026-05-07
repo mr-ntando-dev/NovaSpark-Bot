@@ -10,7 +10,7 @@ const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️�
 
 module.exports = {
   name: 'topmembers',
-  aliases: ['topusers', 'leaderboard', 'top', 'top10'],
+  aliases: ['topusers', 'toplb', 'toplist', 'top10'],
   category: 'general',
   description: 'Show most active members leaderboard',
   usage: '.topmembers',

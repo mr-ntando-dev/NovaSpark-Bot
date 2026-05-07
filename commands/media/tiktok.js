@@ -10,8 +10,8 @@ const axios = require('axios');
 const { Readable } = require('stream');
 
 module.exports = {
-  name: 'tiktok',
-  aliases: ['tt', 'tik'],
+  name: 'tiktoksearch',
+  aliases: ['ttinfo', 'tik'],
   description: '🎵 Download TikTok video (no watermark)',
   category: 'media',
 

@@ -28,7 +28,7 @@ function isRateLimited(userId, isPremium = false) {
 
   // Check cooldown
   if (limit.cooldownUntil > now) {
-    return { limited: true, remaining: Math.ceil((limit.cooldownUntil - now) / 1000), reason: 'cooldown' };
+    return { limited: true, remaining: Math.ceil((limit.cooldownUntil - now) / 1000), reason: 'rlcooldown' };
   }
 
   // Clean old timestamps
@@ -52,7 +52,7 @@ function resetUserLimit(userId) {
 
 module.exports = {
   name: 'ratelimit',
-  aliases: ['rl', 'limits', 'cooldown'],
+  aliases: ['rl', 'limits', 'rlcooldown'],
   category: 'owner',
   description: 'Configure per-user rate limiting',
   usage: '.ratelimit <status|set|reset|whitelist>',

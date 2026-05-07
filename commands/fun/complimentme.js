@@ -25,7 +25,7 @@ const COMPLIMENTS = [
 
 module.exports = {
   name: 'complimentme',
-  aliases: ['selfcompliment', 'hype'],
+  aliases: ['selfcompliment', 'bigup'],
   description: 'Get a personal compliment to boost your day',
   category: 'fun',
 

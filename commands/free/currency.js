@@ -22,7 +22,7 @@ const NAMES = {
 
 module.exports = {
   name: 'currency',
-  aliases: ['convert', 'fx', 'exchange'],
+  aliases: ['fx', 'exchange'],
   description: 'Real-time currency conversion — .currency 100 USD ZAR',
   category: 'free',
 

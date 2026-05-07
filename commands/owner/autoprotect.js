@@ -140,7 +140,7 @@ module.exports = {
   ...module.exports,
 
   name: 'autoprotect',
-  aliases: ['protect', 'waprotect2'],
+  aliases: ['autoprotectmode', 'waprotect2'],
   category: 'owner',
   description: 'Master WA auto-protection suite (auto-starts on bot online)',
   usage: '.autoprotect status | set <feature> on/off',

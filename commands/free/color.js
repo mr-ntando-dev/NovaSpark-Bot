@@ -42,8 +42,8 @@ function randomHex() {
 }
 
 module.exports = {
-  name: 'color',
-  aliases: ['colour', 'hex', 'colorinfo'],
+  name: 'colorfree',
+  aliases: ['colourfree', 'hexfree', 'colorinfofree'],
   category: 'free',
   description: 'Get color info from a HEX code. Usage: .color #FF5733 or .color random',
   usage: '.color #FF5733 | .color random',

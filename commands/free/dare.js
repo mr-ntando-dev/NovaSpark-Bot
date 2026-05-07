@@ -29,8 +29,8 @@ const DARES = [
 ];
 
 module.exports = {
-  name: 'dare',
-  aliases: ['challenge', 'tod-dare'],
+  name: 'freedare',
+  aliases: ['challenge', 'tod-darefree'],
   category: 'fun',
   description: 'Get a random dare challenge',
   usage: '.dare',

@@ -72,7 +72,7 @@ async function sendScheduled(sock, item) {
 
 module.exports = {
   name:        'schedmsg',
-  aliases:     ['schedule', 'sendlater', 'remind2', 'timer'],
+  aliases:     ['schedmsgqueue', 'sendlater', 'remind2', 'schedtimer'],
   category:    'tools',
   description: 'Schedule a message to be sent after a delay or at a specific time',
   usage:       '.schedmsg +10m <message>  OR  .schedmsg 14:30 <message>',

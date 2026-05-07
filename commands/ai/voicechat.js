@@ -78,7 +78,7 @@ async function getAIResponse(text) {
 
 module.exports = {
   name: 'voicechat',
-  aliases: ['vc', 'transcribe', 'stt', 'voice', 'listen'],
+  aliases: ['vc', 'transcribe', 'stt', 'voicechatmode', 'listen'],
   category: 'ai',
   description: 'Transcribe voice messages and get AI responses',
   usage: '.voicechat (reply to a voice note)',

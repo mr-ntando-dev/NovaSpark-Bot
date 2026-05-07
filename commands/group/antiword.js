@@ -10,7 +10,7 @@ const config   = require('../../config');
 
 module.exports = {
   name: 'antiword',
-  aliases: ['badword', 'wordfilter'],
+  aliases: ['wordfilter', 'filterword'],
   description: 'Custom bad word filter with per-group word lists',
   category: 'group',
   adminOnly: true,

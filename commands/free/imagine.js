@@ -18,7 +18,7 @@ const RATIOS = {
 
 module.exports = {
   name: 'imagine',
-  aliases: ['img', 'generate', 'draw', 'image', 'ai'],
+  aliases: ['img', 'freeimagen', 'freedraw', 'image', 'freeai'],
   description: 'Generate an AI image from any text prompt (FREE)',
   category: 'free',
 

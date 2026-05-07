@@ -47,8 +47,8 @@ module.exports = [
     },
   },
   {
-    name: 'insult',
-    aliases: ['roast2', 'savage'],
+    name: 'complinsult',
+    aliases: ['roast2', 'complsavage'],
     description: '😈 Roast someone (funny, not cruel)',
     category: 'social',
     execute: async ({ sock, msg, from, sender, mentions, reply }) => {

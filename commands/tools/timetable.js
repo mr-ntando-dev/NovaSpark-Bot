@@ -26,7 +26,7 @@ function todayName() {
 
 module.exports = {
   name: 'timetable',
-  aliases: ['tt', 'schedule', 'classtable'],
+  aliases: ['classtable', 'myschedule'],
   description: '📅 Group class timetable manager',
   category: 'tools',
 

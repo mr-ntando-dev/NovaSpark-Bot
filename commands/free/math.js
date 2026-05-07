@@ -58,7 +58,7 @@ Important rules:
 
 module.exports = {
   name: 'math',
-  aliases: ['calculate', 'maths', 'calc', 'solve'],
+  aliases: ['mathcalculate', 'maths', 'mathcalc', 'mathsolve'],
   description: 'Solve any math problem or full question paper with step-by-step working (FREE)',
   category: 'free',
 

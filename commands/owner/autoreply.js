@@ -39,7 +39,7 @@ module.exports.checkAutoPM = async function checkAutoPM(sock, msg, from, body) {
 
 module.exports = {
   name: 'autopm',
-  aliases: ['awaymode', 'autoreply'],
+  aliases: ['awaymode', 'autopmreply'],
   category: 'owner',
   description: 'Auto-reply to private messages when away',
   usage: '.autopm on | off | status | set <message>',

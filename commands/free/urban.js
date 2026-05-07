@@ -10,7 +10,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'urban',
-  aliases: ['ud', 'slang', 'define'],
+  aliases: ['ud', 'slang', 'urbandefine'],
   description: 'Look up any slang word on Urban Dictionary',
   category: 'free',
 

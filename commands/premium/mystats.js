@@ -3,7 +3,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'mystats',
-  aliases: ['stats', 'analytics', 'usage'],
+  aliases: ['stats', 'myanalytics', 'myusage'],
   description: '[PREMIUM] View your personal usage analytics dashboard',
   category: 'premium',
   execute: async ({ sender, reply }) => {

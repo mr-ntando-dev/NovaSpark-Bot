@@ -478,9 +478,9 @@ const _handleText = async (sock, msg, session, from, body, userId) => {
 // ─────────────────────────────────────────────────────────────────────────────
 module.exports = {
   name: 'autochat',
-  aliases: ['ac', 'ai'],
+  aliases: ['ac', 'autochatai'],
   description: 'AutoChat AI — always on, auto-detects intent',
-  category: 'ai',
+  category: 'autochatai',
 
   execute: async (ctx) => {
     const { sock, msg, from, sender, args, reply } = ctx;

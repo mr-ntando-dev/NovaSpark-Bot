@@ -9,7 +9,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'groupinfo',
-  aliases: ['ginfo', 'groupstats', 'group'],
+  aliases: ['ginfo', 'groupinfostats', 'group'],
   description: 'Show detailed group information and analytics',
   category: 'free',
 

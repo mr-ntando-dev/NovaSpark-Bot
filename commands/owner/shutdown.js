@@ -28,8 +28,8 @@ module.exports = [
 
   // ── .restart ─────────────────────────────────────────────────────────────
   {
-    name: 'restart',
-    aliases: ['reboot', 'restartbot'],
+    name: 'shutdown-restart',
+    aliases: ['shutdownreboot', 'shutdownrestart'],
     description: '🔄 Restart the bot process',
     category: 'owner',
     ownerOnly: true,

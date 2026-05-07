@@ -59,7 +59,7 @@ function trackError(command, error) {
 
 function flushAnalytics() {
   try {
-    const existing = database.getSetting('analytics') || {};
+    const existing = database.getSetting('owneranalytics') || {};
     const merged = {
       commands: { ...existing.commands },
       totalCommands: (existing.totalCommands || 0) + Object.values(analyticsBuffer.commands).reduce((a, b) => a + b, 0),
@@ -70,7 +70,7 @@ function flushAnalytics() {
     for (const [cmd, count] of Object.entries(analyticsBuffer.commands)) {
       merged.commands[cmd] = (merged.commands[cmd] || 0) + count;
     }
-    database.setSetting('analytics', merged);
+    database.setSetting('owneranalytics', merged);
   } catch {}
 }
 
@@ -83,7 +83,7 @@ function getUptime() {
 
 module.exports = {
   name: 'analytics',
-  aliases: ['stats2', 'dashboard', 'usage', 'insights'],
+  aliases: ['stats2', 'dashboard', 'ownerusage', 'owneranalytics', 'insights'],
   category: 'owner',
   description: 'Advanced analytics dashboard — command usage, engagement, performance',
   usage: '.analytics [commands|users|errors|hourly]',

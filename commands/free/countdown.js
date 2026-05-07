@@ -6,7 +6,7 @@
 'use strict';
 
 module.exports = {
-  name: 'countdown',
+  name: 'countdownfree',
   aliases: ['until', 'daysuntil', 'countto'],
   category: 'free',
   description: 'Count down to a date. Usage: .countdown <YYYY-MM-DD> [event name]',

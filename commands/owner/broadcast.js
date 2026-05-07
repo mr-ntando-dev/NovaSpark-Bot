@@ -6,7 +6,7 @@
 'use strict';
 module.exports = {
   name: 'broadcast',
-  aliases: ['bc', 'announce'],
+  aliases: ['bc', 'bcannounce'],
   category: 'owner',
   description: 'Broadcast a message to all groups',
   usage: '.broadcast <message>',

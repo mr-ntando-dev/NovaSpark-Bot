@@ -4,7 +4,7 @@ const config   = require('../../config');
 
 module.exports = {
   name: 'myplan',
-  aliases: ['plan', 'upgrade', 'help', 'menu'],
+  aliases: ['plan', 'upgrade', 'planhelp', 'planmenu'],
   description: 'Show all available commands and your plan status',
   category: 'free',
   execute: async ({ sender, reply }) => {

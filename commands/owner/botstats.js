@@ -10,7 +10,7 @@ const config   = require('../../config');
 
 module.exports = {
   name: 'botstats',
-  aliases: ['stats', 'serverstats'],
+  aliases: ['botstats2', 'serverstats'],
   description: '📊 Full bot statistics — owner only',
   category: 'owner',
   ownerOnly: true,

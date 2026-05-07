@@ -34,7 +34,7 @@ function bar(pct) {
 
 module.exports = {
   name: 'ship',
-  aliases: ['love', 'couple', 'compat'],
+  aliases: ['love', 'shipmatch', 'compat'],
   description: '💕 Calculate love compatibility between two people',
   category: 'social',
 

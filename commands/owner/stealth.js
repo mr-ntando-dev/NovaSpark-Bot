@@ -31,7 +31,7 @@ function getDelay() {
 
 module.exports = {
   name: 'stealth',
-  aliases: ['stealthmode', 'invisible', 'darkmode'],
+  aliases: ['stealthmode', 'stealthinvis', 'darkmode'],
   description: 'Maximum stealth mode — bot hides completely from detection',
   category: 'owner',
   ownerOnly: true,

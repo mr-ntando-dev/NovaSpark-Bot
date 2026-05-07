@@ -10,7 +10,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'poll',
-  aliases: ['vote', 'survey'],
+  aliases: ['quickvote', 'survey'],
   description: 'Create a native WhatsApp poll with up to 12 options',
   category: 'free',
 

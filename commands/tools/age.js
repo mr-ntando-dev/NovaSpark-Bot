@@ -7,7 +7,7 @@
 
 module.exports = {
   name: 'age',
-  aliases: ['birthday', 'howold'],
+  aliases: ['agebday', 'howold'],
   description: 'Calculate exact age from a date of birth',
   category: 'tools',
   usage: '.age <YYYY-MM-DD>',

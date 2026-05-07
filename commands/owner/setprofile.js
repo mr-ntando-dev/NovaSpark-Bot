@@ -11,7 +11,7 @@ const { downloadMediaMessage } = require('@whiskeysockets/baileys');
 module.exports = [
   // ── .setname ──────────────────────────────────────────────────────────────
   {
-    name: 'setname',
+    name: 'setbotname',
     aliases: ['botname', 'changename'],
     description: "✏️ Change the bot's WhatsApp display name",
     category: 'owner',
@@ -32,7 +32,7 @@ module.exports = [
 
   // ── .setstatus ────────────────────────────────────────────────────────────
   {
-    name: 'setstatus',
+    name: 'setbotstatus',
     aliases: ['setbio', 'botstatus', 'setabout'],
     description: "📝 Update the bot's WhatsApp About/status",
     category: 'owner',

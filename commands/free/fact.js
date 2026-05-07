@@ -32,7 +32,7 @@ const FACT_ENDPOINTS = [
 
 module.exports = {
   name: 'fact',
-  aliases: ['funfact', 'trivia', 'didyouknow'],
+  aliases: ['funfact', 'facttrivia', 'didyouknow'],
   description: 'Get a random verified interesting fact',
   category: 'free',
 

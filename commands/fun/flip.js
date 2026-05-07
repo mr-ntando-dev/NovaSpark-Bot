@@ -7,7 +7,7 @@
 
 module.exports = {
   name: 'flip',
-  aliases: ['coinflip', 'coin', 'toss'],
+  aliases: ['flipcoin', 'headstails', 'fliptoss'],
   category: 'fun',
   description: 'Flip a coin — heads or tails',
   usage: '.flip',

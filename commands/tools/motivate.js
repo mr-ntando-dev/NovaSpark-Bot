@@ -9,7 +9,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'motivate',
-  aliases: ['quote', 'inspire'],
+  aliases: ['motivequote', 'motiveinspire'],
   description: '💪 Live motivational quote — optionally tag a friend',
   category: 'tools',
 

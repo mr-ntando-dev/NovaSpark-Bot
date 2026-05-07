@@ -64,7 +64,7 @@ function getDayIndex() {
 
 module.exports = {
   name: 'horoscope',
-  aliases: ['horo', 'zodiac', 'star'],
+  aliases: ['horo', 'horozodiac', 'horostar'],
   category: 'fun',
   description: 'Get your daily horoscope. Usage: .horoscope <sign>',
   usage: '.horoscope leo | .horoscope virgo',

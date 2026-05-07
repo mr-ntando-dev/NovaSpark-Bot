@@ -42,7 +42,7 @@ async function generateImage(prompt) {
 
 module.exports = {
   name: 'imagine2',
-  aliases: ['txt2img', 'imagine', 'genimage', 'aiart', 'draw'],
+  aliases: ['txt2img', 'aimagine', 'genimage', 'aiart', 'aidraw'],
   category: 'ai',
   description: 'Generate an AI image from a text prompt',
   usage: '.imagine <prompt>',

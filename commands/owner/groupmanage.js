@@ -11,8 +11,8 @@
 module.exports = [
   // ── .listgroups ───────────────────────────────────────────────────────────
   {
-    name: 'listgroups',
-    aliases: ['mygroups', 'botgroups', 'groups'],
+    name: 'glistgroups',
+    aliases: ['gmanage-mygroups', 'gmanage-botgroups', 'groups'],
     description: '📋 List all groups the bot is currently in',
     category: 'owner',
     ownerOnly: true,
@@ -51,7 +51,7 @@ module.exports = [
 
   // ── .leavegroup ───────────────────────────────────────────────────────────
   {
-    name: 'leavegroup',
+    name: 'gleavegroup',
     aliases: ['leave', 'exitgroup'],
     description: '🚪 Make the bot leave a group',
     category: 'owner',
@@ -83,7 +83,7 @@ module.exports = [
 
   // ── .joingroup ────────────────────────────────────────────────────────────
   {
-    name: 'joingroup',
+    name: 'gjoingroup',
     aliases: ['join', 'joinchat'],
     description: '🔗 Join a group via invite link',
     category: 'owner',

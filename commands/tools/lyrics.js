@@ -7,8 +7,8 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'lyrics',
-  aliases: ['songlyrics', 'lyric'],
+  name: 'findlyrics',
+  aliases: ['songlyrics', 'toollyric'],
   description: '🎵 Get song lyrics by name',
   category: 'tools',
 

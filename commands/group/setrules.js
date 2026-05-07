@@ -9,7 +9,7 @@ const database = require('../../database');
 module.exports = [
   {
     name: 'setrules',
-    aliases: ['rules', 'grouprules'],
+    aliases: ['rules', 'editrules'],
     description: '📜 Set or view group rules',
     category: 'group',
     adminOnly: false,

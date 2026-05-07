@@ -36,7 +36,7 @@ function startScheduler(sock, from, entry) {
 
 module.exports = {
   name: 'autoschedule',
-  aliases: ['schedule', 'sched'],
+  aliases: ['autoschedule2', 'autosched'],
   description: 'Schedule daily auto-messages to any chat',
   category: 'owner',
   ownerOnly: true,

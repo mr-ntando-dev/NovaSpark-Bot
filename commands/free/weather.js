@@ -77,8 +77,8 @@ function formatWeather(w) {
 
 // ── Command export ────────────────────────────────────────────────────────────
 module.exports = {
-  name: 'weather',
-  aliases: ['w', 'forecast', 'temp'],
+  name: 'freeweather',
+  aliases: ['w', 'freeforecast', 'temp'],
   description: 'Get real-time weather for any city (free)',
   category: 'free',
 
@@ -87,7 +87,7 @@ module.exports = {
   formatWeather,
 
   execute: async ({ sock, from, sender, args, reply }) => {
-    database.logCommand(sender, 'weather');
+    database.logCommand(sender, 'freeweather');
     const city = args.join(' ').trim();
     if (!city) return reply('🌤️ Usage: *.weather <city>*\nExample: *.weather Harare*');
 

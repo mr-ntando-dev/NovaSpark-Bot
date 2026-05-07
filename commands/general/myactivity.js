@@ -8,7 +8,7 @@ const database = require('../../database');
 
 module.exports = {
   name: 'myactivity',
-  aliases: ['myrank', 'mymsgs', 'rank', 'activity'],
+  aliases: ['myrank', 'mymsgs', 'rankme', 'activity'],
   category: 'general',
   description: 'Check your message activity and rank in this group',
   usage: '.myactivity',

@@ -14,7 +14,7 @@ const activePollsMap = new Map();
 
 module.exports = {
   name: 'autopollclose',
-  aliases: ['pollclose', 'pollresult', 'pollstats'],
+  aliases: ['pollclose', 'pollresult', 'autopollstats'],
   description: 'Auto-close polls and announce results after set time',
   category: 'owner',
   ownerOnly: false,
