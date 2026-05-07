@@ -378,18 +378,63 @@ async function sendListMenu(sock, from, msg, P) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// DYNAMIC COMMAND LISTER — reads all commands from disk, groups by category
+// ══════════════════════════════════════════════════════════════════════════════
+function buildDynamicCmdList(P) {
+  const cmdDir = path.resolve(__dirname, '..');
+  const categoryEmoji = {
+    ai: '🤖', downloads: '⬇️', free: '🆓', fun: '🎉',
+    games: '🎮', general: '📊', group: '🛡️', media: '🎬',
+    owner: '👑', premium: '💸', social: '🤝', tools: '🔧',
+  };
+  const groups = {};
+  try {
+    const cats = fs.readdirSync(cmdDir).filter(c => fs.statSync(path.join(cmdDir, c)).isDirectory());
+    for (const cat of cats) {
+      const files = fs.readdirSync(path.join(cmdDir, cat)).filter(f => f.endsWith('.js'));
+      const cmds = [];
+      for (const f of files) {
+        try {
+          const content = fs.readFileSync(path.join(cmdDir, cat, f), 'utf-8');
+          const nm = content.match(/(?:^|\n)\s*name\s*:\s*['"`]([^'"`]+)['"`]/m);
+          if (nm) cmds.push(nm[1].toLowerCase());
+        } catch {}
+      }
+      if (cmds.length) groups[cat] = cmds;
+    }
+  } catch {}
+  const lines = [`⚡ *${config.botName} v${config.botVersion} — Full Command List*`, `Prefix: *${P}*  |  ${uptimeStr()}`, ''];
+  for (const [cat, cmds] of Object.entries(groups)) {
+    const emoji = categoryEmoji[cat] || '📌';
+    lines.push(`${emoji} *${cat.toUpperCase()}*`);
+    // chunk cmds into rows of 4
+    for (let i = 0; i < cmds.length; i += 4) {
+      lines.push('  ' + cmds.slice(i, i + 4).map(c => `${P}${c}`).join('  ·  '));
+    }
+    lines.push('');
+  }
+  lines.push(`_Type ${P}menu for the styled menu_`);
+  return lines.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // COMMAND EXPORT
 // ══════════════════════════════════════════════════════════════════════════════
 module.exports = {
   name:        'menu',
-  aliases:     ['help', 'cmds', 'commands', 'start', 'h'],
-  description: 'Show bot menu — style switchable via .setmenu',
+  aliases:     ['help', 'cmds', 'commands', 'start', 'h', 'cmdlist', 'allcmds'],
+  description: 'Show bot menu — .menu all for complete list',
   category:    'free',
 
   execute: async ({ sock, msg, from, sender, args, reply }) => {
     const P      = config.prefix || '.';
     const isPrem = true; // All users enjoy Premium for free
     const style  = (database.getSetting('menuStyle') || 'neon').toLowerCase();
+
+    // .menu all — dynamic full list from disk
+    if (args[0] === 'all' || args[0] === 'full' || args[0] === 'list') {
+      return sock.sendMessage(from, { text: buildDynamicCmdList(P) }, { quoted: msg });
+    }
 
     if (style === 'list') return sendListMenu(sock, from, msg, P);
 
@@ -403,6 +448,9 @@ module.exports = {
       case 'fancy':   caption = buildFancyMenu(P, sender, isPrem);    useImage = true; break;
       default:        caption = buildNeonMenu(P, sender, isPrem);      useImage = true; break;
     }
+
+    // Append tip about full list
+    caption += `\n\n_💡 Type *${P}menu all* to see every single command_`;
 
     if (useImage) {
       const imgSrc = loadMenuImage();

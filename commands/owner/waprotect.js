@@ -90,6 +90,13 @@ async function checkDMProtection(sock, msg, from, body, senderNorm, ownerJid) {
   if (!from || from.endsWith('@g.us')) return false;
 
   const senderNum = from.split('@')[0];
+
+  // ── Never block an owner ──────────────────────────────────────────────────
+  const config = require('../../config');
+  const ownerNums = (Array.isArray(config.ownerNumber) ? config.ownerNumber : [config.ownerNumber])
+    .map(n => String(n).replace(/\D/g, ''));
+  if (ownerNums.includes(senderNum.replace(/\D/g, ''))) return false;
+
   if ((s.whitelist || []).some(w => w === senderNum || w === from)) return false;
 
   const lowerBody   = (body || '').toLowerCase();
