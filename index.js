@@ -355,6 +355,13 @@ function _startAutoFeatures(sock) {
       fs.readdirSync(sessionDir).filter(f => !f.startsWith('.')).length > 0);
 
   if (!hasSession) {
+    // ── If we were launched by pair-server, don't start another web server ───
+    if (process.env.LAUNCHED_BY_PAIR_SERVER) {
+      orig.log('[BOT] ⚠️  No session found but launched by pair server — waiting for session files...');
+      orig.log('[BOT] ℹ️  This should not happen. Check that SESSION_ID env var is set.');
+      process.exit(1);
+    }
+
     // ── No session — boot the web pairing server on the main PORT ────────────
     const PORT = process.env.PORT || 3001;
     orig.log(`[PAIR] No SESSION_ID found. Starting web pairing panel on port ${PORT}...`);

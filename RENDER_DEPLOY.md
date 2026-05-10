@@ -63,8 +63,18 @@ Set these Environment Variables:
 |---|---|
 | PORT | 10000 |
 | NODE_ENV | production |
+| RENDER_API_KEY | Your Render API key (see below) |
+| RENDER_SERVICE_ID | Your Render service ID (see below) |
 
-After pairing, copy the SESSION_ID and create a second service for the bot itself (see Option B).
+**Why RENDER_API_KEY + RENDER_SERVICE_ID?**
+After you pair your WhatsApp, the bot auto-saves your SESSION_ID directly to your Render service env vars. This means:
+- Bot starts automatically after pairing — no manual copy-paste
+- Bot survives Render restarts and sleeps — no redeployment ever needed
+- You pair once, it works forever
+
+**How to get them:**
+- `RENDER_API_KEY`: Go to [dashboard.render.com/u/settings](https://dashboard.render.com/u/settings) → API Keys → Create API Key
+- `RENDER_SERVICE_ID`: Open your service on Render → the URL is `dashboard.render.com/web/srv-XXXXXXXXXX` — the `srv-XXXXXXXXXX` part is your Service ID
 
 ### Option B — Deploy the Bot (after you have a SESSION_ID)
 

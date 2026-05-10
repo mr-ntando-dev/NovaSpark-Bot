@@ -17,8 +17,10 @@ process.env.PUPPETEER_SKIP_DOWNLOAD = 'true';
 process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
 
 const http  = require('http');
+const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
+const { spawn } = require('child_process');
 const pino  = require('pino');
 const {
   default: makeWASocket,
@@ -85,7 +87,7 @@ const HTML = `<!DOCTYPE html>
     <div class="step"><span class="step-num">2</span><span>Click <strong>Generate Code</strong> and wait a few seconds</span></div>
     <div class="step"><span class="step-num">3</span><span>On your phone: <em>WhatsApp &rarr; Linked Devices &rarr; Link a device &rarr; Link with phone number</em></span></div>
     <div class="step"><span class="step-num">4</span><span>Enter the 8-digit code shown here — bot is now paired!</span></div>
-    <div class="step"><span class="step-num">5</span><span>Bot will <strong>auto-start automatically</strong> after pairing! Also copy the SESSION_ID below as a backup for your Render env vars.</span></div>
+    <div class="step"><span class="step-num">5</span><span>Bot will <strong>auto-start automatically</strong> after pairing. If <code>RENDER_API_KEY</code> &amp; <code>RENDER_SERVICE_ID</code> are set, your SESSION_ID is saved automatically — no manual steps needed ever again.</span></div>
   </div>
   <label for="phone">WhatsApp Number</label>
   <input id="phone" type="tel" placeholder="e.g. 263786831091" autocomplete="off"/>
@@ -128,10 +130,15 @@ async function pollSession(){
       if(d.status==='done'&&d.sessionID){
         document.getElementById('output').innerHTML+=\`
           <div class="session-box">
-            <h3>✅ Paired! Copy your SESSION_ID below:</h3>
+            <h3>✅ Paired! Bot is starting now...</h3>
+            <p style="color:#34d399;font-size:.82rem;margin-bottom:10px">🚀 Your bot is launching automatically in the background.</p>
+            <p style="color:#888;font-size:.78rem;margin-bottom:12px">
+              Keep this SESSION_ID as a backup. If you set <code style="color:#22d3ee">RENDER_API_KEY</code> +
+              <code style="color:#22d3ee">RENDER_SERVICE_ID</code> as env vars in Render, it gets saved
+              automatically and your bot will restart on its own — no redeployment ever needed.
+            </p>
             <textarea id="sid" readonly>\${escHtml(d.sessionID)}</textarea>
-            <button class="copy-btn" onclick="copySID()">📋 Copy SESSION_ID</button>
-            <p style="color:#888;font-size:.75rem;margin-top:8px">Paste this as the SESSION_ID env variable when deploying your bot.</p>
+            <button class="copy-btn" onclick="copySID()">📋 Copy SESSION_ID (backup)</button>
           </div>
         \`;
         // Remove spinner
@@ -155,7 +162,78 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </body>
 </html>`;
 
-// ── Encode session to NovaSpark!... string (same format as pairing site) ──────
+// ── Save SESSION_ID to Render env var so it survives restarts ────────────────
+// Requires RENDER_API_KEY and RENDER_SERVICE_ID env vars.
+// Get them from: Render dashboard → Account Settings → API Keys
+//                Render dashboard → Your Service → Settings → Service ID
+function saveSessionToRender(sessionID) {
+  return new Promise((resolve) => {
+    const apiKey    = process.env.RENDER_API_KEY;
+    const serviceId = process.env.RENDER_SERVICE_ID;
+    if (!apiKey || !serviceId) {
+      console.log('[SESSION] ⚠️  RENDER_API_KEY or RENDER_SERVICE_ID not set — skipping env var update.');
+      console.log('[SESSION] ℹ️  Set these in Render dashboard to enable auto-persist across restarts.');
+      return resolve(false);
+    }
+    const body = JSON.stringify([{ key: 'SESSION_ID', value: sessionID }]);
+    const req = https.request({
+      hostname: 'api.render.com',
+      path:     `/v1/services/${serviceId}/env-vars`,
+      method:   'PUT',
+      headers:  {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type':  'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', d => data += d);
+      res.on('end', () => {
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          console.log('[SESSION] ✅ SESSION_ID saved to Render env vars — bot will auto-start on restart!');
+          resolve(true);
+        } else {
+          console.log(`[SESSION] ⚠️  Render API returned ${res.statusCode}: ${data.slice(0, 120)}`);
+          resolve(false);
+        }
+      });
+    });
+    req.on('error', (e) => {
+      console.log('[SESSION] ⚠️  Failed to update Render env var:', e.message);
+      resolve(false);
+    });
+    req.setTimeout(8000, () => { req.destroy(); resolve(false); });
+    req.write(body);
+    req.end();
+  });
+}
+
+// ── Launch the bot as a child process (clean, no circular require) ────────────
+function launchBot(sessionID) {
+  console.log('[PAIR] 🚀 Launching bot process now...');
+  const env = {
+    ...process.env,
+    SESSION_ID: sessionID,
+    // Tell the bot it was launched by the pair server — skip web pairing fallback
+    LAUNCHED_BY_PAIR_SERVER: '1',
+    // Unset PORT so the bot doesn't try to bind an HTTP server
+    PORT: '',
+    PAIR_PORT: '',
+  };
+  const child = spawn(process.execPath, ['index.js'], {
+    cwd:   path.join(__dirname),
+    env,
+    stdio: 'inherit',
+    detached: false,
+  });
+  child.on('error', (e) => {
+    console.error('[PAIR] ⚠️  Failed to launch bot:', e.message);
+  });
+  child.on('exit', (code) => {
+    if (code && code !== 0) console.log(`[PAIR] Bot process exited with code ${code}`);
+  });
+  return child;
+}
 function encodeSession(creds, sessionDir) {
   try {
     const files = {};
@@ -217,28 +295,27 @@ async function initPairSocket() {
         _sessionStr = sid;
         _pairState  = 'done';
 
-        // ── Auto-restart: copy session files to the main bot session dir
-        //    then restart the process so the bot starts with the new session.
+        // ── Auto-start: set SESSION_ID in env, persist to Render, launch bot ──
         try {
-          const mainSessionDir = path.join(__dirname, 'session');
-          if (!fs.existsSync(mainSessionDir)) fs.mkdirSync(mainSessionDir, { recursive: true });
-          const entries = fs.readdirSync(SESSION_DIR);
-          for (const entry of entries) {
-            const src = path.join(SESSION_DIR, entry);
-            const dst = path.join(mainSessionDir, entry);
-            if (fs.statSync(src).isFile()) {
-              fs.copyFileSync(src, dst);
+          // 1. Set in current process env so launchBot() inherits it
+          process.env.SESSION_ID = sid;
+
+          // 2. Try to persist to Render env vars (survives future restarts)
+          saveSessionToRender(sid).then((saved) => {
+            if (!saved) {
+              console.log('[PAIR] ⚠️  SESSION_ID not auto-saved to Render.');
+              console.log('[PAIR] ℹ️  Copy the SESSION_ID from the browser panel and set it as');
+              console.log('[PAIR] ℹ️  the SESSION_ID env var in your Render service settings.');
             }
-          }
-          console.log('[PAIR] ✅ Session copied to main session folder.');
-          console.log('[PAIR] 🔄 Restarting bot in 3 seconds...');
-          setTimeout(() => {
-            console.log('[PAIR] 🚀 Launching bot now!');
-            require('./index.js');
-          }, 3000);
+          });
+
+          // 3. Launch the bot as a separate child process (no circular require)
+          console.log('[PAIR] ✅ Session ready. Starting bot in 3 seconds...');
+          setTimeout(() => launchBot(sid), 3000);
+
         } catch (e) {
-          console.error('[PAIR] ⚠️  Auto-restart failed:', e.message);
-          console.log('[PAIR] Copy the SESSION_ID manually to your Render env vars.');
+          console.error('[PAIR] ⚠️  Auto-start failed:', e.message);
+          console.log('[PAIR] ℹ️  Copy the SESSION_ID from the browser and set it in Render env vars.');
         }
       }
     }
