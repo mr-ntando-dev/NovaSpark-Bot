@@ -1,7 +1,7 @@
 'use strict';
 /**
  * NovaSpark Multi-Hosting — Simple JSON Database
- * Stores user accounts and their bot instances
+ * Stores user accounts, bot instances, and server registry
  */
 
 const fs   = require('fs');
@@ -12,9 +12,11 @@ const DB_FILE = path.join(__dirname, 'data', 'db.json');
 
 function _load() {
   try {
-    if (!fs.existsSync(DB_FILE)) return { users: {}, bots: {} };
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-  } catch { return { users: {}, bots: {} }; }
+    if (!fs.existsSync(DB_FILE)) return { users: {}, bots: {}, sessions: {}, servers: {} };
+    const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    if (!data.servers) data.servers = {};
+    return data;
+  } catch { return { users: {}, bots: {}, sessions: {}, servers: {} }; }
 }
 
 function _save(data) {
@@ -30,7 +32,7 @@ function createUser(email, password) {
   if (Object.values(db.users).find(u => u.email === email)) return null;
   const id = crypto.randomBytes(8).toString('hex');
   const hash = crypto.createHash('sha256').update(password).digest('hex');
-  db.users[id] = { id, email, passwordHash: hash, createdAt: Date.now(), plan: 'free' };
+  db.users[id] = { id, email, passwordHash: hash, createdAt: Date.now(), plan: 'free', banned: false, botLimit: 3 };
   _save(db);
   return db.users[id];
 }
@@ -45,9 +47,33 @@ function getUserById(id) {
   return db.users[id] || null;
 }
 
+function getAllUsers() {
+  const db = _load();
+  return Object.values(db.users);
+}
+
+function updateUser(id, fields) {
+  const db = _load();
+  if (!db.users[id]) return null;
+  Object.assign(db.users[id], fields);
+  _save(db);
+  return db.users[id];
+}
+
+function deleteUser(id) {
+  const db = _load();
+  // Also delete their bots
+  for (const botId of Object.keys(db.bots)) {
+    if (db.bots[botId].userId === id) delete db.bots[botId];
+  }
+  delete db.users[id];
+  _save(db);
+}
+
 function verifyUser(email, password) {
   const user = getUser(email);
   if (!user) return null;
+  if (user.banned) return { banned: true };
   const hash = crypto.createHash('sha256').update(password).digest('hex');
   return hash === user.passwordHash ? user : null;
 }
@@ -66,7 +92,6 @@ function getSession(token) {
   if (!db.sessions) return null;
   const s = db.sessions[token];
   if (!s) return null;
-  // 7 day expiry
   if (Date.now() - s.createdAt > 7 * 24 * 60 * 60 * 1000) {
     delete db.sessions[token];
     _save(db);
@@ -142,12 +167,56 @@ function getStats() {
     onlineBots: bots.filter(b => b.status === 'online').length,
     stoppedBots: bots.filter(b => b.status === 'stopped').length,
     pairingBots: bots.filter(b => b.status === 'pairing').length,
+    totalServers: Object.keys(db.servers || {}).length,
   };
 }
 
+// ── Server Registry ────────────────────────────────────────────────────────
+
+function addServer({ name, url, maxBots, serverId, notes }) {
+  const db = _load();
+  const id = serverId || crypto.randomBytes(6).toString('hex');
+  db.servers[id] = {
+    id,
+    name:    name    || `Server ${id}`,
+    url:     url     || '',
+    maxBots: parseInt(maxBots || 10, 10),
+    notes:   notes   || '',
+    active:  true,
+    addedAt: Date.now(),
+  };
+  _save(db);
+  return db.servers[id];
+}
+
+function getServer(id) {
+  const db = _load();
+  return (db.servers || {})[id] || null;
+}
+
+function getAllServers() {
+  const db = _load();
+  return Object.values(db.servers || {});
+}
+
+function updateServer(id, fields) {
+  const db = _load();
+  if (!db.servers || !db.servers[id]) return null;
+  Object.assign(db.servers[id], fields);
+  _save(db);
+  return db.servers[id];
+}
+
+function deleteServer(id) {
+  const db = _load();
+  if (db.servers) delete db.servers[id];
+  _save(db);
+}
+
 module.exports = {
-  createUser, getUser, getUserById, verifyUser,
+  createUser, getUser, getUserById, getAllUsers, updateUser, deleteUser, verifyUser,
   createSession, getSession, deleteSession,
   createBot, getBot, getUserBots, updateBot, deleteBot, getAllBots,
   getStats,
+  addServer, getServer, getAllServers, updateServer, deleteServer,
 };

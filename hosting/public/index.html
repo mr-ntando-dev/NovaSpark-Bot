@@ -143,13 +143,30 @@ input:focus,select:focus{border-color:var(--primary)}
       <div class="stat-card"><div class="stat-value" id="statPairing">–</div><div class="stat-label">Pairing</div></div>
       <div class="stat-card"><div class="stat-value" id="statStopped">–</div><div class="stat-label">Stopped</div></div>
     </div>
-    <!-- Bot list -->
+    <!-- Section header -->
     <div class="section-header">
       <h2>🤖 My Bots</h2>
-      <button class="btn-sm btn-primary" onclick="showCreateModal()">+ Deploy New Bot</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm btn-outline" onclick="showServers()" style="font-size:.78rem">🖥️ Available Servers</button>
+        <button class="btn-sm btn-primary" onclick="showCreateModal()">+ Deploy New Bot</button>
+      </div>
     </div>
     <div class="bots-grid" id="botsGrid">
       <div class="empty-state"><div class="empty-icon">🤖</div><p>No bots deployed yet.</p><button class="btn-sm btn-primary" onclick="showCreateModal()">Deploy your first bot</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Servers Modal ─────────────────────────────────────────────────────── -->
+<div id="serversModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:580px">
+    <h3>🖥️ Available Servers</h3>
+    <p style="color:var(--muted);font-size:.83rem;margin-bottom:16px">Deploy your bot on any of these servers. Each server runs independently.</p>
+    <div id="serversList" style="display:flex;flex-direction:column;gap:10px">
+      <div style="color:var(--muted);font-size:.85rem;padding:20px;text-align:center">Loading servers...</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-primary" onclick="document.getElementById('serversModal').classList.add('hidden')">Close</button>
     </div>
   </div>
 </div>
@@ -270,6 +287,30 @@ async function loadServerInfo() {
     document.getElementById('infoRunning').textContent   = d.runningBots;
     document.getElementById('infoAvail').textContent     = d.available;
   } catch {}
+}
+
+async function showServers() {
+  document.getElementById('serversModal').classList.remove('hidden');
+  const sl = document.getElementById('serversList');
+  try {
+    const r = await fetch('/api/servers');
+    const d = await r.json();
+    if (!d.servers.length) {
+      sl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:24px">No servers configured yet. Contact admin.</div>';
+      return;
+    }
+    sl.innerHTML = d.servers.map(s => `
+      <div style="background:#0d0d1a;border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600;font-size:.9rem">${esc(s.name)}</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Max bots: <span style="color:var(--accent)">${s.maxBots}</span></div>
+          ${s.notes ? `<div style="font-size:.75rem;color:var(--muted);margin-top:2px">${esc(s.notes)}</div>` : ''}
+        </div>
+        <a href="${esc(s.url)}" target="_blank" class="btn-sm btn-primary" style="padding:7px 14px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:.78rem;font-weight:600;text-decoration:none">Open Panel →</a>
+      </div>`).join('');
+  } catch {
+    sl.innerHTML = '<div style="color:var(--red);text-align:center;padding:24px">Failed to load servers</div>';
+  }
 }
 
 function showHowToScale() {
@@ -422,6 +463,7 @@ function toast(msg, type='success') {
 // Close modals on overlay click
 document.getElementById('createModal').addEventListener('click', function(e) { if (e.target === this) hideCreateModal(); });
 document.getElementById('scaleModal').addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+document.getElementById('serversModal').addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
 
 // Enter key on auth form
 document.addEventListener('keydown', e => {

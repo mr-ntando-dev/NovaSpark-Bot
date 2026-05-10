@@ -2,17 +2,24 @@
 /**
  * NovaSpark Multi-Hosting Panel — Main Server
  * Express API + serves the dashboard UI
+ * Admin credentials set via ADMIN_USER / ADMIN_PASS env vars (default: ntando/ntando)
  */
 
 const http    = require('http');
 const fs      = require('fs');
 const path    = require('path');
 const url     = require('url');
+const crypto  = require('crypto');
 const db      = require('./db');
 const manager = require('./manager');
 
-const PORT    = process.env.PORT || 3000;
-const PUBLIC  = path.join(__dirname, 'public');
+const PORT       = process.env.PORT || 3000;
+const PUBLIC     = path.join(__dirname, 'public');
+const ADMIN_USER = process.env.ADMIN_USER || 'ntando';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'ntando';
+
+// Admin sessions (in-memory, intentionally — admin sessions reset on restart)
+const _adminSessions = new Map();
 
 // ── Cookie helpers ───────────────────────────────────────────────────────────
 function getCookie(req, name) {
@@ -34,6 +41,12 @@ function authUser(req) {
   const token = getCookie(req, 'ns_token');
   if (!token) return null;
   return db.getSession(token);
+}
+
+function authAdmin(req) {
+  const token = getCookie(req, 'ns_admin');
+  if (!token) return false;
+  return _adminSessions.has(token);
 }
 
 // ── JSON response helpers ─────────────────────────────────────────────────────
@@ -72,9 +85,150 @@ const server = http.createServer(async (req, res) => {
   const method   = req.method;
 
   // ── Static assets ──────────────────────────────────────────────────────────
-  if (method === 'GET' && !pathname.startsWith('/api/')) {
+  if (method === 'GET' && !pathname.startsWith('/api/') && !pathname.startsWith('/admin')) {
     const file = pathname === '/' ? 'index.html' : pathname.slice(1);
     return serveStatic(res, path.join(PUBLIC, file));
+  }
+
+  // Serve admin page
+  if (method === 'GET' && (pathname === '/admin' || pathname === '/admin/')) {
+    return serveStatic(res, path.join(PUBLIC, 'admin.html'));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  ADMIN AUTH
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // POST /api/admin/login
+  if (method === 'POST' && pathname === '/api/admin/login') {
+    const { username, password } = await body(req);
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      const token = crypto.randomBytes(32).toString('hex');
+      _adminSessions.set(token, { createdAt: Date.now() });
+      setCookie(res, 'ns_admin', token, 86400); // 24h
+      return json(res, 200, { ok: true });
+    }
+    return json(res, 401, { error: 'Invalid credentials' });
+  }
+
+  // POST /api/admin/logout
+  if (method === 'POST' && pathname === '/api/admin/logout') {
+    const token = getCookie(req, 'ns_admin');
+    if (token) _adminSessions.delete(token);
+    clearCookie(res, 'ns_admin');
+    return json(res, 200, { ok: true });
+  }
+
+  // GET /api/admin/me
+  if (method === 'GET' && pathname === '/api/admin/me') {
+    if (!authAdmin(req)) return json(res, 401, { error: 'Not authenticated' });
+    return json(res, 200, { ok: true, username: ADMIN_USER });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  ADMIN ROUTES (require admin auth)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  if (pathname.startsWith('/api/admin/') && pathname !== '/api/admin/login' && pathname !== '/api/admin/logout' && pathname !== '/api/admin/me') {
+    if (!authAdmin(req)) return json(res, 401, { error: 'Admin auth required' });
+
+    // GET /api/admin/stats
+    if (method === 'GET' && pathname === '/api/admin/stats') {
+      const stats = db.getStats();
+      return json(res, 200, { ...stats, runningBots: manager.runningCount(), maxBots: manager.maxBots(), serverId: manager.serverId() });
+    }
+
+    // GET /api/admin/users — all users
+    if (method === 'GET' && pathname === '/api/admin/users') {
+      const users = db.getAllUsers().map(u => ({
+        id: u.id, email: u.email, plan: u.plan, banned: u.banned,
+        botLimit: u.botLimit || 3, createdAt: u.createdAt,
+        botCount: db.getUserBots(u.id).length,
+      }));
+      return json(res, 200, { users });
+    }
+
+    // PATCH /api/admin/users/:id — update user (ban, botLimit, plan)
+    const userPatch = pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
+    if (method === 'PATCH' && userPatch) {
+      const userId = userPatch[1];
+      const fields = await body(req);
+      const allowed = ['banned', 'botLimit', 'plan'];
+      const update = {};
+      for (const k of allowed) if (fields[k] !== undefined) update[k] = fields[k];
+      const updated = db.updateUser(userId, update);
+      if (!updated) return json(res, 404, { error: 'User not found' });
+      return json(res, 200, { ok: true, user: updated });
+    }
+
+    // DELETE /api/admin/users/:id
+    const userDel = pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
+    if (method === 'DELETE' && userDel) {
+      db.deleteUser(userDel[1]);
+      return json(res, 200, { ok: true });
+    }
+
+    // GET /api/admin/bots — all bots across all users
+    if (method === 'GET' && pathname === '/api/admin/bots') {
+      const bots = db.getAllBots().map(b => ({
+        ...b, running: manager.isRunning(b.id),
+      }));
+      return json(res, 200, { bots });
+    }
+
+    // POST /api/admin/bots/:id/start|stop|restart
+    const adminBotAction = pathname.match(/^\/api\/admin\/bots\/([^/]+)\/(start|stop|restart)$/);
+    if (method === 'POST' && adminBotAction) {
+      const [, botId, action] = adminBotAction;
+      const result = action === 'start' ? manager.startBot(botId)
+                   : action === 'stop'  ? manager.stopBot(botId)
+                   : manager.restartBot(botId);
+      return json(res, result.error ? 400 : 200, result);
+    }
+
+    // DELETE /api/admin/bots/:id
+    const adminBotDel = pathname.match(/^\/api\/admin\/bots\/([^/]+)$/);
+    if (method === 'DELETE' && adminBotDel) {
+      manager.deleteBot(adminBotDel[1]);
+      return json(res, 200, { ok: true });
+    }
+
+    // ── Server Registry ─────────────────────────────────────────────────────
+
+    // GET /api/admin/servers
+    if (method === 'GET' && pathname === '/api/admin/servers') {
+      return json(res, 200, { servers: db.getAllServers() });
+    }
+
+    // POST /api/admin/servers — add a server
+    if (method === 'POST' && pathname === '/api/admin/servers') {
+      const { name, url: sUrl, maxBots, serverId, notes } = await body(req);
+      if (!sUrl) return json(res, 400, { error: 'url is required' });
+      const server = db.addServer({ name, url: sUrl, maxBots, serverId, notes });
+      return json(res, 200, { ok: true, server });
+    }
+
+    // PATCH /api/admin/servers/:id
+    const serverPatch = pathname.match(/^\/api\/admin\/servers\/([^/]+)$/);
+    if (method === 'PATCH' && serverPatch) {
+      const fields = await body(req);
+      const updated = db.updateServer(serverPatch[1], fields);
+      if (!updated) return json(res, 404, { error: 'Server not found' });
+      return json(res, 200, { ok: true, server: updated });
+    }
+
+    // DELETE /api/admin/servers/:id
+    const serverDel = pathname.match(/^\/api\/admin\/servers\/([^/]+)$/);
+    if (method === 'DELETE' && serverDel) {
+      db.deleteServer(serverDel[1]);
+      return json(res, 200, { ok: true });
+    }
+  }
+
+  // GET /api/servers — public server list for users
+  if (method === 'GET' && pathname === '/api/servers') {
+    const servers = db.getAllServers().filter(s => s.active);
+    return json(res, 200, { servers });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -139,6 +293,10 @@ const server = http.createServer(async (req, res) => {
   if (method === 'POST' && pathname === '/api/bots') {
     const { botName, ownerNumber, prefix } = await body(req);
     if (!ownerNumber) return json(res, 400, { error: 'ownerNumber is required' });
+    // Check user's bot limit
+    const userBots = db.getUserBots(user.id);
+    const botLimit = user.botLimit || 3;
+    if (userBots.length >= botLimit) return json(res, 403, { error: `Bot limit reached (${botLimit}). Contact admin to increase your limit.` });
     const result = db.createBot(user.id, { botName, ownerNumber, prefix });
     if (result.error) return json(res, 403, { error: result.error });
     return json(res, 200, { bot: result });

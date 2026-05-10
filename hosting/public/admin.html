@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NovaSpark — Admin Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080f;--surface:#111120;--card:#161628;--border:#2a2a45;
+  --primary:#6366f1;--primary2:#a855f7;--accent:#22d3ee;
+  --green:#22c55e;--red:#ef4444;--yellow:#eab308;--orange:#f97316;
+  --text:#e2e2f0;--muted:#6b6b8a;--radius:14px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--red),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge-admin{background:linear-gradient(135deg,var(--red),var(--primary2));color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;-webkit-text-fill-color:#fff}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-tabs{display:flex;gap:4px}
+.tab{padding:6px 14px;border-radius:8px;cursor:pointer;font-size:.83rem;color:var(--muted);border:1px solid transparent;transition:.15s}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--card);border-color:var(--border);color:var(--text)}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:.15s}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+.btn-primary:hover{opacity:.85}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+
+/* ── Auth ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:40px;width:100%;max-width:380px}
+.auth-card h2{font-size:1.4rem;font-weight:700;margin-bottom:4px;background:linear-gradient(135deg,var(--red),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-card p{color:var(--muted);font-size:.83rem;margin-bottom:24px}
+.form-group{margin-bottom:14px}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px 14px;background:#1a1a2e;border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.92rem;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+textarea{resize:vertical;min-height:60px}
+.btn-full{width:100%;padding:12px;margin-top:6px}
+.error-msg{background:#2a1010;border:1px solid var(--red);border-radius:8px;padding:10px 14px;color:var(--red);font-size:.82rem;margin-top:10px}
+
+/* ── Main ── */
+.main{padding:24px;max-width:1200px;margin:0 auto}
+.section{display:none}
+.section.active{display:block}
+
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.stat-value{font-size:1.7rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* ── Tables ── */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-header h3{font-size:.95rem;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface)}
+td{padding:12px 16px;font-size:.82rem;border-bottom:1px solid #1a1a2a;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#1a1a28}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── Status badges ── */
+.badge{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.badge-online{background:#14532d;color:var(--green)}
+.badge-pairing{background:#422006;color:var(--orange)}
+.badge-stopped{background:#1f1f1f;color:var(--muted)}
+.badge-error{background:#450a0a;color:var(--red)}
+.badge-banned{background:#450a0a;color:var(--red)}
+.badge-active{background:#14532d;color:var(--green)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:480px}
+.modal h3{font-size:1rem;font-weight:600;margin-bottom:18px}
+.modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.hidden{display:none!important}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.84rem;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideIn .25s ease}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+@keyframes slideIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- ── Admin Login ─────────────────────────────────────────────────────────── -->
+<div id="loginScreen" class="auth-wrap">
+  <div class="auth-card">
+    <h2>🔐 Admin Panel</h2>
+    <p>NovaSpark Hosting — Restricted Access</p>
+    <div class="form-group"><label>Username</label><input id="adminUser" type="text" placeholder="ntando"/></div>
+    <div class="form-group"><label>Password</label><input id="adminPass" type="password" placeholder="••••••"/></div>
+    <button class="btn btn-primary btn-full" onclick="adminLogin()">Sign In</button>
+    <div id="loginError" class="error-msg hidden"></div>
+  </div>
+</div>
+
+<!-- ── Admin App ───────────────────────────────────────────────────────────── -->
+<div id="adminApp" class="hidden">
+  <nav class="navbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="logo">⚡ NovaSpark</span>
+      <span class="badge-admin">ADMIN</span>
+    </div>
+    <div class="nav-tabs">
+      <div class="tab active" onclick="switchTab('overview')">Overview</div>
+      <div class="tab" onclick="switchTab('users')">Users</div>
+      <div class="tab" onclick="switchTab('bots')">Bots</div>
+      <div class="tab" onclick="switchTab('servers')">Servers</div>
+    </div>
+    <div class="nav-right">
+      <a href="/" style="font-size:.8rem;color:var(--muted)">← User Panel</a>
+      <button class="btn btn-outline btn-sm" onclick="adminLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- ── Overview ── -->
+    <div id="tab-overview" class="section active">
+      <div class="stats-grid" id="adminStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
+        <div class="table-wrap">
+          <div class="table-header"><h3>🟢 Online Bots</h3></div>
+          <table><thead><tr><th>Bot</th><th>Number</th><th>User</th></tr></thead>
+          <tbody id="overviewOnline"><tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px">Loading...</td></tr></tbody></table>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>🔴 Error Bots</h3></div>
+          <table><thead><tr><th>Bot</th><th>Error</th><th>Actions</th></tr></thead>
+          <tbody id="overviewErrors"><tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Users ── -->
+    <div id="tab-users" class="section">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>👥 All Users</h3>
+          <input id="userSearch" type="text" placeholder="Search by email..." style="width:220px;padding:7px 12px;font-size:.82rem" oninput="filterUsers()"/>
+        </div>
+        <table>
+          <thead><tr><th>Email</th><th>Bots</th><th>Bot Limit</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersTable"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Bots ── -->
+    <div id="tab-bots" class="section">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>🤖 All Bots</h3>
+          <input id="botSearch" type="text" placeholder="Search by name or number..." style="width:240px;padding:7px 12px;font-size:.82rem" oninput="filterBots()"/>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Number</th><th>Prefix</th><th>Status</th><th>Last Seen</th><th>Actions</th></tr></thead>
+          <tbody id="botsTable"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Servers ── -->
+    <div id="tab-servers" class="section">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>🖥️ Server Registry</h3>
+          <button class="btn btn-primary btn-sm" onclick="showAddServer()">+ Add Server</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>URL</th><th>Max Bots</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
+          <tbody id="serversTable"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px">
+        <h3 style="font-size:.9rem;margin-bottom:10px">ℹ️ How to deploy a new Render server</h3>
+        <div style="font-size:.82rem;color:var(--muted);line-height:2">
+          1. Go to <a href="https://render.com" target="_blank" style="color:var(--accent)">render.com</a> → New → Web Service → connect your repo<br>
+          2. Build: <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--primary)">npm install</code> &nbsp; Start: <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--primary)">node hosting/server.js</code><br>
+          3. Set env vars: <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--accent)">MAX_BOTS=10</code> <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--accent)">SERVER_ID=server-X</code> <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--accent)">ADMIN_USER=ntando</code> <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--accent)">ADMIN_PASS=ntando</code><br>
+          4. Copy the live URL and add it here using the <b style="color:var(--text)">+ Add Server</b> button above
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Add Server Modal ────────────────────────────────────────────────────── -->
+<div id="addServerModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>🖥️ Add New Server</h3>
+    <div class="form-group"><label>Server Name</label><input id="srvName" placeholder="e.g. Render Server 2"/></div>
+    <div class="form-group"><label>Render URL</label><input id="srvUrl" placeholder="https://novaspark-hosting-2.onrender.com"/></div>
+    <div class="form-group"><label>Max Bots</label><input id="srvMaxBots" type="number" value="10" min="1" max="100"/></div>
+    <div class="form-group"><label>Server ID (optional)</label><input id="srvId" placeholder="server-2"/></div>
+    <div class="form-group"><label>Notes (optional)</label><textarea id="srvNotes" placeholder="Region, plan, notes..."></textarea></div>
+    <div id="addServerError" class="error-msg hidden"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideAddServer()">Cancel</button>
+      <button class="btn btn-primary" onclick="addServer()">Add Server</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit User Modal ─────────────────────────────────────────────────────── -->
+<div id="editUserModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>✏️ Edit User</h3>
+    <input type="hidden" id="editUserId"/>
+    <div class="form-group"><label>Email</label><input id="editUserEmail" readonly style="opacity:.6"/></div>
+    <div class="form-group"><label>Bot Limit</label><input id="editBotLimit" type="number" min="0" max="100"/></div>
+    <div class="form-group"><label>Status</label>
+      <select id="editBanned"><option value="false">Active</option><option value="true">Banned</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideEditUser()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteUser()">Delete User</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let _allUsers = [];
+let _allBots  = [];
+let _allServers = [];
+let _pollTimer  = null;
+let _activeTab  = 'overview';
+
+// ── Admin Auth ────────────────────────────────────────────────────────────────
+async function adminLogin() {
+  const username = document.getElementById('adminUser').value.trim();
+  const password = document.getElementById('adminPass').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.classList.add('hidden');
+  try {
+    const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error; errEl.classList.remove('hidden'); return; }
+    showAdmin();
+  } catch { errEl.textContent = 'Network error'; errEl.classList.remove('hidden'); }
+}
+
+async function adminLogout() {
+  await fetch('/api/admin/logout', { method:'POST' });
+  clearInterval(_pollTimer);
+  document.getElementById('adminApp').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+async function init() {
+  try {
+    const r = await fetch('/api/admin/me');
+    if (r.ok) showAdmin();
+  } catch {}
+}
+
+function showAdmin() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('adminApp').classList.remove('hidden');
+  loadAll();
+  _pollTimer = setInterval(loadAll, 5000);
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadStats(), loadUsers(), loadBots(), loadServers()]);
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/admin/stats');
+    if (!r.ok) return;
+    const d = await r.json();
+    document.getElementById('adminStats').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${d.totalUsers}</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-card"><div class="stat-value">${d.totalBots}</div><div class="stat-label">Total Bots</div></div>
+      <div class="stat-card"><div class="stat-value">${d.onlineBots}</div><div class="stat-label">Online Bots</div></div>
+      <div class="stat-card"><div class="stat-value">${d.runningBots}</div><div class="stat-label">Running Now</div></div>
+      <div class="stat-card"><div class="stat-value">${d.maxBots}</div><div class="stat-label">This Server Max</div></div>
+      <div class="stat-card"><div class="stat-value">${d.totalServers}</div><div class="stat-label">Servers</div></div>
+    `;
+  } catch {}
+}
+
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/admin/users');
+    if (!r.ok) return;
+    _allUsers = (await r.json()).users;
+    renderUsers(_allUsers);
+  } catch {}
+}
+
+async function loadBots() {
+  try {
+    const r = await fetch('/api/admin/bots');
+    if (!r.ok) return;
+    _allBots = (await r.json()).bots;
+    renderBots(_allBots);
+    renderOverview();
+  } catch {}
+}
+
+async function loadServers() {
+  try {
+    const r = await fetch('/api/admin/servers');
+    if (!r.ok) return;
+    _allServers = (await r.json()).servers;
+    renderServers(_allServers);
+  } catch {}
+}
+
+// ── Render functions ──────────────────────────────────────────────────────────
+function renderUsers(users) {
+  const tb = document.getElementById('usersTable');
+  if (!users.length) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">No users yet</td></tr>`; return; }
+  tb.innerHTML = users.map(u => `
+    <tr>
+      <td>${esc(u.email)}</td>
+      <td>${u.botCount}</td>
+      <td>${u.botLimit}</td>
+      <td><span class="badge ${u.banned ? 'badge-banned' : 'badge-active'}">${u.banned ? 'Banned' : 'Active'}</span></td>
+      <td style="color:var(--muted)">${new Date(u.createdAt).toLocaleDateString()}</td>
+      <td class="actions">
+        <button class="btn btn-outline btn-sm" onclick="showEditUser('${u.id}')">✏️ Edit</button>
+        ${u.banned
+          ? `<button class="btn btn-green btn-sm" onclick="toggleBan('${u.id}',false)">✅ Unban</button>`
+          : `<button class="btn btn-danger btn-sm" onclick="toggleBan('${u.id}',true)">🚫 Ban</button>`}
+      </td>
+    </tr>`).join('');
+}
+
+function renderBots(bots) {
+  const tb = document.getElementById('botsTable');
+  if (!bots.length) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">No bots yet</td></tr>`; return; }
+  tb.innerHTML = bots.map(b => {
+    const sc = {online:'badge-online',pairing:'badge-pairing',stopped:'badge-stopped',error:'badge-error'}[b.status]||'badge-stopped';
+    return `<tr>
+      <td>${esc(b.botName)}</td>
+      <td style="font-family:monospace">${esc(b.ownerNumber)}</td>
+      <td>${esc(b.prefix)}</td>
+      <td><span class="badge ${sc}">${b.status}</span></td>
+      <td style="color:var(--muted)">${b.lastSeen ? timeSince(b.lastSeen) : 'Never'}</td>
+      <td class="actions">
+        ${!b.running ? `<button class="btn btn-green btn-sm" onclick="adminBotAction('${b.id}','start')">▶</button>` : ''}
+        ${b.running  ? `<button class="btn btn-outline btn-sm" onclick="adminBotAction('${b.id}','restart')">🔄</button>` : ''}
+        ${b.running  ? `<button class="btn btn-outline btn-sm" onclick="adminBotAction('${b.id}','stop')">⏹</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="adminDeleteBot('${b.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderServers(servers) {
+  const tb = document.getElementById('serversTable');
+  if (!servers.length) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">No servers added yet. Add your first Render server above.</td></tr>`; return; }
+  tb.innerHTML = servers.map(s => `
+    <tr>
+      <td><b>${esc(s.name)}</b><br><span style="color:var(--muted);font-size:.75rem">${esc(s.id)}</span></td>
+      <td><a href="${esc(s.url)}" target="_blank" style="color:var(--accent);font-size:.8rem">${esc(s.url)}</a></td>
+      <td>${s.maxBots}</td>
+      <td><span class="badge ${s.active ? 'badge-active' : 'badge-stopped'}">${s.active ? 'Active' : 'Disabled'}</span></td>
+      <td style="color:var(--muted);font-size:.78rem">${esc(s.notes||'—')}</td>
+      <td class="actions">
+        <button class="btn btn-outline btn-sm" onclick="toggleServer('${s.id}',${!s.active})">${s.active ? 'Disable' : 'Enable'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteServer('${s.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderOverview() {
+  const online = _allBots.filter(b => b.status === 'online');
+  const errors = _allBots.filter(b => b.status === 'error');
+  const userMap = {};
+  _allUsers.forEach(u => userMap[u.id] = u.email);
+
+  document.getElementById('overviewOnline').innerHTML = online.length
+    ? online.map(b => `<tr><td>${esc(b.botName)}</td><td style="font-family:monospace">${esc(b.ownerNumber)}</td><td style="color:var(--muted)">${esc(userMap[b.userId]||'?')}</td></tr>`).join('')
+    : `<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px">No bots online</td></tr>`;
+
+  document.getElementById('overviewErrors').innerHTML = errors.length
+    ? errors.map(b => `<tr><td>${esc(b.botName)}</td><td style="color:var(--red);font-size:.75rem">${esc(b.error||'Unknown')}</td><td><button class="btn btn-green btn-sm" onclick="adminBotAction('${b.id}','start')">Restart</button></td></tr>`).join('')
+    : `<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:20px">No errors 🎉</td></tr>`;
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  _activeTab = name;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs = ['overview','users','bots','servers'];
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── Search filters ─────────────────────────────────────────────────────────────
+function filterUsers() {
+  const q = document.getElementById('userSearch').value.toLowerCase();
+  renderUsers(_allUsers.filter(u => u.email.toLowerCase().includes(q)));
+}
+function filterBots() {
+  const q = document.getElementById('botSearch').value.toLowerCase();
+  renderBots(_allBots.filter(b => b.botName.toLowerCase().includes(q) || b.ownerNumber.includes(q)));
+}
+
+// ── User actions ──────────────────────────────────────────────────────────────
+function showEditUser(id) {
+  const u = _allUsers.find(u => u.id === id);
+  if (!u) return;
+  document.getElementById('editUserId').value    = u.id;
+  document.getElementById('editUserEmail').value = u.email;
+  document.getElementById('editBotLimit').value  = u.botLimit;
+  document.getElementById('editBanned').value    = String(u.banned);
+  document.getElementById('editUserModal').classList.remove('hidden');
+}
+function hideEditUser() { document.getElementById('editUserModal').classList.add('hidden'); }
+
+async function saveUser() {
+  const id       = document.getElementById('editUserId').value;
+  const botLimit = parseInt(document.getElementById('editBotLimit').value, 10);
+  const banned   = document.getElementById('editBanned').value === 'true';
+  await fetch(`/api/admin/users/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ botLimit, banned }) });
+  hideEditUser(); toast('User updated', 'success'); loadUsers();
+}
+
+async function toggleBan(id, banned) {
+  await fetch(`/api/admin/users/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ banned }) });
+  toast(banned ? 'User banned' : 'User unbanned', 'success'); loadUsers();
+}
+
+async function deleteUser() {
+  const id = document.getElementById('editUserId').value;
+  if (!confirm('Delete this user and all their bots?')) return;
+  await fetch(`/api/admin/users/${id}`, { method:'DELETE' });
+  hideEditUser(); toast('User deleted', 'success'); loadAll();
+}
+
+// ── Bot actions ───────────────────────────────────────────────────────────────
+async function adminBotAction(id, action) {
+  const r = await fetch(`/api/admin/bots/${id}/${action}`, { method:'POST' });
+  const d = await r.json();
+  if (d.error) toast(d.error, 'error'); else { toast(`Bot ${action}ed`, 'success'); loadBots(); }
+}
+
+async function adminDeleteBot(id) {
+  if (!confirm('Delete this bot?')) return;
+  await fetch(`/api/admin/bots/${id}`, { method:'DELETE' });
+  toast('Bot deleted', 'success'); loadBots();
+}
+
+// ── Server actions ────────────────────────────────────────────────────────────
+function showAddServer() { document.getElementById('addServerModal').classList.remove('hidden'); }
+function hideAddServer() { document.getElementById('addServerModal').classList.add('hidden'); }
+
+async function addServer() {
+  const name    = document.getElementById('srvName').value.trim();
+  const srvUrl  = document.getElementById('srvUrl').value.trim();
+  const maxBots = document.getElementById('srvMaxBots').value;
+  const srvId   = document.getElementById('srvId').value.trim();
+  const notes   = document.getElementById('srvNotes').value.trim();
+  const errEl   = document.getElementById('addServerError');
+  errEl.classList.add('hidden');
+  if (!srvUrl) { errEl.textContent = 'URL is required'; errEl.classList.remove('hidden'); return; }
+  const r = await fetch('/api/admin/servers', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, url: srvUrl, maxBots, serverId: srvId, notes }) });
+  const d = await r.json();
+  if (!r.ok) { errEl.textContent = d.error; errEl.classList.remove('hidden'); return; }
+  hideAddServer(); toast('Server added!', 'success'); loadServers();
+}
+
+async function toggleServer(id, active) {
+  await fetch(`/api/admin/servers/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ active }) });
+  toast(active ? 'Server enabled' : 'Server disabled', 'success'); loadServers();
+}
+
+async function deleteServer(id) {
+  if (!confirm('Remove this server from the registry?')) return;
+  await fetch(`/api/admin/servers/${id}`, { method:'DELETE' });
+  toast('Server removed', 'success'); loadServers();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeSince(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return Math.floor(s/60)+'m ago';
+  if (s < 86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+let _toastT;
+function toast(msg, type='success') {
+  clearTimeout(_toastT);
+  document.querySelectorAll('.toast').forEach(e => e.remove());
+  const el = document.createElement('div');
+  el.className = `toast ${type}`; el.textContent = msg;
+  document.body.appendChild(el);
+  _toastT = setTimeout(() => el.remove(), 3000);
+}
+
+// Close modals on overlay click
+['addServerModal','editUserModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) { if (e.target===this) this.classList.add('hidden'); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) adminLogin();
+});
+
+init();
+</script>
+</body>
+</html>
