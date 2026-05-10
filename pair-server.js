@@ -70,12 +70,16 @@ const HTML = `<!DOCTYPE html>
   .steps{margin-bottom:24px;counter-reset:step}
   .step{display:flex;gap:10px;margin-bottom:10px;font-size:.85rem;color:#aaa}
   .step-num{width:22px;height:22px;background:#6366f1;border-radius:50%;color:#fff;font-weight:700;font-size:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .trial-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #a855f740;border-radius:10px;padding:12px 16px;font-size:.82rem;color:#d8b4fe;margin-bottom:18px;text-align:center;line-height:1.5}
 </style>
 </head>
 <body>
 <h1>⚡ NovaSpark Bot</h1>
 <p class="sub">Web Pairing Panel v11 — Link WhatsApp without scanning a QR code</p>
 <div class="card">
+  <div class="trial-banner">
+    🎁 <strong>7-Day Free Trial</strong> — After pairing, the bot is fully functional for <strong>7 days</strong> at no cost. Contact the owner to extend.
+  </div>
   <div class="steps">
     <div class="step"><span class="step-num">1</span><span>Enter your WhatsApp number below (with country code, no + or spaces)</span></div>
     <div class="step"><span class="step-num">2</span><span>Click <strong>Generate Code</strong> and wait a few seconds</span></div>

@@ -10,9 +10,13 @@ module.exports = {
   ownerNumber: ['263786831091', '263777124998'],
   ownerName:   ['Dev-Ntando', 'Mr Ntando Ofc'],
 
+  // ── Premium Numbers (always have full bot access, trial never expires) ────
+  // These numbers also auto-seed as premium in the database on first boot.
+  premiumNumbers: ['263786831091', '263777124998', '263771629199'],
+
   // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
-  botVersion:  '11.0.0',
+  botVersion:  '11.2.0',
   prefix:      '.',
   sessionName: process.env.SESSION_DIR || 'session',
   sessionID:   process.env.SESSION_ID  || '',

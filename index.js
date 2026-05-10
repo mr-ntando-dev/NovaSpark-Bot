@@ -50,6 +50,7 @@ const {
 const qrcode  = require('qrcode-terminal');
 const config  = require('./config');
 const handler = require('./handler');
+const trial   = require('./utils/trial');
 const fs      = require('fs');
 const path    = require('path');
 const os      = require('os');
@@ -196,6 +197,19 @@ async function startBot() {
 
     if (connection === 'open') {
       printOnline(sock);
+      trial.initTrial(); // Start / check trial on first connect
+
+      // ── Seed premium numbers from config ──────────────────────────────────
+      // Ensures config.premiumNumbers are always in the database premium list.
+      try {
+        const db = require('./database');
+        const premNums = Array.isArray(config.premiumNumbers) ? config.premiumNumbers : [];
+        for (const num of premNums) {
+          const jid = `${num.replace(/\D/g,'')}@s.whatsapp.net`;
+          if (!db.isPremium(jid)) db.addPremium(jid);
+        }
+      } catch {}
+
       // Start auto-features (lazy — loaded only when needed)
       _startAutoFeatures(sock);
     }

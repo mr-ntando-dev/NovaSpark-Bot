@@ -1,7 +1,7 @@
 {
   "name": "novaspark-bot",
-  "version": "11.1.0",
-  "description": "NovaSpark Bot v11.1 TURBO — WhatsApp MD AutoChat Bot. Web & console pairing (no QR), lazy-load commands, in-memory DB. 275+ commands, AI, games, and more. Powered by Baileys.",
+  "version": "11.2.0",
+  "description": "NovaSpark Bot v11.2 TURBO — WhatsApp MD Bot. Web & console pairing, 7-day free trial, premium licence system, 275+ commands, AI, games. Powered by Baileys.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {

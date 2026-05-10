@@ -1,13 +1,14 @@
 /**
- * ⚡ NovaSpark Bot v11 — TURBO Handler
+ * ⚡ NovaSpark Bot v11.1 — TURBO Handler
  * Lazy-load commands | O(1) command map | Zero-alloc hot path
- * Parallel auto-feature checks | Minimal overhead
+ * Parallel auto-feature checks | Trial & Premium licence system
  * By Dev-Ntando — Engineered for SPEED
  */
 'use strict';
 
 const config   = require('./config');
 const database = require('./database');
+const trial    = require('./utils/trial');
 const path     = require('path');
 const fs       = require('fs');
 
@@ -387,6 +388,15 @@ const handler = async (sock, msg) => {
   // Rate limit
   if (!isOwner(senderNorm) && isRateLimited(senderNorm)) {
     return sock.sendMessage(from, { text: config.messages?.rateLimited || '⏳ Slow down! Too many commands.' }, { quoted: msg });
+  }
+
+  // ── Trial / Licence gate ──────────────────────────────────────────────────
+  // Premium numbers bypass this entirely. Everyone else is gated by the trial.
+  if (!isOwner(senderNorm)) {
+    const access = trial.isBotAllowed(senderNorm);
+    if (!access.allowed) {
+      return sock.sendMessage(from, { text: access.message }, { quoted: msg });
+    }
   }
 
   // Typing indicator
