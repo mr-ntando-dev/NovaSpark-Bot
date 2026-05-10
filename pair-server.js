@@ -27,7 +27,7 @@ const {
   fetchLatestBaileysVersion,
 } = require('@whiskeysockets/baileys');
 
-const PORT       = process.env.PAIR_PORT || 3001;
+const PORT       = process.env.PORT || process.env.PAIR_PORT || 3001;
 const SESSION_DIR = path.join(__dirname, 'pair_session');
 
 // ── Keep a reference to the active socket so we can reuse it ─────────────────
@@ -278,10 +278,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ── GET /health ────────────────────────────────────────────────────────────
-  if (method === 'GET' && reqUrl === '/health') {
+  // ── GET /health  (also accept /api/health for Render health-check compat) ──
+  if (method === 'GET' && (reqUrl === '/health' || reqUrl === '/api/health')) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', version: '11.0.0' }));
+    res.end(JSON.stringify({ status: 'ok', version: '11.0.0', uptime: Math.floor(process.uptime()) + 's' }));
+    return;
+  }
+
+  // ── GET /admin  → redirect to main panel (hosted separately) ───────────────
+  if (method === 'GET' && (reqUrl === '/admin' || reqUrl === '/admin/')) {
+    res.writeHead(302, { 'Location': '/' });
+    res.end();
     return;
   }
 

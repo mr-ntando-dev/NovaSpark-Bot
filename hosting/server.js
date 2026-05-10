@@ -357,9 +357,9 @@ const server = http.createServer(async (req, res) => {
     return json(res, 200, db.getStats());
   }
 
-  // GET /api/health
-  if (method === 'GET' && pathname === '/api/health') {
-    return json(res, 200, { ok: true, uptime: process.uptime(), bots: manager.runningCount() });
+  // GET /api/health  (also /health for Render healthCheckPath compatibility)
+  if (method === 'GET' && (pathname === '/api/health' || pathname === '/health')) {
+    return json(res, 200, { ok: true, uptime: Math.floor(process.uptime()), bots: manager.runningCount() });
   }
 
   // GET /api/server-info — capacity info for this Render instance

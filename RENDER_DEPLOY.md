@@ -48,11 +48,29 @@ Scan the QR code that appears in the terminal with WhatsApp.
 
 ## 🚀 Deploy on Render (Free Tier)
 
+### Option A — Deploy the Web Pairing Panel (recommended for first-time setup)
+
 1. Fork this repo
 2. Go to render.com → New → Web Service
 3. Connect your fork
 4. Build command: `npm install`
-5. Start command: `node index.js`
+5. Start command: `node pair-server.js`
+6. Health check path: `/health`
+
+Set these Environment Variables:
+
+| Variable | Value |
+|---|---|
+| PORT | 10000 |
+| NODE_ENV | production |
+
+After pairing, copy the SESSION_ID and create a second service for the bot itself (see Option B).
+
+### Option B — Deploy the Bot (after you have a SESSION_ID)
+
+1. Fork this repo (or reuse the same service)
+2. Start command: `node index.js`
+3. Health check path: `/health`
 
 Set these Environment Variables:
 
@@ -62,6 +80,19 @@ Set these Environment Variables:
 | PREFIX | . |
 | OWNER_NUMBER | e.g. 263786831091 |
 | BOT_NAME | NovaSpark Bot |
+
+### Option C — Deploy the Multi-Bot Hosting Panel
+
+1. Start command: `node hosting/server.js`
+2. Health check path: `/health`
+
+| Variable | Value |
+|---|---|
+| PORT | 10000 |
+| MAX_BOTS | 10 |
+| SERVER_ID | server-1 |
+| ADMIN_USER | (your admin username) |
+| ADMIN_PASS | (your admin password) |
 
 ---
 
@@ -80,7 +111,7 @@ docker run -d -e SESSION_ID="NovaSpark!..." -e OWNER_NUMBER="263786831091" --nam
 |---|---|
 | Bot offline / 401 | Session expired — run npm run pair for a new SESSION_ID |
 | Commands not working | Check PREFIX env var (default: .) |
-| Web pairing not loading | Port 3001 must be free, or set PAIR_PORT env var |
+| Web pairing not loading | Set PORT env var to 10000 on Render, or set PAIR_PORT for local use |
 | QR not showing | Delete session/ folder and restart |
 
 ---

@@ -5,6 +5,20 @@
 
 services:
 
+  # ── Pair Server (web pairing panel — the public-facing entry point) ──
+  - type: web
+    name: novaspark-bot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node pair-server.js
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+
   # ── Server 1 ── (10 bots)
   - type: web
     name: novaspark-hosting-1
@@ -12,7 +26,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node hosting/server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
@@ -30,7 +44,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node hosting/server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
@@ -48,7 +62,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node hosting/server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
@@ -66,7 +80,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node hosting/server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
@@ -84,7 +98,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node hosting/server.js
-    healthCheckPath: /api/health
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 10000
