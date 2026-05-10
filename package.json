@@ -1,13 +1,15 @@
 {
   "name": "novaspark-bot",
-  "version": "11.0.0",
-  "description": "NovaSpark Bot v11 TURBO — WhatsApp MD AutoChat Bot. Lazy-load commands, in-memory cached DB, zero-bloat engine. 264 commands, Advanced AI, Plugin System. Powered by Baileys.",
+  "version": "11.1.0",
+  "description": "NovaSpark Bot v11.1 TURBO — WhatsApp MD AutoChat Bot. Web & console pairing (no QR), lazy-load commands, in-memory DB. 275+ commands, AI, games, and more. Powered by Baileys.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node --max-old-space-size=256 --optimize-for-size index.js",
     "api": "node api/server.js",
-    "dev": "nodemon index.js"
+    "pair": "node pair-server.js",
+    "dev": "nodemon index.js",
+    "dev:pair": "nodemon pair-server.js"
   },
   "keywords": ["whatsapp", "bot", "novaspark", "turbo", "baileys", "md", "ai", "2026"],
   "author": "Dev-Ntando",

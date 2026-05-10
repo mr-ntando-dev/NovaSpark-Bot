@@ -54,6 +54,31 @@ const fs      = require('fs');
 const path    = require('path');
 const os      = require('os');
 
+// ── SESSION_ID restore ────────────────────────────────────────────────────────
+// If SESSION_ID env var is set (NovaSpark!<base64>), restore session files
+// before Baileys tries to load them. This enables zero-touch cloud deploys.
+(function restoreSessionFromEnv() {
+  const sid = process.env.SESSION_ID || config.sessionID;
+  if (!sid || !sid.startsWith('NovaSpark!')) return;
+  const sessionDir = path.join(__dirname, config.sessionName || 'session');
+  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+  // Only restore if the directory is empty (don't overwrite a running session)
+  const existing = fs.readdirSync(sessionDir).filter(f => !f.startsWith('.'));
+  if (existing.length > 0) return;
+  try {
+    const b64  = sid.slice('NovaSpark!'.length);
+    const json = Buffer.from(b64, 'base64').toString('utf-8');
+    const files = JSON.parse(json);
+    for (const [name, content] of Object.entries(files)) {
+      const safeName = path.basename(name); // prevent path traversal
+      fs.writeFileSync(path.join(sessionDir, safeName), content, 'utf-8');
+    }
+    orig.log('[SESSION] ✅ Session restored from SESSION_ID env var.');
+  } catch (e) {
+    orig.log('[SESSION] ⚠️  Failed to restore session from SESSION_ID:', e.message);
+  }
+})();
+
 // ── Banner ────────────────────────────────────────────────────────────────────
 function printBanner() {
   const owners = Array.isArray(config.ownerName) ? config.ownerName.join(', ') : config.ownerName;
@@ -124,13 +149,38 @@ async function startBot() {
     fireInitQueries: true,
   });
 
+  // ── Pairing-code flow (if PAIRING_NUMBER is set, skip QR) ──────────────────
+  // Set PAIRING_NUMBER=263xxxxxxxxx to get a 8-digit code in the console.
+  // Then enter it in WhatsApp → Linked Devices → Link with phone number.
+  const pairingNumber = process.env.PAIRING_NUMBER || '';
+  let _pairCodeRequested = false;
+
   // ── Connection events ───────────────────────────────────────────────────────
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      orig.log('\n📱 Scan QR code to connect:\n');
-      qrcode.generate(qr, { small: true });
+      if (pairingNumber && !_pairCodeRequested) {
+        // Use pairing code instead of QR
+        _pairCodeRequested = true;
+        try {
+          const code = await sock.requestPairingCode(pairingNumber.replace(/\D/g, ''));
+          orig.log(`\n╔═══════════════════════════════════╗`);
+          orig.log(`  📲  PAIRING CODE: ${code}`);
+          orig.log(`  Enter this in WhatsApp → Linked`);
+          orig.log(`  Devices → Link with phone number`);
+          orig.log(`╚═══════════════════════════════════╝\n`);
+        } catch (e) {
+          orig.log('[PAIR] Failed to get pairing code:', e.message);
+          orig.log('\n📱 Falling back to QR code:\n');
+          qrcode.generate(qr, { small: true });
+        }
+      } else if (!pairingNumber) {
+        orig.log('\n📱 Scan QR code to connect:\n');
+        qrcode.generate(qr, { small: true });
+        orig.log('\n💡 TIP: Set PAIRING_NUMBER=<your_number> to pair without QR scan.');
+        orig.log('💡 TIP: Run  npm run pair  and open http://localhost:3001 for web pairing.\n');
+      }
     }
 
     if (connection === 'close') {
@@ -272,6 +322,10 @@ function _startAutoFeatures(sock) {
     try {
       const autostatusreact = require('./commands/owner/autostatusreact');
       if (autostatusreact.startAutoStatusReact) autostatusreact.startAutoStatusReact(sock);
+    } catch {}
+    try {
+      const autogoodnight = require('./commands/group/autogoodnight');
+      if (autogoodnight.startAutoGoodnight) autogoodnight.startAutoGoodnight(sock);
     } catch {}
   });
 }

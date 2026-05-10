@@ -241,8 +241,14 @@ const isBanned = (jid) => getBanned().includes(jid);
 // ── Force flush (for critical writes) ─────────────────────────────────────────
 const flush = () => _flushAll();
 
+// ── getAllGroupIds — returns array of all group JIDs stored in DB ─────────────
+const getAllGroupIds = () => Object.keys(_loadFile(GROUPS_DB, {}));
+
+// ── saveGroupSettings — alias for updateGroupSettings (used by new commands) ──
+const saveGroupSettings = (id, data) => updateGroupSettings(id, data);
+
 module.exports = {
-  getGroupSettings, updateGroupSettings, getAllGroupSettings,
+  getGroupSettings, updateGroupSettings, getAllGroupSettings, getAllGroupIds, saveGroupSettings,
   getUserProfile, updateUserProfile,
   isPremium, addPremium, removePremium, listPremium,
   getSetting, setSetting,
@@ -256,6 +262,7 @@ module.exports = {
   flush,
   // backward compat
   readDB, writeDB,
+  saveGroupSettings,
   // alias — many commands call database.getProfile() / database.setProfile()
   getProfile:    getUserProfile,
   setProfile:    (jid, data) => updateUserProfile(jid, data),

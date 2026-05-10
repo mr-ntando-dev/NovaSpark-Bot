@@ -1,5 +1,5 @@
 /**
- * ⚡ NovaSpark Bot v8.0 — 2026 EDITION
+ * ⚡ NovaSpark Bot v11.0.0 — 2026 TURBO EDITION
  * Global Configuration — ALL auto-features configurable here
  * By Dev-Ntando
  */
@@ -12,7 +12,7 @@ module.exports = {
 
   // ── Bot ───────────────────────────────────────────────────────────────────
   botName:     'NovaSpark Bot',
-  botVersion:  '10.0.0',
+  botVersion:  '11.0.0',
   prefix:      '.',
   sessionName: process.env.SESSION_DIR || 'session',
   sessionID:   process.env.SESSION_ID  || '',
