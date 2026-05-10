@@ -344,4 +344,35 @@ function _startAutoFeatures(sock) {
   });
 }
 
-startBot().catch(e => { console.error('Fatal error:', e); process.exit(1); });
+// ── Render Web Pairing: if no SESSION_ID and no saved session, serve the
+//    pairing panel on the main PORT so users can pair directly in the browser.
+// ─────────────────────────────────────────────────────────────────────────────
+(async () => {
+  const sid = process.env.SESSION_ID || config.sessionID || '';
+  const sessionDir = path.join(__dirname, config.sessionName || 'session');
+  const hasSession = sid.startsWith('NovaSpark!') ||
+    (fs.existsSync(sessionDir) &&
+      fs.readdirSync(sessionDir).filter(f => !f.startsWith('.')).length > 0);
+
+  if (!hasSession) {
+    // ── No session — boot the web pairing server on the main PORT ────────────
+    const PORT = process.env.PORT || 3001;
+    orig.log(`[PAIR] No SESSION_ID found. Starting web pairing panel on port ${PORT}...`);
+    orig.log(`[PAIR] Open your Render URL in a browser to pair WhatsApp.`);
+
+    // Temporarily override PAIR_PORT so pair-server listens on the right port
+    process.env.PAIR_PORT = PORT;
+
+    // pair-server.js exports nothing — it self-starts when required
+    try {
+      require('./pair-server');
+    } catch (e) {
+      orig.error('[PAIR] Failed to load pair-server.js:', e.message);
+      orig.log('[PAIR] Falling back to normal bot start (QR in logs)...');
+      startBot().catch(err => { console.error('Fatal error:', err); process.exit(1); });
+    }
+  } else {
+    // ── Session exists — start the bot normally ───────────────────────────────
+    startBot().catch(e => { console.error('Fatal error:', e); process.exit(1); });
+  }
+})();

@@ -85,7 +85,7 @@ const HTML = `<!DOCTYPE html>
     <div class="step"><span class="step-num">2</span><span>Click <strong>Generate Code</strong> and wait a few seconds</span></div>
     <div class="step"><span class="step-num">3</span><span>On your phone: <em>WhatsApp &rarr; Linked Devices &rarr; Link a device &rarr; Link with phone number</em></span></div>
     <div class="step"><span class="step-num">4</span><span>Enter the 8-digit code shown here — bot is now paired!</span></div>
-    <div class="step"><span class="step-num">5</span><span>Copy the SESSION_ID and paste it into your hosting panel (Render / NovaSpark Nodes)</span></div>
+    <div class="step"><span class="step-num">5</span><span>Bot will <strong>auto-start automatically</strong> after pairing! Also copy the SESSION_ID below as a backup for your Render env vars.</span></div>
   </div>
   <label for="phone">WhatsApp Number</label>
   <input id="phone" type="tel" placeholder="e.g. 263786831091" autocomplete="off"/>
@@ -216,6 +216,30 @@ async function initPairSocket() {
       if (sid) {
         _sessionStr = sid;
         _pairState  = 'done';
+
+        // ── Auto-restart: copy session files to the main bot session dir
+        //    then restart the process so the bot starts with the new session.
+        try {
+          const mainSessionDir = path.join(__dirname, 'session');
+          if (!fs.existsSync(mainSessionDir)) fs.mkdirSync(mainSessionDir, { recursive: true });
+          const entries = fs.readdirSync(SESSION_DIR);
+          for (const entry of entries) {
+            const src = path.join(SESSION_DIR, entry);
+            const dst = path.join(mainSessionDir, entry);
+            if (fs.statSync(src).isFile()) {
+              fs.copyFileSync(src, dst);
+            }
+          }
+          console.log('[PAIR] ✅ Session copied to main session folder.');
+          console.log('[PAIR] 🔄 Restarting bot in 3 seconds...');
+          setTimeout(() => {
+            console.log('[PAIR] 🚀 Launching bot now!');
+            require('./index.js');
+          }, 3000);
+        } catch (e) {
+          console.error('[PAIR] ⚠️  Auto-restart failed:', e.message);
+          console.log('[PAIR] Copy the SESSION_ID manually to your Render env vars.');
+        }
       }
     }
     if (connection === 'close') {
