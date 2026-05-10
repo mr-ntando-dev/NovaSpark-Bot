@@ -204,6 +204,17 @@ const server = http.createServer(async (req, res) => {
     return json(res, 200, { ok: true, uptime: process.uptime(), bots: manager.runningCount() });
   }
 
+  // GET /api/server-info — capacity info for this Render instance
+  if (method === 'GET' && pathname === '/api/server-info') {
+    return json(res, 200, {
+      serverId:    manager.serverId(),
+      maxBots:     manager.maxBots(),
+      runningBots: manager.runningCount(),
+      available:   manager.maxBots() - manager.runningCount(),
+      totalBots:   db.getAllBots().length,
+    });
+  }
+
   res.writeHead(404); res.end('Not found');
 });
 

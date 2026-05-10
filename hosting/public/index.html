@@ -126,6 +126,16 @@ input:focus,select:focus{border-color:var(--primary)}
     </div>
   </nav>
   <div class="main">
+    <!-- Server capacity bar -->
+    <div id="serverInfoBar" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span style="font-size:.82rem;color:var(--muted)">🖥️ Server: <span id="infoServerId" style="color:var(--text)">–</span></span>
+        <span style="font-size:.82rem;color:var(--muted)">🤖 Capacity: <span id="infoCapacity" style="color:var(--accent);font-weight:700">–</span></span>
+        <span style="font-size:.82rem;color:var(--muted)">🟢 Running: <span id="infoRunning" style="color:var(--green);font-weight:700">–</span></span>
+        <span style="font-size:.82rem;color:var(--muted)">🆓 Slots free: <span id="infoAvail" style="color:var(--primary);font-weight:700">–</span></span>
+      </div>
+      <button class="btn-sm btn-outline" onclick="showHowToScale()" style="font-size:.78rem">➕ Add Server</button>
+    </div>
     <!-- Stats -->
     <div class="stats-bar" id="statsBar">
       <div class="stat-card"><div class="stat-value" id="statTotal">–</div><div class="stat-label">Your Bots</div></div>
@@ -140,6 +150,33 @@ input:focus,select:focus{border-color:var(--primary)}
     </div>
     <div class="bots-grid" id="botsGrid">
       <div class="empty-state"><div class="empty-icon">🤖</div><p>No bots deployed yet.</p><button class="btn-sm btn-primary" onclick="showCreateModal()">Deploy your first bot</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scale Modal ────────────────────────────────────────────────────────── -->
+<div id="scaleModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h3>➕ Add Another Server on Render</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:18px">Each Render service runs independently. Deploy a new one to get more bot slots. Steps below:</p>
+    <div style="background:#0d0d1a;border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-size:.82rem;color:var(--muted);line-height:2">
+        <b style="color:var(--text)">1.</b> Go to <a href="https://render.com" target="_blank" style="color:var(--accent)">render.com</a> → New → Web Service<br>
+        <b style="color:var(--text)">2.</b> Connect your GitHub fork of NovaSpark-Bot<br>
+        <b style="color:var(--text)">3.</b> Build command: <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--primary)">npm install</code><br>
+        <b style="color:var(--text)">4.</b> Start command: <code style="background:#1a1a2e;padding:2px 7px;border-radius:4px;color:var(--primary)">node hosting/server.js</code><br>
+        <b style="color:var(--text)">5.</b> Set these environment variables:
+      </div>
+    </div>
+    <div style="background:#0d0d1a;border-radius:10px;padding:16px;font-family:monospace;font-size:.8rem;line-height:2;color:var(--accent)">
+      MAX_BOTS=10<br>
+      SERVER_ID=server-2<br>
+      PORT=10000<br>
+      NODE_ENV=production
+    </div>
+    <p style="color:var(--muted);font-size:.78rem;margin-top:12px">💡 Change <b>SERVER_ID</b> to server-3, server-4 etc. for each new instance. Change <b>MAX_BOTS</b> to any number you want (10 recommended for free tier, 50+ for paid).</p>
+    <div class="modal-actions">
+      <button class="btn-sm btn-primary" onclick="document.getElementById('scaleModal').classList.add('hidden')">Got it</button>
     </div>
   </div>
 </div>
@@ -219,7 +256,24 @@ function showApp() {
   document.getElementById('appScreen').classList.remove('hidden');
   document.getElementById('navEmail').textContent = _user.email;
   loadBots();
-  _pollTimer = setInterval(loadBots, 4000);
+  loadServerInfo();
+  _pollTimer = setInterval(() => { loadBots(); loadServerInfo(); }, 4000);
+}
+
+async function loadServerInfo() {
+  try {
+    const r = await fetch('/api/server-info');
+    if (!r.ok) return;
+    const d = await r.json();
+    document.getElementById('infoServerId').textContent  = d.serverId;
+    document.getElementById('infoCapacity').textContent  = d.maxBots + ' bots';
+    document.getElementById('infoRunning').textContent   = d.runningBots;
+    document.getElementById('infoAvail').textContent     = d.available;
+  } catch {}
+}
+
+function showHowToScale() {
+  document.getElementById('scaleModal').classList.remove('hidden');
 }
 
 // ── Bots ──────────────────────────────────────────────────────────────────────
@@ -365,10 +419,9 @@ function toast(msg, type='success') {
   _toastTimer = setTimeout(() => el.remove(), 3000);
 }
 
-// Close modal on overlay click
-document.getElementById('createModal').addEventListener('click', function(e) {
-  if (e.target === this) hideCreateModal();
-});
+// Close modals on overlay click
+document.getElementById('createModal').addEventListener('click', function(e) { if (e.target === this) hideCreateModal(); });
+document.getElementById('scaleModal').addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
 
 // Enter key on auth form
 document.addEventListener('keydown', e => {

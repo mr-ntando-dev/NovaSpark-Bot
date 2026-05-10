@@ -2,6 +2,7 @@
 /**
  * NovaSpark Multi-Hosting — Bot Process Manager
  * Spawns, monitors and manages individual bot worker processes
+ * MAX_BOTS env var controls how many bots this server instance allows (default 10)
  */
 
 const { spawn }  = require('child_process');
@@ -13,7 +14,11 @@ const ROOT       = path.join(__dirname, '..');
 const WORKER     = path.join(__dirname, 'bot-worker.js');
 const SESSIONS   = path.join(__dirname, 'sessions');
 
-// Map of botId -> { process, pairResolver }
+// ── Server-level bot limit (set MAX_BOTS env var on Render) ─────────────────
+const MAX_BOTS   = parseInt(process.env.MAX_BOTS || '10', 10);
+const SERVER_ID  = process.env.SERVER_ID || 'server-1';
+
+// Map of botId -> { process }
 const _procs = new Map();
 
 if (!fs.existsSync(SESSIONS)) fs.mkdirSync(SESSIONS, { recursive: true });
@@ -21,6 +26,11 @@ if (!fs.existsSync(SESSIONS)) fs.mkdirSync(SESSIONS, { recursive: true });
 // ── Start a bot ─────────────────────────────────────────────────────────────
 function startBot(botId) {
   if (_procs.has(botId)) return { error: 'Already running' };
+
+  // ── Server-level capacity check ──────────────────────────────────────────
+  if (_procs.size >= MAX_BOTS) {
+    return { error: `Server at capacity (${MAX_BOTS} bots). Deploy another Render service or increase MAX_BOTS.` };
+  }
 
   const bot = db.getBot(botId);
   if (!bot) return { error: 'Bot not found' };
@@ -142,6 +152,14 @@ function runningCount() {
   return _procs.size;
 }
 
+function maxBots() {
+  return MAX_BOTS;
+}
+
+function serverId() {
+  return SERVER_ID;
+}
+
 // ── Auto-restart bots that were online before a crash ───────────────────────
 function autoRestoreOnlineBots() {
   const bots = db.getAllBots();
@@ -156,4 +174,4 @@ function autoRestoreOnlineBots() {
   if (restored > 0) console.log(`[MANAGER] Restored ${restored} bot(s).`);
 }
 
-module.exports = { startBot, stopBot, restartBot, deleteBot, isRunning, runningCount, autoRestoreOnlineBots };
+module.exports = { startBot, stopBot, restartBot, deleteBot, isRunning, runningCount, maxBots, serverId, autoRestoreOnlineBots };

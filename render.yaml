@@ -1,12 +1,96 @@
+# ⚡ NovaSpark Multi-Hosting — Render Deploy Config
+# Each service = independent hosting panel with its own bot capacity.
+# To add more servers: duplicate a service block, change name + SERVER_ID.
+# 5 servers x 10 bots = 50 bots total across Render free tier.
+
 services:
-  - type: worker
-    name: novaspark-turbo
-    runtime: node
-    plan: starter
-    buildCommand: npm ci --omit=dev
-    startCommand: node --max-old-space-size=256 --optimize-for-size index.js
+
+  # ── Server 1 ── (10 bots)
+  - type: web
+    name: novaspark-hosting-1
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node hosting/server.js
+    healthCheckPath: /api/health
     envVars:
+      - key: PORT
+        value: 10000
       - key: NODE_ENV
         value: production
-      - key: SESSION_DIR
-        value: session
+      - key: MAX_BOTS
+        value: 10
+      - key: SERVER_ID
+        value: server-1
+
+  # ── Server 2 ── (10 bots)
+  - type: web
+    name: novaspark-hosting-2
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node hosting/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MAX_BOTS
+        value: 10
+      - key: SERVER_ID
+        value: server-2
+
+  # ── Server 3 ── (10 bots)
+  - type: web
+    name: novaspark-hosting-3
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node hosting/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MAX_BOTS
+        value: 10
+      - key: SERVER_ID
+        value: server-3
+
+  # ── Server 4 ── (10 bots)
+  - type: web
+    name: novaspark-hosting-4
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node hosting/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MAX_BOTS
+        value: 10
+      - key: SERVER_ID
+        value: server-4
+
+  # ── Server 5 ── (10 bots)
+  - type: web
+    name: novaspark-hosting-5
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node hosting/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MAX_BOTS
+        value: 10
+      - key: SERVER_ID
+        value: server-5

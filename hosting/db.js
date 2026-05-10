@@ -85,11 +85,6 @@ function deleteSession(token) {
 
 function createBot(userId, { botName, ownerNumber, prefix }) {
   const db = _load();
-  // Check user bot limit (free = 1 bot)
-  const userBots = Object.values(db.bots).filter(b => b.userId === userId);
-  const user = db.users[userId];
-  const limit = user?.plan === 'pro' ? 5 : 1;
-  if (userBots.length >= limit) return { error: `Plan limit reached (${limit} bot${limit > 1 ? 's' : ''})` };
 
   const id = crypto.randomBytes(8).toString('hex');
   db.bots[id] = {
