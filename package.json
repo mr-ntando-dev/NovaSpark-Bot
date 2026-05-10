@@ -6,10 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node --max-old-space-size=256 --optimize-for-size index.js",
+    "hosting": "node hosting/server.js",
     "api": "node api/server.js",
     "pair": "node pair-server.js",
     "dev": "nodemon index.js",
-    "dev:pair": "nodemon pair-server.js"
+    "dev:pair": "nodemon pair-server.js",
+    "dev:hosting": "nodemon hosting/server.js"
   },
   "keywords": ["whatsapp", "bot", "novaspark", "turbo", "baileys", "md", "ai", "2026"],
   "author": "Dev-Ntando",
